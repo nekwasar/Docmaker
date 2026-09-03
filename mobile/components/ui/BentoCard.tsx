@@ -53,9 +53,9 @@ export function BentoCard({
       ]}
     >
       <View style={styles.content}>
-        <View style={styles.header}>
+        <View style={styles.topRow}>
           <View style={[styles.iconBadge, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
-            <Ionicons name={icon as any} size={24} color={iconColor || Colors.white} />
+            <Ionicons name={icon as any} size={28} color={iconColor || Colors.white} />
           </View>
           {badge && (
             <View style={[styles.badge, { backgroundColor: badge.color }]}>
@@ -65,13 +65,8 @@ export function BentoCard({
         </View>
 
         <View style={styles.bottom}>
-          <View style={styles.textContainer}>
-            <Text style={styles.title} numberOfLines={1}>{title}</Text>
-            <Text style={styles.subtitle} numberOfLines={1}>{subtitle}</Text>
-          </View>
-          <View style={styles.arrowPill}>
-            <Ionicons name="arrow-forward" size={14} color={Colors.white} />
-          </View>
+          <Text style={styles.title} numberOfLines={2}>{title}</Text>
+          <Text style={styles.subtitle} numberOfLines={1}>{subtitle}</Text>
         </View>
       </View>
     </AnimatedPressable>
@@ -89,14 +84,14 @@ const styles = StyleSheet.create({
     padding: Spacing.xl,
     justifyContent: 'space-between',
   },
-  header: {
+  topRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
   iconBadge: {
-    width: 48,
-    height: 48,
+    width: 52,
+    height: 52,
     borderRadius: Radius.lg,
     justifyContent: 'center',
     alignItems: 'center',
@@ -113,29 +108,17 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
   bottom: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-  },
-  textContainer: {
-    flex: 1,
-    marginRight: Spacing.md,
+    gap: Spacing.xs,
   },
   title: {
-    ...Typography.h3,
+    fontSize: 20,
+    fontWeight: '700',
     color: Colors.white,
-    marginBottom: 2,
+    letterSpacing: -0.3,
   },
   subtitle: {
-    ...Typography.caption,
-    color: 'rgba(255,255,255,0.8)',
-  },
-  arrowPill: {
-    width: 32,
-    height: 32,
-    borderRadius: Radius.full,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    fontSize: 13,
+    fontWeight: '500',
+    color: 'rgba(255,255,255,0.75)',
   },
 });

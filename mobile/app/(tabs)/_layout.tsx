@@ -8,71 +8,54 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.textSecondary,
         headerShown: false,
+        tabBarShowLabel: false,
         tabBarStyle: {
           backgroundColor: Colors.white,
           borderTopColor: Colors.borderSolid,
           borderTopWidth: 1,
-          height: 88,
-          paddingBottom: 28,
-          paddingTop: 8,
+          height: 80,
+          paddingTop: 12,
+          paddingBottom: 20,
           ...Shadow.tab,
-        },
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '600',
-        },
-        tabBarActiveLabelStyle: {
-          color: Colors.primary,
-        },
-        tabBarInactiveLabelStyle: {
-          color: Colors.textSecondary,
         },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Files',
-          tabBarIcon: ({ color, size, focused }) => (
-            <TabIcon name="folder" focused={focused} color={color} size={size} />
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="home" focused={focused} />
           ),
         }}
       />
       <Tabs.Screen
-        name="ai"
+        name="files"
         options={{
-          title: 'AI',
-          tabBarIcon: ({ color, size, focused }) => (
-            <TabIcon name="sparkles" focused={focused} color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="transfer"
-        options={{
-          title: 'Transfer',
-          tabBarIcon: ({ color, size, focused }) => (
-            <TabIcon name="swap-horizontal" focused={focused} color={color} size={size} />
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="folder" focused={focused} />
           ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, size, focused }) => (
-            <TabIcon name="person" focused={focused} color={color} size={size} />
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="person" focused={focused} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="transfer"
+        options={{
+          href: null,
         }}
       />
     </Tabs>
   );
 }
 
-function TabIcon({ name, focused, color, size }: { name: string; focused: boolean; color: string; size: number }) {
+function TabIcon({ name, focused }: { name: string; focused: boolean }) {
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -81,7 +64,7 @@ function TabIcon({ name, focused, color, size }: { name: string; focused: boolea
 
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    scale.value = withSpring(0.8, { damping: 10, stiffness: 200 }, () => {
+    scale.value = withSpring(0.85, { damping: 10, stiffness: 200 }, () => {
       scale.value = withSpring(1, { damping: 10, stiffness: 200 });
     });
   };
@@ -90,8 +73,8 @@ function TabIcon({ name, focused, color, size }: { name: string; focused: boolea
     <Animated.View style={animatedStyle}>
       <Ionicons
         name={focused ? name : `${name}-outline` as any}
-        size={size}
-        color={color}
+        size={28}
+        color={focused ? Colors.primary : Colors.textSecondary}
       />
     </Animated.View>
   );

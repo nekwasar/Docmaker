@@ -14,6 +14,14 @@ export const Colors = {
   danger: '#EF4444',
   success: '#10B981',
   warning: '#F59E0B',
+  bentoPrimary: '#0B3954',
+  bentoAccent: '#1E6091',
+  bentoSuccess: '#10B981',
+  bentoWarning: '#FFB703',
+  swipeShare: '#007AFF',
+  swipeFavorite: '#FFB703',
+  swipeDelete: '#EF4444',
+  swipeAction: '#10B981',
 };
 
 export const Spacing = {
@@ -32,6 +40,7 @@ export const Radius = {
   lg: 16,
   xl: 20,
   xxl: 24,
+  bento: 24,
   full: 9999,
 };
 
@@ -56,6 +65,13 @@ export const Shadow = {
     shadowOpacity: 0.08,
     shadowRadius: 16,
     elevation: 4,
+  },
+  tab: {
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 8,
   },
 };
 
@@ -93,4 +109,11 @@ export const Typography = {
     color: Colors.textPrimary,
     letterSpacing: -1,
   },
+};
+
+export const Animation = {
+  pressScale: 0.96,
+  pressDuration: 150,
+  springConfig: { damping: 15, stiffness: 150 },
+  staggerDelay: 80,
 };

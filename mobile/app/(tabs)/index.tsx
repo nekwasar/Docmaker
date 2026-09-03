@@ -1,14 +1,32 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList } from 'react-native';
+import { useState, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Radius, Shadow, Typography } from '../../lib/theme';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { Colors, Spacing, Radius, Shadow, Typography, Animation } from '../../lib/theme';
 import { useFileStore } from '../../store/file-store';
+import { AnimatedPressable } from '../../components/ui/AnimatedPressable';
+import { BentoCard } from '../../components/ui/BentoCard';
+import { SwipeableFileCard } from '../../components/ui/SwipeableFileCard';
+import { SkeletonLoader } from '../../components/ui/SkeletonLoader';
+import { EmptyState } from '../../components/ui/EmptyState';
+import { FileActionsSheet } from '../../components/ui/FileActionsSheet';
+import { useRouter } from 'expo-router';
 
 const FILTERS = ['All', 'PDF', 'Doc', 'Image', 'Sheet'] as const;
 
+const QUICK_ACTIONS = [
+  { id: 'scan', icon: 'camera', color: Colors.amber, title: 'Scan', route: '/camera/scanner' },
+  { id: 'ocr', icon: 'text', color: Colors.emerald, title: 'OCR', route: '/camera/ocr' },
+  { id: 'merge', icon: 'documents', color: Colors.indigo, title: 'Merge', route: '/pdf/merge' },
+  { id: 'sign', icon: 'pen', color: Colors.teal, title: 'Sign', route: '/pdf/sign' },
+];
+
 export default function FilesScreen() {
+  const router = useRouter();
   const [activeFilter, setActiveFilter] = useState<string>('All');
-  const { files, removeFile } = useFileStore();
+  const [selectedFile, setSelectedFile] = useState<any>(null);
+  const [showActions, setShowActions] = useState(false);
+  const { files, isLoading, removeFile, loadFiles } = useFileStore();
 
   const filteredFiles = files.filter((file) => {
     if (activeFilter === 'All') return true;
@@ -19,94 +37,193 @@ export default function FilesScreen() {
     return true;
   });
 
-  const getFileIcon = (format: string) => {
-    switch (format) {
-      case 'pdf': return 'document-text';
-      case 'docx': return 'document';
-      case 'txt': return 'document-outline';
-      case 'jpg':
-      case 'png': return 'image';
-      case 'xlsx':
-      case 'csv': return 'grid';
-      default: return 'document';
+  const handleFilePress = useCallback((file: any) => {
+    setSelectedFile(file);
+    setShowActions(true);
+  }, []);
+
+  const handleDelete = useCallback(() => {
+    if (selectedFile) {
+      removeFile(selectedFile.id);
+      setShowActions(false);
     }
+  }, [selectedFile, removeFile]);
+
+  const getFileStats = () => {
+    const pdfCount = files.filter(f => f.format === 'pdf').length;
+    const docCount = files.filter(f => f.format === 'docx' || f.format === 'txt').length;
+    const imageCount = files.filter(f => f.format === 'jpg' || f.format === 'png').length;
+    return { pdfCount, docCount, imageCount, total: files.length };
   };
 
-  const getFileColor = (format: string) => {
-    switch (format) {
-      case 'pdf': return Colors.indigo;
-      case 'docx': return Colors.action;
-      case 'jpg':
-      case 'png': return Colors.emerald;
-      case 'xlsx':
-      case 'csv': return Colors.teal;
-      default: return Colors.textSecondary;
-    }
-  };
-
-  const renderFileCard = ({ item }: { item: any }) => (
-    <TouchableOpacity style={styles.fileCard} activeOpacity={0.7}>
-      <View style={[styles.fileIcon, { backgroundColor: getFileColor(item.format) + '15' }]}>
-        <Ionicons name={getFileIcon(item.format) as any} size={24} color={getFileColor(item.format)} />
-      </View>
-      <View style={styles.fileInfo}>
-        <Text style={styles.fileName} numberOfLines={1}>{item.title}</Text>
-        <Text style={styles.fileMeta}>
-          {item.format.toUpperCase()} • {item.wordCount ? `${item.wordCount} words` : 'File'}
-        </Text>
-      </View>
-      <TouchableOpacity style={styles.fileMore} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-        <Ionicons name="ellipsis-horizontal" size={18} color={Colors.textSecondary} />
-      </TouchableOpacity>
-    </TouchableOpacity>
-  );
+  const stats = getFileStats();
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Docmaker</Text>
-        <TouchableOpacity style={styles.searchBtn}>
+        <AnimatedPressable
+          onPress={() => {}}
+          haptic="light"
+          style={styles.searchBtn}
+        >
           <Ionicons name="search" size={20} color={Colors.textPrimary} />
-        </TouchableOpacity>
+        </AnimatedPressable>
       </View>
 
-      <View style={styles.filterRow}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterContent}>
-          {FILTERS.map((filter) => (
-            <TouchableOpacity
-              key={filter}
-              style={[styles.filterPill, activeFilter === filter && styles.filterPillActive]}
-              onPress={() => setActiveFilter(filter)}
-            >
-              <Text style={[styles.filterText, activeFilter === filter && styles.filterTextActive]}>
-                {filter}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-
-      {filteredFiles.length === 0 ? (
-        <View style={styles.emptyState}>
-          <View style={styles.emptyIcon}>
-            <Ionicons name="folder-open" size={48} color={Colors.textSecondary} />
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+          <View style={styles.bentoGrid}>
+            <BentoCard
+              variant="wide"
+              color={Colors.bentoPrimary}
+              icon="folder"
+              title="All Files"
+              subtitle={`${stats.total} documents`}
+              onPress={() => {}}
+              badge={{ text: 'Total', color: Colors.action }}
+            />
+            <View style={styles.bentoRow}>
+              <BentoCard
+                variant="standard"
+                color={Colors.indigo}
+                icon="document-text"
+                title="PDFs"
+                subtitle={`${stats.pdfCount} files`}
+                onPress={() => setActiveFilter('PDF')}
+              />
+              <BentoCard
+                variant="standard"
+                color={Colors.action}
+                icon="document"
+                title="Docs"
+                subtitle={`${stats.docCount} files`}
+                onPress={() => setActiveFilter('Doc')}
+              />
+            </View>
+            <View style={styles.bentoRow}>
+              <BentoCard
+                variant="standard"
+                color={Colors.emerald}
+                icon="image"
+                title="Images"
+                subtitle={`${stats.imageCount} files`}
+                onPress={() => setActiveFilter('Image')}
+              />
+              <BentoCard
+                variant="standard"
+                color={Colors.teal}
+                icon="grid"
+                title="Sheets"
+                subtitle="0 files"
+                onPress={() => setActiveFilter('Sheet')}
+              />
+            </View>
           </View>
-          <Text style={styles.emptyTitle}>No files yet</Text>
-          <Text style={styles.emptySubtitle}>Tap + to add your first file</Text>
-        </View>
-      ) : (
-        <FlatList
-          data={filteredFiles}
-          renderItem={renderFileCard}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.fileList}
-          showsVerticalScrollIndicator={false}
-        />
-      )}
+        </Animated.View>
 
-      <TouchableOpacity style={styles.fab} activeOpacity={0.8}>
+        <Animated.View entering={FadeInDown.delay(200).duration(400)}>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Quick Actions</Text>
+            <View style={styles.quickGrid}>
+              {QUICK_ACTIONS.map((action, index) => (
+                <AnimatedPressable
+                  key={action.id}
+                  onPress={() => router.push(action.route as any)}
+                  haptic="light"
+                  style={styles.quickPill}
+                >
+                  <View style={[styles.quickIcon, { backgroundColor: action.color + '15' }]}>
+                    <Ionicons name={action.icon as any} size={18} color={action.color} />
+                  </View>
+                  <Text style={styles.quickText}>{action.title}</Text>
+                </AnimatedPressable>
+              ))}
+            </View>
+          </View>
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(300).duration(400)}>
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Files</Text>
+              <Text style={styles.sectionCount}>{filteredFiles.length}</Text>
+            </View>
+
+            <View style={styles.filterRow}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterContent}>
+                {FILTERS.map((filter) => (
+                  <AnimatedPressable
+                    key={filter}
+                    onPress={() => setActiveFilter(filter)}
+                    haptic="selection"
+                    style={[styles.filterPill, activeFilter === filter && styles.filterPillActive]}
+                  >
+                    <Text style={[styles.filterText, activeFilter === filter && styles.filterTextActive]}>
+                      {filter}
+                    </Text>
+                  </AnimatedPressable>
+                ))}
+              </ScrollView>
+            </View>
+          </View>
+        </Animated.View>
+
+        {isLoading ? (
+          <SkeletonLoader variant="listItem" count={4} />
+        ) : filteredFiles.length === 0 ? (
+          <EmptyState
+            icon="folder-open"
+            title="No files yet"
+            subtitle="Tap the button below to add your first file"
+            actionLabel="Add File"
+            onAction={() => {}}
+          />
+        ) : (
+          <View style={styles.fileList}>
+            {filteredFiles.map((file, index) => (
+              <Animated.View
+                key={file.id}
+                entering={FadeInDown.delay(400 + index * 80).duration(400)}
+              >
+                <SwipeableFileCard
+                  file={{
+                    id: file.id,
+                    name: file.title,
+                    format: file.format,
+                    date: new Date(file.createdAt).toLocaleDateString(),
+                  }}
+                  onPress={() => handleFilePress(file)}
+                  onShare={() => {}}
+                  onFavorite={() => {}}
+                  onDelete={() => removeFile(file.id)}
+                  onConvert={() => router.push('/convert' as any)}
+                />
+              </Animated.View>
+            ))}
+          </View>
+        )}
+      </ScrollView>
+
+      <AnimatedPressable
+        onPress={() => {}}
+        haptic="medium"
+        style={styles.fab}
+      >
         <Ionicons name="add" size={28} color={Colors.white} />
-      </TouchableOpacity>
+      </AnimatedPressable>
+
+      <FileActionsSheet
+        isVisible={showActions}
+        file={selectedFile ? { id: selectedFile.id, name: selectedFile.title, format: selectedFile.format } : null}
+        onClose={() => setShowActions(false)}
+        onView={() => setShowActions(false)}
+        onEdit={() => setShowActions(false)}
+        onShare={() => setShowActions(false)}
+        onConvert={() => { setShowActions(false); router.push('/convert' as any); }}
+        onSign={() => { setShowActions(false); router.push('/pdf/sign' as any); }}
+        onDelete={handleDelete}
+      />
     </View>
   );
 }
@@ -128,19 +245,79 @@ const styles = StyleSheet.create({
     ...Typography.h1,
   },
   searchBtn: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     borderRadius: Radius.full,
     backgroundColor: Colors.white,
     justifyContent: 'center',
     alignItems: 'center',
     ...Shadow.sm,
   },
+  content: {
+    paddingHorizontal: Spacing.xl,
+    paddingBottom: 100,
+  },
+  bentoGrid: {
+    gap: Spacing.sm,
+    marginBottom: Spacing.xxl,
+  },
+  bentoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: Spacing.sm,
+  },
+  section: {
+    marginBottom: Spacing.xxl,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    marginBottom: Spacing.md,
+  },
+  sectionTitle: {
+    ...Typography.h3,
+  },
+  sectionCount: {
+    ...Typography.caption,
+    color: Colors.primary,
+    fontWeight: '700',
+    backgroundColor: Colors.primary + '10',
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: Radius.full,
+  },
+  quickGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+  },
+  quickPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  quickIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: Radius.sm,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  quickText: {
+    ...Typography.caption,
+    fontWeight: '600',
+  },
   filterRow: {
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
   },
   filterContent: {
-    paddingHorizontal: Spacing.xl,
     gap: Spacing.sm,
   },
   filterPill: {
@@ -164,65 +341,7 @@ const styles = StyleSheet.create({
     color: Colors.white,
   },
   fileList: {
-    paddingHorizontal: Spacing.xl,
-    gap: Spacing.md,
-    paddingBottom: 100,
-  },
-  fileCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.white,
-    borderRadius: Radius.xl,
-    padding: Spacing.lg,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    ...Shadow.card,
-  },
-  fileIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: Radius.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  fileInfo: {
-    flex: 1,
-    marginLeft: Spacing.md,
-  },
-  fileName: {
-    ...Typography.body,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  fileMeta: {
-    ...Typography.caption,
-  },
-  fileMore: {
-    padding: Spacing.sm,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.xxxl,
-  },
-  emptyIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: Radius.full,
-    backgroundColor: Colors.white,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: Spacing.xl,
-    ...Shadow.sm,
-  },
-  emptyTitle: {
-    ...Typography.h3,
-    marginBottom: Spacing.sm,
-  },
-  emptySubtitle: {
-    ...Typography.caption,
-    textAlign: 'center',
+    gap: Spacing.sm,
   },
   fab: {
     position: 'absolute',

@@ -204,23 +204,25 @@ export default function HomePage() {
       </section>
 
       {/* Enterprise Section */}
-      <section className="py-16 sm:py-24 bg-white">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-6 leading-tight">
+      <section className="py-24 sm:py-32 bg-white">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+          <div className="h-px bg-slate-200 mb-16" />
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6" style={{ fontFamily: 'var(--font-playfair)' }}>
             Built for <span style={{ color: Brand.navy }}>scale</span>
           </h2>
-          <p className="text-xl text-slate-600 mb-8 max-w-2xl leading-relaxed">
+          <p className="text-xl text-slate-500 mb-10 max-w-xl leading-relaxed">
             API access, batch processing, team collaboration, and enterprise-grade security.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
-            <Link href="/enterprise" className="inline-flex items-center gap-2 rounded-full px-8 py-4 text-base font-semibold text-white transition-all hover:scale-105" style={{ backgroundColor: Brand.navy }}>
+            <Link href="/enterprise" className="inline-flex items-center gap-2 px-8 py-4 text-base font-semibold text-white transition-all hover:opacity-90" style={{ backgroundColor: Brand.navy }}>
               Enterprise Plan — $49/mo
               <ArrowRight className="h-5 w-5" />
             </Link>
-            <Link href="/contact" className="inline-flex items-center gap-2 rounded-full px-8 py-4 text-base font-semibold border-2 border-slate-200 text-slate-900 hover:border-slate-400 transition-all">
+            <Link href="/contact" className="inline-flex items-center gap-2 px-8 py-4 text-base font-semibold text-slate-900 border-2 border-slate-200 hover:border-slate-400 transition-all">
               Talk to Sales
             </Link>
           </div>
+          <div className="h-px bg-slate-200 mt-16" />
         </div>
       </section>
 

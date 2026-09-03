@@ -39,7 +39,6 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 sm:py-32">
         <div className="absolute inset-0 bg-gradient-to-br from-[#121660] to-[#1a1f6e]" />
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl sm:text-6xl font-bold text-white tracking-tight mb-6">

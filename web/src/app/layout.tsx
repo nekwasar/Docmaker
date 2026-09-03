@@ -14,6 +14,9 @@ export const metadata: Metadata = {
   },
   description: SITE.description,
   keywords: ["pdf tools", "document generator", "file converter", "free pdf", "merge pdf", "compress pdf", "ocr", "e-sign"],
+  icons: {
+    icon: "/favicon.svg",
+  },
   openGraph: {
     title: SITE.name,
     description: SITE.description,

@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Colors, Spacing, Radius, Shadow, Typography } from '../../lib/theme';
@@ -16,28 +17,77 @@ const RELATED_TOOLS = [
 
 export default function WatermarkPDFScreen() {
   const router = useRouter();
+  const [hasFile, setHasFile] = useState(false);
+  const [watermarkText, setWatermarkText] = useState('CONFIDENTIAL');
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+        <View style={styles.header}>
+          <AnimatedPressable onPress={() => router.back()} haptic="light" style={styles.backBtn}>
+            <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
+          </AnimatedPressable>
+          <Text style={styles.headerTitle}>Watermark</Text>
+          <View style={{ width: 44 }} />
+        </View>
+      </Animated.View>
+
+      <Animated.View entering={FadeInDown.delay(150).duration(400)}>
         <View style={styles.iconContainer}>
-          <View style={styles.iconCircle}>
+          <View style={[styles.iconCircle, { backgroundColor: Colors.amber + '10' }]}>
             <Ionicons name="layers" size={48} color={Colors.amber} />
           </View>
         </View>
-        <Text style={styles.title}>Watermark</Text>
         <Text style={styles.subtitle}>Add watermarks to your PDF documents</Text>
       </Animated.View>
-      <Animated.View entering={FadeInDown.delay(200).duration(400)}>
-        <AnimatedPressable onPress={() => {}} haptic="light" style={styles.uploadArea}>
-          <Ionicons name="cloud-upload" size={48} color={Colors.textSecondary} />
-          <Text style={styles.uploadText}>Tap to select a PDF file</Text>
-        </AnimatedPressable>
-      </Animated.View>
-      <Animated.View entering={FadeInDown.delay(300).duration(400)}>
-        <AnimatedPressable onPress={() => {}} haptic="medium" style={styles.actionBtn} disabled>
-          <Text style={styles.actionBtnText}>Add Watermark</Text>
-        </AnimatedPressable>
-      </Animated.View>
+
+      {!hasFile ? (
+        <Animated.View entering={FadeInDown.delay(200).duration(400)}>
+          <AnimatedPressable onPress={() => setHasFile(true)} haptic="light" style={styles.uploadArea}>
+            <Ionicons name="cloud-upload" size={48} color={Colors.textSecondary} />
+            <Text style={styles.uploadText}>Tap to select a PDF file</Text>
+          </AnimatedPressable>
+        </Animated.View>
+      ) : (
+        <Animated.View entering={FadeInDown.delay(100).duration(300)}>
+          <View style={styles.fileCard}>
+            <View style={styles.fileIcon}>
+              <Ionicons name="document-text" size={24} color={Colors.amber} />
+            </View>
+            <View style={styles.fileInfo}>
+              <Text style={styles.fileName}>document.pdf</Text>
+              <Text style={styles.fileMeta}>3 pages</Text>
+            </View>
+            <AnimatedPressable onPress={() => setHasFile(false)} haptic="light">
+              <Ionicons name="close-circle" size={20} color={Colors.danger} />
+            </AnimatedPressable>
+          </View>
+
+          <View style={styles.watermarkSection}>
+            <Text style={styles.watermarkLabel}>Watermark Text</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter watermark text"
+              placeholderTextColor={Colors.textSecondary}
+              value={watermarkText}
+              onChangeText={setWatermarkText}
+            />
+          </View>
+
+          <View style={styles.previewSection}>
+            <Text style={styles.previewLabel}>Preview</Text>
+            <View style={styles.previewBox}>
+              <Text style={styles.previewText}>{watermarkText}</Text>
+            </View>
+          </View>
+
+          <AnimatedPressable onPress={() => {}} haptic="medium" style={styles.actionBtn}>
+            <Ionicons name="layers" size={20} color={Colors.white} />
+            <Text style={styles.actionBtnText}>Add Watermark</Text>
+          </AnimatedPressable>
+        </Animated.View>
+      )}
+
       <RelatedTools tools={RELATED_TOOLS} onToolPress={(route) => router.push(route as any)} />
     </ScrollView>
   );
@@ -46,12 +96,26 @@ export default function WatermarkPDFScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.canvas },
   content: { padding: Spacing.xl, paddingBottom: 100 },
-  iconContainer: { alignItems: 'center', marginBottom: Spacing.xxl },
-  iconCircle: { width: 100, height: 100, borderRadius: Radius.full, backgroundColor: Colors.amber + '10', justifyContent: 'center', alignItems: 'center' },
-  title: { ...Typography.h1, textAlign: 'center', marginBottom: Spacing.sm },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: Spacing.xxl, paddingTop: Spacing.lg },
+  backBtn: { width: 44, height: 44, borderRadius: Radius.full, backgroundColor: Colors.white, justifyContent: 'center', alignItems: 'center', ...Shadow.sm },
+  headerTitle: { ...Typography.h2 },
+  iconContainer: { alignItems: 'center', marginBottom: Spacing.lg },
+  iconCircle: { width: 100, height: 100, borderRadius: Radius.full, justifyContent: 'center', alignItems: 'center' },
   subtitle: { ...Typography.body, color: Colors.textSecondary, textAlign: 'center', marginBottom: Spacing.xxxl },
-  uploadArea: { backgroundColor: Colors.white, borderRadius: Radius.xl, borderWidth: 2, borderColor: Colors.border, borderStyle: 'dashed', padding: Spacing.xxxl, alignItems: 'center', gap: Spacing.md, marginBottom: Spacing.xxl },
+  uploadArea: { backgroundColor: Colors.white, borderRadius: Radius.xl, borderWidth: 2, borderColor: Colors.border, borderStyle: 'dashed', padding: Spacing.xxxl, alignItems: 'center', gap: Spacing.md, marginBottom: Spacing.xl, ...Shadow.sm },
   uploadText: { ...Typography.body, fontWeight: '600' },
-  actionBtn: { backgroundColor: Colors.amber, borderRadius: Radius.full, paddingVertical: Spacing.lg, alignItems: 'center', ...Shadow.md },
+  fileCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.white, borderRadius: Radius.xl, padding: Spacing.lg, borderWidth: 1, borderColor: Colors.border, marginBottom: Spacing.xl, ...Shadow.sm },
+  fileIcon: { width: 48, height: 48, borderRadius: Radius.md, backgroundColor: Colors.amber + '10', justifyContent: 'center', alignItems: 'center', marginRight: Spacing.md },
+  fileInfo: { flex: 1 },
+  fileName: { ...Typography.body, fontWeight: '600' },
+  fileMeta: { ...Typography.caption },
+  watermarkSection: { marginBottom: Spacing.xl },
+  watermarkLabel: { ...Typography.body, fontWeight: '600', marginBottom: Spacing.md },
+  input: { backgroundColor: Colors.white, borderRadius: Radius.lg, borderWidth: 1, borderColor: Colors.border, padding: Spacing.lg, fontSize: 15, fontWeight: '500', color: Colors.textPrimary },
+  previewSection: { marginBottom: Spacing.xl },
+  previewLabel: { ...Typography.body, fontWeight: '600', marginBottom: Spacing.md },
+  previewBox: { backgroundColor: Colors.white, borderRadius: Radius.xl, padding: Spacing.xxxl, alignItems: 'center', borderWidth: 1, borderColor: Colors.border, ...Shadow.sm },
+  previewText: { fontSize: 24, fontWeight: '700', color: Colors.amber + '60', letterSpacing: 4 },
+  actionBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.sm, backgroundColor: Colors.amber, borderRadius: Radius.full, paddingVertical: Spacing.lg, ...Shadow.md },
   actionBtnText: { ...Typography.body, color: Colors.white, fontWeight: '600' },
 });

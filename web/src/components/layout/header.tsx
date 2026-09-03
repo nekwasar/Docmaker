@@ -70,21 +70,32 @@ const TOOLS_MEGA = {
 const RESOURCES_MEGA = {
   categories: [
     {
-      title: "Learn",
-      icon: BookOpen,
-      items: [
-        { label: "Blog", href: "/blog", description: "Tips, guides, and insights" },
-        { label: "Features", href: "/features", description: "All features explained" },
-        { label: "How It Works", href: "/how-it-works", description: "Step-by-step walkthrough" },
-      ],
-    },
-    {
-      title: "Support",
+      title: "Help",
       icon: HelpCircle,
       items: [
         { label: "Help Center", href: "/help", description: "Get help with Docmaker" },
+        { label: "FAQ", href: "/help#faq", description: "Frequently asked questions" },
+        { label: "How It Works", href: "/how-it-works", description: "Step-by-step walkthrough" },
         { label: "Contact Us", href: "/contact", description: "Reach our team" },
-        { label: "FAQ", href: "/faq", description: "Frequently asked questions" },
+      ],
+    },
+    {
+      title: "Blog",
+      icon: BookOpen,
+      items: [
+        { label: "All Posts", href: "/blog", description: "Tips, guides, and insights" },
+        { label: "Tutorials", href: "/blog?tutorials", description: "Step-by-step guides" },
+        { label: "Updates", href: "/blog?updates", description: "Product news" },
+        { label: "Case Studies", href: "/blog?cases", description: "Success stories" },
+      ],
+    },
+    {
+      title: "Legals",
+      icon: MessageSquare,
+      items: [
+        { label: "Privacy Policy", href: "/privacy", description: "How we handle data" },
+        { label: "Terms of Service", href: "/terms", description: "Usage terms" },
+        { label: "Cookie Policy", href: "/cookies", description: "Cookie usage" },
       ],
     },
     {
@@ -92,8 +103,7 @@ const RESOURCES_MEGA = {
       icon: MessageSquare,
       items: [
         { label: "About", href: "/about", description: "About Docmaker" },
-        { label: "Privacy Policy", href: "/privacy", description: "How we handle data" },
-        { label: "Terms of Service", href: "/terms", description: "Usage terms" },
+        { label: "Pricing", href: "/pricing", description: "Free for everyone" },
       ],
     },
   ],
@@ -218,11 +228,11 @@ function ResourcesMenu() {
 
       {isOpen && (
         <div
-          className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[500px] rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl z-50"
+          className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[700px] rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl z-50"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-4 gap-4">
             {RESOURCES_MEGA.categories.map((cat) => (
               <div key={cat.title}>
                 <div className="flex items-center gap-2 mb-3">

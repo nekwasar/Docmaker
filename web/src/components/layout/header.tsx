@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Menu, X, FileText, ChevronDown, Sparkles, Globe, Zap, BookOpen, HelpCircle, MessageSquare } from "lucide-react";
 import { Brand } from "@/config/site";
 
@@ -88,36 +88,38 @@ const RESOURCES_MEGA = {
   ],
 };
 
-function MegaMenu({ label, data, isOpen, onToggle, onClose }: {
-  label: string;
-  data: typeof TOOLS_MEGA;
-  isOpen: boolean;
-  onToggle: () => void;
-  onClose: () => void;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
+function MegaMenu({ label, data }: { label: string; data: typeof TOOLS_MEGA }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    setIsOpen(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    timeoutRef.current = setTimeout(() => {
+      setIsOpen(false);
+    }, 150); // 150ms delay before closing
+  }, []);
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        onClose();
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
       }
-    }
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen, onClose]);
+    };
+  }, []);
 
   return (
     <div
-      ref={ref}
       className="relative"
-      onMouseEnter={onToggle}
-      onMouseLeave={onClose}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <button
-        onClick={onToggle}
         className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors rounded-lg hover:bg-slate-50"
       >
         {label}
@@ -125,7 +127,11 @@ function MegaMenu({ label, data, isOpen, onToggle, onClose }: {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[700px] rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl z-50">
+        <div
+          className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[700px] rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl z-50"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
           <div className="grid grid-cols-4 gap-6">
             {data.categories.map((cat) => (
               <div key={cat.title}>
@@ -141,7 +147,6 @@ function MegaMenu({ label, data, isOpen, onToggle, onClose }: {
                       <Link
                         href={item.href}
                         className="block rounded-lg px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-                        onClick={onClose}
                       >
                         {item.label}
                       </Link>
@@ -152,7 +157,7 @@ function MegaMenu({ label, data, isOpen, onToggle, onClose }: {
             ))}
           </div>
           <div className="mt-4 pt-4 border-t border-slate-100">
-            <Link href="/features" className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors" onClick={onClose}>
+            <Link href="/features" className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
               View all tools →
             </Link>
           </div>
@@ -162,34 +167,38 @@ function MegaMenu({ label, data, isOpen, onToggle, onClose }: {
   );
 }
 
-function ResourcesMenu({ isOpen, onToggle, onClose }: {
-  isOpen: boolean;
-  onToggle: () => void;
-  onClose: () => void;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
+function ResourcesMenu() {
+  const [isOpen, setIsOpen] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    setIsOpen(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    timeoutRef.current = setTimeout(() => {
+      setIsOpen(false);
+    }, 150);
+  }, []);
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        onClose();
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
       }
-    }
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen, onClose]);
+    };
+  }, []);
 
   return (
     <div
-      ref={ref}
       className="relative"
-      onMouseEnter={onToggle}
-      onMouseLeave={onClose}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <button
-        onClick={onToggle}
         className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors rounded-lg hover:bg-slate-50"
       >
         Resources
@@ -197,7 +206,11 @@ function ResourcesMenu({ isOpen, onToggle, onClose }: {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[500px] rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl z-50">
+        <div
+          className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[500px] rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl z-50"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
           <div className="grid grid-cols-3 gap-6">
             {RESOURCES_MEGA.categories.map((cat) => (
               <div key={cat.title}>
@@ -213,7 +226,6 @@ function ResourcesMenu({ isOpen, onToggle, onClose }: {
                       <Link
                         href={item.href}
                         className="block rounded-lg px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-                        onClick={onClose}
                       >
                         {item.label}
                       </Link>
@@ -231,8 +243,8 @@ function ResourcesMenu({ isOpen, onToggle, onClose }: {
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [toolsOpen, setToolsOpen] = useState(false);
-  const [resourcesOpen, setResourcesOpen] = useState(false);
+  const [toolsAccordion, setToolsAccordion] = useState(false);
+  const [resourcesAccordion, setResourcesAccordion] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
@@ -244,20 +256,9 @@ export function Header() {
           <span className="text-xl font-bold text-slate-900">Docmaker</span>
         </Link>
 
-        {/* Desktop Navigation */}
         <nav className="hidden lg:flex items-center gap-1">
-          <MegaMenu
-            label="Tools"
-            data={TOOLS_MEGA}
-            isOpen={toolsOpen}
-            onToggle={() => { setToolsOpen(!toolsOpen); setResourcesOpen(false); }}
-            onClose={() => setToolsOpen(false)}
-          />
-          <ResourcesMenu
-            isOpen={resourcesOpen}
-            onToggle={() => { setResourcesOpen(!resourcesOpen); setToolsOpen(false); }}
-            onClose={() => setResourcesOpen(false)}
-          />
+          <MegaMenu label="Tools" data={TOOLS_MEGA} />
+          <ResourcesMenu />
           <Link href="/pricing" className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors rounded-lg hover:bg-slate-50">
             Pricing
           </Link>
@@ -276,7 +277,6 @@ export function Header() {
           </Link>
         </div>
 
-        {/* Mobile Menu Button */}
         <button
           className="lg:hidden p-2"
           onClick={() => setMobileOpen(!mobileOpen)}
@@ -285,31 +285,24 @@ export function Header() {
         </button>
       </div>
 
-      {/* Mobile Menu */}
       {mobileOpen && (
         <div className="border-t border-slate-200 bg-white px-4 py-4 lg:hidden">
           <div className="space-y-4">
-            {/* Tools Section */}
             <div>
               <button
                 className="flex w-full items-center justify-between text-sm font-semibold text-slate-900"
-                onClick={() => setToolsOpen(!toolsOpen)}
+                onClick={() => setToolsAccordion(!toolsAccordion)}
               >
                 Tools
-                <ChevronDown className={`h-4 w-4 transition-transform ${toolsOpen ? "rotate-180" : ""}`} />
+                <ChevronDown className={`h-4 w-4 transition-transform ${toolsAccordion ? "rotate-180" : ""}`} />
               </button>
-              {toolsOpen && (
+              {toolsAccordion && (
                 <div className="mt-2 space-y-3 pl-2">
                   {TOOLS_MEGA.categories.map((cat) => (
                     <div key={cat.title}>
                       <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">{cat.title}</p>
                       {cat.items.map((item) => (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          className="block py-1 text-sm text-slate-600 hover:text-slate-900"
-                          onClick={() => setMobileOpen(false)}
-                        >
+                        <Link key={item.href} href={item.href} className="block py-1 text-sm text-slate-600" onClick={() => setMobileOpen(false)}>
                           {item.label}
                         </Link>
                       ))}
@@ -319,27 +312,21 @@ export function Header() {
               )}
             </div>
 
-            {/* Resources Section */}
             <div>
               <button
                 className="flex w-full items-center justify-between text-sm font-semibold text-slate-900"
-                onClick={() => setResourcesOpen(!resourcesOpen)}
+                onClick={() => setResourcesAccordion(!resourcesAccordion)}
               >
                 Resources
-                <ChevronDown className={`h-4 w-4 transition-transform ${resourcesOpen ? "rotate-180" : ""}`} />
+                <ChevronDown className={`h-4 w-4 transition-transform ${resourcesAccordion ? "rotate-180" : ""}`} />
               </button>
-              {resourcesOpen && (
+              {resourcesAccordion && (
                 <div className="mt-2 space-y-3 pl-2">
                   {RESOURCES_MEGA.categories.map((cat) => (
                     <div key={cat.title}>
                       <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">{cat.title}</p>
                       {cat.items.map((item) => (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          className="block py-1 text-sm text-slate-600 hover:text-slate-900"
-                          onClick={() => setMobileOpen(false)}
-                        >
+                        <Link key={item.href} href={item.href} className="block py-1 text-sm text-slate-600" onClick={() => setMobileOpen(false)}>
                           {item.label}
                         </Link>
                       ))}
@@ -354,10 +341,8 @@ export function Header() {
             </Link>
 
             <div className="pt-4 border-t border-slate-200 flex flex-col gap-2">
-              <Link href="/login" className="text-center text-sm font-medium text-slate-600" onClick={() => setMobileOpen(false)}>
-                Sign In
-              </Link>
-              <Link href="/register" className="text-center rounded-full px-5 py-2.5 text-sm font-semibold text-white" style={{ backgroundColor: Brand.navy }} onClick={() => setMobileOpen(false)}>
+              <Link href="/login" className="text-center text-sm font-medium text-slate-600">Sign In</Link>
+              <Link href="/register" className="text-center rounded-full px-5 py-2.5 text-sm font-semibold text-white" style={{ backgroundColor: Brand.navy }}>
                 Get Started
               </Link>
             </div>

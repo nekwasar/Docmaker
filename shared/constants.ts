@@ -1,26 +1,15 @@
-// Credit costs
-export const CREDIT_COSTS = {
-  GENERATE: 1, // per 100 words
-  EDIT: 1, // per 10 edits
-  TRANSLATE: 1, // per 50 words
-  OCR: 1, // per 50 words
-  CHANGE_STYLE: 1, // per 100 words
-  SUMMARIZE: 1, // per 100 words
-  IMAGE: 1, // per image
-  QA: 1, // per question
-} as const;
+// Brand colors
+export const Brand = {
+  navy: '#121660',
+  teal: '#3CAE8B',
+  blue: '#0171DF',
+  yellow: '#FFD140',
+};
 
-// Free tools (no credits)
-export const FREE_TOOLS = [
-  'merge_pdf',
-  'split_pdf',
-  'compress_pdf',
-  'edit_pdf',
-  'esign',
-  'file_transfer',
-  'file_viewer',
-  'convert',
-] as const;
+// App constants
+export const APP_NAME = 'Docmaker';
+export const APP_VERSION = '1.0.0';
+export const APP_URL = 'https://docmaker.io';
 
 // Supported languages
 export const LANGUAGES = [
@@ -57,24 +46,20 @@ export const COMPRESSION_LEVELS = [
   { id: 'high', name: 'High', description: 'Smallest file' },
 ] as const;
 
-// App constants
-export const APP_NAME = 'Docmaker';
-export const APP_VERSION = '1.0.0';
-export const MAX_IMAGES_PER_DOC = 5;
+// Free tools (no credits)
+export const FREE_TOOLS = [
+  'merge_pdf',
+  'split_pdf',
+  'compress_pdf',
+  'edit_pdf',
+  'esign',
+  'file_transfer',
+  'file_viewer',
+  'convert',
+] as const;
+
+// Max file size
 export const MAX_FILE_SIZE_MB = 50;
+export const MAX_IMAGES_PER_DOC = 5;
 export const TRANSFER_CODE_LENGTH = 6;
 export const TRANSFER_EXPIRY_HOURS = 24;
-
-// Colors
-export const COLORS = {
-  primary: '#007AFF',
-  secondary: '#5856D6',
-  success: '#34C759',
-  warning: '#FF9500',
-  danger: '#FF3B30',
-  background: '#F2F2F7',
-  surface: '#FFFFFF',
-  text: '#000000',
-  textSecondary: '#8E8E93',
-  border: '#C6C6C8',
-} as const;

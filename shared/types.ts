@@ -19,6 +19,16 @@ export interface Document {
   updatedAt: string;
 }
 
+// File types
+export interface FileItem {
+  id: string;
+  name: string;
+  format: string;
+  size: number;
+  uri: string;
+  createdAt: string;
+}
+
 // AI Generation
 export interface GenerateRequest {
   text: string;
@@ -32,8 +42,6 @@ export interface GenerateResponse {
     documentId: string;
     content: string;
     wordCount: number;
-    creditsUsed: number;
-    creditsRemaining: number;
   };
 }
 
@@ -64,8 +72,6 @@ export interface TranslateResponse {
   success: boolean;
   data: {
     translatedText: string;
-    creditsUsed: number;
-    creditsRemaining: number;
   };
 }
 
@@ -79,8 +85,6 @@ export interface OCRResponse {
   data: {
     text: string;
     confidence: number;
-    creditsUsed: number;
-    creditsRemaining: number;
   };
 }
 
@@ -99,11 +103,12 @@ export interface TransferResponse {
   };
 }
 
-// Credits
-export interface CreditBalance {
-  balance: number;
-  used: number;
-  plan: 'free' | 'pro';
+export interface Transfer {
+  id: string;
+  transferCode: string;
+  fileIds: string[];
+  createdAt: string;
+  expiresAt: string;
 }
 
 // API Response
@@ -112,4 +117,49 @@ export interface ApiResponse<T> {
   data?: T;
   error?: string;
   message?: string;
+}
+
+// Image attachment
+export interface ImageAttachment {
+  uri: string;
+  base64?: string;
+  description?: string;
+}
+
+// Annotation
+export interface Annotation {
+  id: string;
+  type: 'text' | 'image' | 'draw' | 'shape';
+  x: number;
+  y: number;
+  width?: number;
+  height?: number;
+  content?: string;
+}
+
+// PDF Document
+export interface PDFDocument {
+  uri: string;
+  totalPages: number;
+  currentPage: number;
+}
+
+// PDF File
+export interface PDFFile {
+  id: string;
+  name: string;
+  uri: string;
+}
+
+// Signature
+export interface SignatureData {
+  imageUri: string;
+  base64: string;
+}
+
+// Conversion pairs
+export interface ConversionPair {
+  from: string;
+  to: string;
+  slug: string;
 }

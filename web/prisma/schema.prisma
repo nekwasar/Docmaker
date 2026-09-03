@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  passwordHash  String?
+  googleId      String?
+  role          String    @default("free") // free, pro, admin
+  credits       Int       @default(0)
+  usedCredits   Int       @default(0)
+  avatarUrl     String?
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  documents     Document[]
+  refreshTokens RefreshToken[]
+  payments      Payment[]
+  subscriptions Subscription[]
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  content   Json     // Structured document content
+  format    String   @default("pdf")
+  wordCount Int      @default(0)
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user       User         @relation(fields: [userId], references: [id])
+  versions   DocumentVersion[]
+}
+
+model DocumentVersion {
+  id         String   @id @default(cuid())
+  documentId String
+  content    Json
+  trigger    String   // generation, edit, manual
+  createdAt  DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  isRevoked Boolean  @default(false)
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  userId    String
+  amount    Decimal
+  currency  String   @default("usd")
+  status    String   // pending, completed, failed, refunded
+  provider  String   // stripe, flutterwave, paystack, paypal
+  externalId String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String
+  plan      String   // monthly, yearly
+  status    String   // active, canceled, past_due
+  credits   Int
+  currentPeriodEnd DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}

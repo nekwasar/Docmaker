@@ -24,6 +24,20 @@ export const Colors = {
   swipeAction: '#10B981',
 };
 
+export const Brand = {
+  navy: '#121660',
+  teal: '#3CAE8B',
+  blue: '#0171DF',
+  yellow: '#FFD140',
+};
+
+export const BrandLight = {
+  navy: '#12166015',
+  teal: '#3CAE8B15',
+  blue: '#0171DF15',
+  yellow: '#FFD14020',
+};
+
 export const Spacing = {
   xs: 4,
   sm: 8,

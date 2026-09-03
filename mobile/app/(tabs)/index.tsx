@@ -91,7 +91,7 @@ export default function HomeScreen() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>AI Tools</Text>
-              <AnimatedPressable onPress={() => {}} haptic="light">
+              <AnimatedPressable onPress={() => router.push('/ai-tools' as any)} haptic="light">
                 <Text style={styles.seeAll}>See All</Text>
               </AnimatedPressable>
             </View>
@@ -117,7 +117,7 @@ export default function HomeScreen() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>PDF Tools</Text>
-              <AnimatedPressable onPress={() => {}} haptic="light">
+              <AnimatedPressable onPress={() => router.push('/pdf-tools' as any)} haptic="light">
                 <Text style={styles.seeAll}>See All</Text>
               </AnimatedPressable>
             </View>

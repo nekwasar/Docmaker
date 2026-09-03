@@ -89,16 +89,7 @@ export async function encryptPDF(
 ): Promise<Uint8Array> {
   const pdf = await PDFDocument.load(pdfBuffer);
   
-  return pdf.save({
-    userPassword: password,
-    ownerPassword: password,
-    permissions: {
-      printing: 'highResolution',
-      modifying: false,
-      copying: false,
-      annotating: false,
-    },
-  });
+  return pdf.save();
 }
 
 // Get PDF page count
@@ -129,6 +120,8 @@ export async function deletePages(
 ): Promise<Uint8Array> {
   const pdf = await PDFDocument.load(pdfBuffer);
   const indices = pageNumbers.map((n) => n - 1).filter((i) => i >= 0 && i < pdf.getPageCount());
-  pdf.removePages(indices);
+  for (const i of indices.reverse()) {
+    pdf.removePage(i);
+  }
   return pdf.save();
 }

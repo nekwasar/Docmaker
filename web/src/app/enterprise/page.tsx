@@ -1,16 +1,16 @@
 import Link from "next/link";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, FileText, Layers, Users, Settings, Lock, BarChart3, Code, Globe, Shield } from "lucide-react";
 import { Brand } from "@/config/site";
 
 const FEATURES = [
-  "API access with dedicated endpoints",
-  "Batch processing for 100+ files",
-  "Team collaboration with real-time editing",
-  "Admin dashboard with user management",
-  "SSO integration (SAML, OIDC)",
-  "Audit logs for compliance",
-  "Webhook support for event notifications",
-  "Priority support with SLA",
+  { icon: Code, title: "API Access", description: "RESTful endpoints with comprehensive documentation" },
+  { icon: Layers, title: "Batch Processing", description: "Process hundreds of files in a single request" },
+  { icon: Users, title: "Team Collaboration", description: "Real-time editing with your entire team" },
+  { icon: Settings, title: "Admin Dashboard", description: "Manage users, monitor usage, configure settings" },
+  { icon: Lock, title: "SSO Integration", description: "SAML, OIDC, or your identity provider" },
+  { icon: BarChart3, title: "Audit Logs", description: "Track every action for compliance" },
+  { icon: Globe, title: "Webhook Support", description: "Get notified of events in real-time" },
+  { icon: Shield, title: "Priority Support", description: "Dedicated support with SLA guarantees" },
 ];
 
 export default function EnterprisePage() {
@@ -22,22 +22,33 @@ export default function EnterprisePage() {
           Built for <span style={{ color: Brand.navy }}>scale</span>
         </h1>
 
-        <p className="text-xl sm:text-2xl text-slate-600 mb-16 max-w-2xl leading-relaxed">
-          Docmaker Enterprise gives your organization everything it needs to process documents at scale. API access, batch processing, team collaboration, and enterprise-grade security.
+        <p className="text-xl sm:text-2xl text-slate-600 mb-12 max-w-2xl leading-relaxed">
+          Docmaker Enterprise gives your organization everything it needs to process documents at scale.
         </p>
 
-        {/* Feature List - No Cards */}
+        {/* Divider */}
+        <div className="h-px bg-slate-200 mb-12" />
+
+        {/* Feature List with Icons */}
         <div className="mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-8">What you get</h2>
-          <ul className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {FEATURES.map((feature) => (
-              <li key={feature} className="flex items-start gap-3 text-lg text-slate-700">
-                <Check className="h-6 w-6 mt-0.5 flex-shrink-0" style={{ color: Brand.teal }} />
-                {feature}
-              </li>
+              <div key={feature.title} className="flex items-start gap-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0" style={{ backgroundColor: Brand.navy + '10' }}>
+                  <feature.icon className="h-5 w-5" style={{ color: Brand.navy }} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-1">{feature.title}</h3>
+                  <p className="text-sm text-slate-500">{feature.description}</p>
+                </div>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
+
+        {/* Divider */}
+        <div className="h-px bg-slate-200 mb-12" />
 
         {/* Pricing */}
         <div className="mb-16">
@@ -51,39 +62,23 @@ export default function EnterprisePage() {
               <span className="text-5xl font-bold text-slate-900">$49</span>
               <span className="text-xl text-slate-500">/month</span>
             </div>
+            <div className="h-px bg-slate-100 mb-6" />
             <ul className="space-y-3 mb-8">
-              <li className="flex items-center gap-2 text-slate-700">
-                <Check className="h-5 w-5" style={{ color: Brand.teal }} />
-                Unlimited API requests
-              </li>
-              <li className="flex items-center gap-2 text-slate-700">
-                <Check className="h-5 w-5" style={{ color: Brand.teal }} />
-                Unlimited batch processing
-              </li>
-              <li className="flex items-center gap-2 text-slate-700">
-                <Check className="h-5 w-5" style={{ color: Brand.teal }} />
-                Team collaboration (up to 25 users)
-              </li>
-              <li className="flex items-center gap-2 text-slate-700">
-                <Check className="h-5 w-5" style={{ color: Brand.teal }} />
-                Admin dashboard
-              </li>
-              <li className="flex items-center gap-2 text-slate-700">
-                <Check className="h-5 w-5" style={{ color: Brand.teal }} />
-                SSO integration
-              </li>
-              <li className="flex items-center gap-2 text-slate-700">
-                <Check className="h-5 w-5" style={{ color: Brand.teal }} />
-                Audit logs
-              </li>
-              <li className="flex items-center gap-2 text-slate-700">
-                <Check className="h-5 w-5" style={{ color: Brand.teal }} />
-                Webhook support
-              </li>
-              <li className="flex items-center gap-2 text-slate-700">
-                <Check className="h-5 w-5" style={{ color: Brand.teal }} />
-                Priority support with SLA
-              </li>
+              {[
+                "Unlimited API requests",
+                "Unlimited batch processing",
+                "Team collaboration (up to 25 users)",
+                "Admin dashboard",
+                "SSO integration",
+                "Audit logs",
+                "Webhook support",
+                "Priority support with SLA",
+              ].map((item) => (
+                <li key={item} className="flex items-center gap-2 text-slate-700">
+                  <Check className="h-5 w-5 flex-shrink-0" style={{ color: Brand.teal }} />
+                  {item}
+                </li>
+              ))}
             </ul>
             <Link
               href="/register"
@@ -96,11 +91,14 @@ export default function EnterprisePage() {
           </div>
         </div>
 
+        {/* Divider */}
+        <div className="h-px bg-slate-200 mb-12" />
+
         {/* Custom Enterprise */}
         <div className="mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">Need something custom?</h2>
           <p className="text-lg text-slate-600 mb-8 max-w-2xl">
-            For larger teams, custom integrations, or specific compliance requirements, talk to our sales team. We'll build a plan that works for you.
+            For larger teams, custom integrations, or specific compliance requirements, talk to our sales team.
           </p>
           <Link
             href="/contact"
@@ -111,28 +109,29 @@ export default function EnterprisePage() {
           </Link>
         </div>
 
+        {/* Divider */}
+        <div className="h-px bg-slate-200 mb-12" />
+
         {/* Use Cases */}
         <div className="mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-8">Who uses Enterprise?</h2>
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-2">Legal firms</h3>
-              <p className="text-lg text-slate-600">Process contracts, NDAs, and legal documents in bulk with full audit trails.</p>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-2">Healthcare providers</h3>
-              <p className="text-lg text-slate-600">Convert patient records, extract text from medical documents securely.</p>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-2">Education institutions</h3>
-              <p className="text-lg text-slate-600">Batch process student submissions, generate certificates, manage documents.</p>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-2">Financial services</h3>
-              <p className="text-lg text-slate-600">Process invoices, reports, and financial documents with compliance tracking.</p>
-            </div>
+          <div className="space-y-8">
+            {[
+              { title: "Legal firms", description: "Process contracts, NDAs, and legal documents in bulk with full audit trails." },
+              { title: "Healthcare providers", description: "Convert patient records, extract text from medical documents securely." },
+              { title: "Education institutions", description: "Batch process student submissions, generate certificates, manage documents." },
+              { title: "Financial services", description: "Process invoices, reports, and financial documents with compliance tracking." },
+            ].map((useCase) => (
+              <div key={useCase.title} className="border-l-4 pl-6" style={{ borderColor: Brand.navy }}>
+                <h3 className="text-xl font-semibold text-slate-900 mb-2">{useCase.title}</h3>
+                <p className="text-lg text-slate-600">{useCase.description}</p>
+              </div>
+            ))}
           </div>
         </div>
+
+        {/* Divider */}
+        <div className="h-px bg-slate-200 mb-12" />
 
         {/* CTA */}
         <div>

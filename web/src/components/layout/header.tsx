@@ -110,7 +110,12 @@ function MegaMenu({ label, data, isOpen, onToggle, onClose }: {
   }, [isOpen, onClose]);
 
   return (
-    <div ref={ref} className="relative">
+    <div
+      ref={ref}
+      className="relative"
+      onMouseEnter={onToggle}
+      onMouseLeave={onClose}
+    >
       <button
         onClick={onToggle}
         className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors rounded-lg hover:bg-slate-50"
@@ -177,7 +182,12 @@ function ResourcesMenu({ isOpen, onToggle, onClose }: {
   }, [isOpen, onClose]);
 
   return (
-    <div ref={ref} className="relative">
+    <div
+      ref={ref}
+      className="relative"
+      onMouseEnter={onToggle}
+      onMouseLeave={onClose}
+    >
       <button
         onClick={onToggle}
         className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors rounded-lg hover:bg-slate-50"

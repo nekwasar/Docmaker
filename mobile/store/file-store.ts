@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Document } from '../../shared/types';
+import { Document } from '../lib/types';
 
 interface FileState {
   files: Document[];

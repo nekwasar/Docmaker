@@ -104,6 +104,7 @@ const RESOURCES_MEGA = {
       items: [
         { label: "About", href: "/about", description: "About Docmaker" },
         { label: "Pricing", href: "/pricing", description: "Free for everyone" },
+        { label: "Mobile App", href: "/mobile", description: "iOS & Android" },
       ],
     },
   ],

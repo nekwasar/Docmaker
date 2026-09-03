@@ -105,81 +105,81 @@ All features are available on all platforms (Web, Mobile, Enterprise). Platform-
 
 ### AI-Powered Features
 
-| Feature | What It Does | Cost |
-|---------|--------------|------|
-| **Generate Document** | Create professional documents from text prompts | 1 credit / 100 words |
-| **AI Edit** | Edit documents with natural language commands | 1 credit / 10 edits |
-| **AI Document Q&A** | Ask questions about your documents, get answers | 1 credit / question |
-| **Translate** | Translate documents between 10+ languages | 1 credit / 50 words |
-| **Voice to Document** | Record voice, get formatted document | 1 credit / 100 words |
-| **Extract Text (OCR)** | Pull text from images and scanned PDFs | 1 credit / 50 words |
-| **Change Style** | Restyle any document with AI | 1 credit / 100 words |
-| **Summarize** | Create short summaries of long documents | 1 credit / 100 words |
+| Feature | What It Does |
+|---------|--------------|
+| **Generate Document** | Create professional documents from text prompts |
+| **AI Edit** | Edit documents with natural language commands |
+| **AI Document Q&A** | Ask questions about your documents, get answers |
+| **Translate** | Translate documents between 10+ languages |
+| **Voice to Document** | Record voice, get formatted document |
+| **Extract Text (OCR)** | Pull text from images and scanned PDFs |
+| **Change Style** | Restyle any document with AI |
+| **Summarize** | Create short summaries of long documents |
 
-### PDF Tools (Always Free)
+### PDF Tools
 
-| Feature | What It Does | Cost |
-|---------|--------------|------|
-| **Merge PDF** | Combine multiple PDFs into one | FREE |
-| **Split PDF** | Separate PDF into individual pages | FREE |
-| **Compress PDF** | Reduce PDF file size | FREE |
-| **Edit PDF** | Add text, images, shapes, annotations | FREE |
-| **E-Sign** | Sign documents digitally | FREE |
-| **Rotate PDF** | Rotate PDF pages | FREE |
-| **Delete Pages** | Remove pages from PDF | FREE |
-| **Extract Pages** | Extract specific pages from PDF | FREE |
-| **Watermark** | Add watermarks to PDFs | FREE |
-| **Encrypt PDF** | Password-protect PDFs | FREE |
-| **Redact PDF** | Black out sensitive information | FREE |
-| **Fill PDF Forms** | Fill in PDF form fields | FREE |
+| Feature | What It Does |
+|---------|--------------|
+| **Merge PDF** | Combine multiple PDFs into one |
+| **Split PDF** | Separate PDF into individual pages |
+| **Compress PDF** | Reduce PDF file size |
+| **Edit PDF** | Add text, images, shapes, annotations |
+| **E-Sign** | Sign documents digitally |
+| **Rotate PDF** | Rotate PDF pages |
+| **Delete Pages** | Remove pages from PDF |
+| **Extract Pages** | Extract specific pages from PDF |
+| **Watermark** | Add watermarks to PDFs |
+| **Encrypt PDF** | Password-protect PDFs |
+| **Redact PDF** | Black out sensitive information |
+| **Fill PDF Forms** | Fill in PDF form fields |
 
-### File Conversion (Always Free)
+### File Conversion
 
-| Feature | What It Does | Cost |
-|---------|--------------|------|
-| **Convert Files** | Convert between 200+ format pairs | FREE |
-| **PDF to Word** | Convert PDF to editable DOCX | FREE |
-| **Word to PDF** | Convert DOCX to PDF | FREE |
-| **JPG to PDF** | Convert images to PDF | FREE |
-| **PDF to JPG** | Convert PDF to images | FREE |
-| **Excel to PDF** | Convert spreadsheets to PDF | FREE |
-| **PDF to Excel** | Convert PDF to spreadsheets | FREE |
-| **PowerPoint to PDF** | Convert presentations to PDF | FREE |
-| **HTML to PDF** | Convert web pages to PDF | FREE |
-| **Markdown to PDF** | Convert MD to PDF | FREE |
-| + 190 more pairs | Full conversion matrix | FREE |
+| Feature | What It Does |
+|---------|--------------|
+| **Convert Files** | Convert between 200+ format pairs |
+| **PDF to Word** | Convert PDF to editable DOCX |
+| **Word to PDF** | Convert DOCX to PDF |
+| **JPG to PDF** | Convert images to PDF |
+| **PDF to JPG** | Convert PDF to images |
+| **Excel to PDF** | Convert spreadsheets to PDF |
+| **PDF to Excel** | Convert PDF to spreadsheets |
+| **PowerPoint to PDF** | Convert presentations to PDF |
+| **HTML to PDF** | Convert web pages to PDF |
+| **Markdown to PDF** | Convert MD to PDF |
+| + 190 more pairs | Full conversion matrix |
 
 ### File Management
 
-| Feature | What It Does | Cost |
-|---------|--------------|------|
-| **File Transfer** | Send files between devices (phone ↔ computer) | FREE |
-| **File Viewer** | Open and read any file format on any device | FREE |
-| **File Editor** | Edit documents directly on mobile | FREE |
-| **Cloud Storage** | Save documents to cloud (Pro feature) | Pro |
-| **Document History** | Access previous versions | Free (basic) / Pro (full) |
-| **Folder Organization** | Organize documents into folders | Pro |
+| Feature | What It Does |
+|---------|--------------|
+| **File Transfer** | Send files between devices (phone ↔ computer) |
+| **File Viewer** | Open and read any file format on any device |
+| **File Editor** | Edit documents directly on mobile |
+| **Cloud Storage** | Save documents to cloud (Pro feature) |
+| **Document History** | Access previous versions |
+| **Folder Organization** | Organize documents into folders |
 
 ### Collaboration & Sharing
 
-| Feature | What It Does | Cost |
-|---------|--------------|------|
-| **Share Documents** | Share via link with view tracking | FREE |
-| **Document Analytics** | See who viewed, when, how long | FREE |
-| **Team Collaboration** | Multiple users edit same document | Pro |
-| **Comments & Annotations** | Add comments to shared documents | FREE |
-| **Version Control** | Track changes, restore previous versions | Pro |
+| Feature | What It Does |
+|---------|--------------|
+| **Share Documents** | Share via link with view tracking |
+| **Document Analytics** | See who viewed, when, how long |
+| **Team Collaboration** | Multiple users edit same document |
+| **Comments & Annotations** | Add comments to shared documents |
+| **Version Control** | Track changes, restore previous versions |
 
 ### Developer & Enterprise
 
-| Feature | What It Does | Cost |
-|---------|--------------|------|
-| **API Access** | Integrate Docmaker into your apps | Pro |
-| **Batch Processing** | Process 100+ files at once | Free (10) / Pro (unlimited) |
-| **Webhook Support** | Get notified of events | Pro |
-| **Admin Dashboard** | Manage users, credits, settings | Enterprise |
-| **SSO Integration** | Single sign-on for teams | Enterprise |
-| **Audit Logs** | Track all actions for compliance | Enterprise |
+| Feature | What It Does |
+|---------|--------------|
+| **API Access** | Integrate Docmaker into your apps |
+| **Batch Processing** | Process 100+ files at once |
+| **Webhook Support** | Get notified of events |
+| **Admin Dashboard** | Manage users, settings |
+| **SSO Integration** | Single sign-on for teams |
+| **Audit Logs** | Track all actions for compliance |
 
 ---
 
@@ -205,18 +205,18 @@ All features are available on all platforms (Web, Mobile, Enterprise). Platform-
 ### Mobile App (iOS/Android)
 
 **Primary highlights on homepage:**
+- File Manager (home tab)
 - AI Document Generator
 - File Transfer (send files between phone ↔ computer)
-- File Viewer (open any format on phone)
-- File Editor (edit documents on phone)
+- Profile & Settings
 
-**Secondary features (accessible but not highlighted):**
+**Secondary features (accessible from menu):**
 - PDF tools
 - Conversion
 - E-signatures
 - OCR
 
-**Use case:** User opens app, sees AI + file management front and center, can access everything else from menu.
+**Use case:** User opens app, sees file manager front and center, can access AI generation, transfer, and other tools from navigation.
 
 ### Enterprise (API & Dashboard)
 
@@ -236,69 +236,19 @@ All features are available on all platforms (Web, Mobile, Enterprise). Platform-
 
 ---
 
-## Credits
-
-### Credit Costs
-
-| Action | Cost |
-|--------|------|
-| Generate Document | 1 credit per 100 words |
-| AI Edit | 1 credit per 10 edits |
-| Translate | 1 credit per 50 words |
-| Extract Text (OCR) | 1 credit per 50 words |
-| Change Style | 1 credit per 100 words |
-| Summarize | 1 credit per 100 words |
-| Add Image to Document | 1 credit per image (max 5) |
-| AI Document Q&A | 1 credit per question |
-| Voice to Document | 1 credit per 100 words |
-| Convert Files | FREE |
-| Merge PDF | FREE |
-| Split PDF | FREE |
-| Compress PDF | FREE |
-| Edit PDF | FREE |
-| E-Sign | FREE |
-| File Transfer | FREE |
-| File Viewer | FREE |
-| File Editor | FREE |
-
-### Getting Credits
-
-**Free credits:** New registered users get 10 credits after email verification.
-
-**Buy credits anytime:**
-
-| Bundle | Price |
-|--------|-------|
-| 100 credits | $10 |
-| 500 credits | $40 |
-| 1,000 credits | $70 |
-
-**Pro subscription:**
-
-| Plan | Price | Credits |
-|------|-------|---------|
-| Pro Monthly | $9/month | 200 credits/month |
-| Pro Yearly | $86/year | 2,400 credits/year |
-
----
-
 ## Account Types
 
 ### No Account (Guest)
 - Use all tools immediately
 - Documents saved in your browser (localStorage)
-- Credits are session-based
 - No history or cloud storage
 
 ### Free Account
-- 10 free credits on signup
 - All tools fully available
 - Documents saved in your browser
 - Activity history
-- Can buy credits anytime
 
 ### Pro Account
-- 200 credits/month (Monthly) or 2,400/year (Yearly)
 - All documents saved to cloud (MongoDB)
 - Version history — restore any previous version
 - Folder organization
@@ -338,7 +288,6 @@ All features are available on all platforms (Web, Mobile, Enterprise). Platform-
 
 ### Tier 1: FREE (No Account)
 - All tools available
-- AI Document Q&A (limited queries)
 - Basic e-signatures
 - Document sharing with view tracking
 - PDF encryption
@@ -346,7 +295,6 @@ All features are available on all platforms (Web, Mobile, Enterprise). Platform-
 
 ### Tier 2: FREE (Account Required)
 - Everything in Tier 1
-- Unlimited AI Q&A
 - Document history & versioning
 - Batch processing (up to 10 files)
 - Fillable form creator
@@ -423,14 +371,11 @@ All features are available on all platforms (Web, Mobile, Enterprise). Platform-
 - **AI:** OpenAI/Anthropic API
 - **Real-time:** Socket.io
 - **Container:** Docker + Docker Compose
-- **Payment:** Stripe, Flutterwave, Paystack, PayPal
 
 ### Key Features
 
 - Real-time AI streaming via WebSocket
 - Browser-based file processing (privacy-first)
-- Credit system with admin-configurable pricing
-- Multi-payment processor support
 - Admin panel with full control
 - SEO-optimized static pages
 - Mobile-responsive design

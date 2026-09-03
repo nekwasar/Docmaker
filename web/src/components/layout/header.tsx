@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Menu, X, FileText, ChevronDown, Sparkles, Globe, Zap, BookOpen, HelpCircle, MessageSquare } from "lucide-react";
+import { Menu, X, FileText, ChevronDown, Sparkles, Globe, Timer, BookOpen, HelpCircle, MessageSquare } from "lucide-react";
 import { Brand } from "@/config/site";
 
 const TOOLS_MEGA = {
@@ -46,7 +46,7 @@ const TOOLS_MEGA = {
     },
     {
       title: "More Tools",
-      icon: Zap,
+      icon: Timer,
       color: Brand.yellow,
       items: [
         { label: "OCR", href: "/ocr", description: "Extract text from images" },

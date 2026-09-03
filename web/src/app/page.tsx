@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileText, ArrowRight, Zap, Shield, Globe, Sparkles, Merge, Scissors, FileUp, Pen, Scan, FileDown, RotateCcw, Lock, Layers, RefreshCw } from "lucide-react";
+import { FileText, ArrowRight, Timer, Shield, Globe, Sparkles, Merge, Scissors, FileUp, Pen, Lock, Layers, RefreshCw, Camera, Type, PenTool, ArrowUpDown } from "lucide-react";
 import { Brand } from "@/config/site";
 
 const AI_TOOLS = [
@@ -27,7 +27,7 @@ const CONVERSIONS = [
 ];
 
 const FEATURES = [
-  { icon: Zap, title: "Lightning Fast", description: "Process documents in seconds, not minutes" },
+  { icon: Timer, title: "Lightning Fast", description: "Process documents in seconds, not minutes" },
   { icon: Shield, title: "Privacy First", description: "Process files in your browser - nothing leaves your device" },
   { icon: Globe, title: "200+ Formats", description: "Convert between any file format imaginable" },
   { icon: Sparkles, title: "AI-Powered", description: "Smart tools that understand your documents" },
@@ -69,26 +69,79 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* AI Tools Section */}
+      {/* Bento Grid - AI + Quick Actions */}
       <section className="py-16 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">AI-Powered Tools</h2>
-            <p className="text-lg text-slate-500">Intelligent document processing at your fingertips</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Hero AI Card - spans 2 columns */}
+            <Link href="/generate" className="md:col-span-2 rounded-3xl p-8 text-white transition-all hover:scale-[1.02] hover:shadow-xl" style={{ backgroundColor: Brand.navy }}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20">
+                  <Sparkles className="h-6 w-6 text-white" />
+                </div>
+                <span className="px-3 py-1 text-xs font-bold bg-white/20 rounded-full">AI</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-2">Generate Document</h2>
+              <p className="text-white/75 text-lg">Create professional documents from text prompts</p>
+            </Link>
+
+            {/* Quick Action Cards */}
+            <div className="flex flex-col gap-4">
+              <Link href="/camera/scanner" className="flex-1 rounded-3xl p-6 text-white transition-all hover:scale-[1.02] hover:shadow-xl" style={{ backgroundColor: Brand.yellow }}>
+                <Camera className="h-8 w-8 text-[#0F172A] mb-3" />
+                <h3 className="text-lg font-bold text-[#0F172A]">Scan</h3>
+                <p className="text-sm text-[#0F172A]/75">Scan documents</p>
+              </Link>
+              <Link href="/ocr" className="flex-1 rounded-3xl p-6 text-white transition-all hover:scale-[1.02] hover:shadow-xl" style={{ backgroundColor: Brand.teal }}>
+                <Type className="h-8 w-8 text-white mb-3" />
+                <h3 className="text-lg font-bold text-white">OCR</h3>
+                <p className="text-sm text-white/75">Extract text</p>
+              </Link>
+            </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          {/* Second row - 3 equal cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <Link href="/sign" className="rounded-3xl p-6 text-white transition-all hover:scale-[1.02] hover:shadow-xl" style={{ backgroundColor: Brand.blue }}>
+              <PenTool className="h-8 w-8 text-white mb-3" />
+              <h3 className="text-lg font-bold text-white">Sign Document</h3>
+              <p className="text-sm text-white/75">Sign documents digitally</p>
+            </Link>
+            <Link href="/transfer" className="rounded-3xl p-6 text-white transition-all hover:scale-[1.02] hover:shadow-xl" style={{ backgroundColor: Brand.teal }}>
+              <ArrowUpDown className="h-8 w-8 text-white mb-3" />
+              <h3 className="text-lg font-bold text-white">File Transfer</h3>
+              <p className="text-sm text-white/75">Send files between devices</p>
+            </Link>
+            <Link href="/convert" className="rounded-3xl p-6 text-white transition-all hover:scale-[1.02] hover:shadow-xl" style={{ backgroundColor: Brand.navy }}>
+              <RefreshCw className="h-8 w-8 text-white mb-3" />
+              <h3 className="text-lg font-bold text-white">Convert Files</h3>
+              <p className="text-sm text-white/75">200+ format pairs</p>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* AI Tools Section */}
+      <section className="py-16 sm:py-24 bg-white">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">AI Tools</h2>
+            <Link href="/features" className="text-sm font-semibold text-[#121660] hover:underline">
+              See All →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {AI_TOOLS.map((tool) => (
               <Link
                 key={tool.href}
                 href={tool.href}
-                className="group relative rounded-2xl bg-white p-6 border border-slate-200 hover:border-slate-300 transition-all hover:shadow-lg hover:-translate-y-1"
+                className="group rounded-2xl bg-[#F4F6FB] p-5 hover:bg-white border border-transparent hover:border-slate-200 transition-all hover:shadow-lg hover:-translate-y-1"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl mb-4" style={{ backgroundColor: tool.color + '15' }}>
-                  <tool.icon className="h-6 w-6" style={{ color: tool.color }} />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl mb-3" style={{ backgroundColor: tool.color + '15' }}>
+                  <tool.icon className="h-5 w-5" style={{ color: tool.color }} />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">{tool.title}</h3>
-                <p className="text-sm text-slate-500">{tool.description}</p>
-                <ArrowRight className="absolute right-6 top-6 h-5 w-5 text-slate-300 group-hover:text-slate-600 transition-colors" />
+                <h3 className="text-sm font-semibold text-slate-900 mb-1">{tool.title}</h3>
+                <p className="text-xs text-slate-500 line-clamp-2">{tool.description}</p>
               </Link>
             ))}
           </div>
@@ -96,85 +149,71 @@ export default function HomePage() {
       </section>
 
       {/* PDF Tools Section */}
-      <section className="py-16 sm:py-24 bg-white">
+      <section className="py-16 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">PDF Tools</h2>
-            <p className="text-lg text-slate-500">Everything you need for PDF documents — completely free</p>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">PDF Tools</h2>
+            <Link href="/merge-pdf" className="text-sm font-semibold hover:underline" style={{ color: Brand.teal }}>
+              See All →
+            </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {PDF_TOOLS.map((tool) => (
               <Link
                 key={tool.href}
                 href={tool.href}
-                className="group relative rounded-2xl bg-[#F4F6FB] p-6 hover:bg-white border border-transparent hover:border-slate-200 transition-all hover:shadow-lg hover:-translate-y-1"
+                className="group rounded-2xl bg-white p-5 border border-slate-200 hover:border-slate-300 transition-all hover:shadow-lg hover:-translate-y-1"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl mb-4" style={{ backgroundColor: tool.color + '15' }}>
-                  <tool.icon className="h-6 w-6" style={{ color: tool.color }} />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl mb-3" style={{ backgroundColor: tool.color + '15' }}>
+                  <tool.icon className="h-5 w-5" style={{ color: tool.color }} />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">{tool.title}</h3>
-                <p className="text-sm text-slate-500">{tool.description}</p>
-                <ArrowRight className="absolute right-6 top-6 h-5 w-5 text-slate-300 group-hover:text-slate-600 transition-colors" />
+                <h3 className="text-sm font-semibold text-slate-900 mb-1">{tool.title}</h3>
+                <p className="text-xs text-slate-500 line-clamp-2">{tool.description}</p>
               </Link>
             ))}
-          </div>
-          <div className="text-center mt-8">
-            <Link href="/merge-pdf" className="inline-flex items-center gap-2 text-sm font-semibold text-[#3CAE8B] hover:text-[#2d9a7a] transition-colors">
-              View All PDF Tools
-              <ArrowRight className="h-4 w-4" />
-            </Link>
           </div>
         </div>
       </section>
 
       {/* Conversions Section */}
-      <section className="py-16 sm:py-24">
+      <section className="py-16 sm:py-24 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">File Conversion</h2>
-            <p className="text-lg text-slate-500">Convert between 200+ format pairs — completely free</p>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">File Conversion</h2>
+            <Link href="/convert" className="text-sm font-semibold hover:underline" style={{ color: Brand.blue }}>
+              See All →
+            </Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {CONVERSIONS.map((conv) => (
               <Link
                 key={conv.href}
                 href={conv.href}
-                className="group flex flex-col items-center justify-center rounded-2xl bg-white p-6 border border-slate-200 hover:border-[#0171DF] transition-all hover:shadow-lg"
+                className="group rounded-2xl bg-[#F4F6FB] p-6 text-center hover:bg-white border border-transparent hover:border-slate-200 transition-all hover:shadow-lg"
               >
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-lg font-bold text-slate-900">{conv.from}</span>
-                  <ArrowRight className="h-5 w-5 text-[#0171DF]" />
-                  <span className="text-lg font-bold text-slate-900">{conv.to}</span>
+                <div className="flex items-center justify-center gap-3 mb-2">
+                  <span className="text-xl font-bold text-slate-900">{conv.from}</span>
+                  <ArrowRight className="h-5 w-5" style={{ color: Brand.blue }} />
+                  <span className="text-xl font-bold text-slate-900">{conv.to}</span>
                 </div>
-                <span className="text-sm text-slate-500 group-hover:text-[#0171DF] transition-colors">
-                  Convert {conv.from} to {conv.to}
-                </span>
+                <p className="text-sm text-slate-500">Convert {conv.from} to {conv.to}</p>
               </Link>
             ))}
-          </div>
-          <div className="text-center mt-8">
-            <Link href="/convert" className="inline-flex items-center gap-2 text-sm font-semibold text-[#0171DF] hover:text-[#015bb5] transition-colors">
-              View All Conversions
-              <ArrowRight className="h-4 w-4" />
-            </Link>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-16 sm:py-24 bg-white">
+      <section className="py-16 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">Why Docmaker?</h2>
-            <p className="text-lg text-slate-500">Built for speed, privacy, and simplicity</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 text-center mb-12">Why Docmaker?</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {FEATURES.map((feature) => (
-              <div key={feature.title} className="text-center">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#121660] mb-4">
-                  <feature.icon className="h-7 w-7 text-white" />
+              <div key={feature.title} className="rounded-2xl bg-white p-6 border border-slate-200 text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl mb-4" style={{ backgroundColor: Brand.navy }}>
+                  <feature.icon className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">{feature.title}</h3>
+                <h3 className="text-base font-semibold text-slate-900 mb-2">{feature.title}</h3>
                 <p className="text-sm text-slate-500">{feature.description}</p>
               </div>
             ))}
@@ -183,7 +222,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 sm:py-24">
+      <section className="py-16 sm:py-24 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="rounded-3xl bg-gradient-to-br from-[#121660] to-[#1a1f6e] p-12 text-center">
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">

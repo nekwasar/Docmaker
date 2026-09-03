@@ -273,7 +273,7 @@ export function Header() {
             style={{ backgroundColor: Brand.navy }}
           >
             Get Started
-          </link>
+          </Link>
         </div>
 
         {/* Mobile Menu Button */}

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Menu, X, FileText, ChevronDown, Sparkles, Globe, Timer, BookOpen, HelpCircle, MessageSquare } from "lucide-react";
+import { Menu, X, FileText, ChevronDown, Sparkles, Globe, Timer, BookOpen, HelpCircle, MessageSquare, Code, Layers, Users } from "lucide-react";
 import { Brand } from "@/config/site";
 
 const TOOLS_MEGA = {
@@ -51,6 +51,17 @@ const TOOLS_MEGA = {
       items: [
         { label: "OCR", href: "/ocr", description: "Extract text from images" },
         { label: "File Transfer", href: "/transfer", description: "Send files between devices" },
+      ],
+    },
+    {
+      title: "Enterprise",
+      icon: Layers,
+      color: Brand.navy,
+      items: [
+        { label: "API Access", href: "/api-docs", description: "Integrate into your apps" },
+        { label: "Batch Processing", href: "/enterprise", description: "Process 100+ files" },
+        { label: "Team Collaboration", href: "/enterprise", description: "Work together" },
+        { label: "Admin Dashboard", href: "/enterprise", description: "Manage users & settings" },
       ],
     },
   ],
@@ -128,11 +139,11 @@ function MegaMenu({ label, data }: { label: string; data: typeof TOOLS_MEGA }) {
 
       {isOpen && (
         <div
-          className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[700px] rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl z-50"
+          className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[850px] rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl z-50"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
-          <div className="grid grid-cols-4 gap-6">
+          <div className="grid grid-cols-5 gap-4">
             {data.categories.map((cat) => (
               <div key={cat.title}>
                 <div className="flex items-center gap-2 mb-3">

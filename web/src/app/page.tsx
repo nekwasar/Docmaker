@@ -203,6 +203,55 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Enterprise Section */}
+      <section className="py-16 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl bg-gradient-to-br from-[#0F172A] to-[#1E293B] p-8 sm:p-12">
+            <div className="text-center mb-10">
+              <span className="inline-block px-3 py-1 text-xs font-semibold bg-white/10 text-white rounded-full mb-4">Enterprise</span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">Built for teams and developers</h2>
+              <p className="text-slate-400 max-w-2xl mx-auto">API access, batch processing, team collaboration, and admin tools — everything your organization needs.</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Link href="/api" className="rounded-2xl bg-white/5 border border-white/10 p-5 hover:bg-white/10 transition-all">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 mb-3">
+                  <FileText className="h-5 w-5 text-white" />
+                </div>
+                <h3 className="text-sm font-semibold text-white mb-1">API Access</h3>
+                <p className="text-xs text-slate-400">Integrate Docmaker into your apps</p>
+              </Link>
+              <Link href="/enterprise" className="rounded-2xl bg-white/5 border border-white/10 p-5 hover:bg-white/10 transition-all">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 mb-3">
+                  <Layers className="h-5 w-5 text-white" />
+                </div>
+                <h3 className="text-sm font-semibold text-white mb-1">Batch Processing</h3>
+                <p className="text-xs text-slate-400">Process 100+ files at once</p>
+              </Link>
+              <Link href="/enterprise" className="rounded-2xl bg-white/5 border border-white/10 p-5 hover:bg-white/10 transition-all">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 mb-3">
+                  <Shield className="h-5 w-5 text-white" />
+                </div>
+                <h3 className="text-sm font-semibold text-white mb-1">Team Collaboration</h3>
+                <p className="text-xs text-slate-400">Work together on documents</p>
+              </Link>
+              <Link href="/enterprise" className="rounded-2xl bg-white/5 border border-white/10 p-5 hover:bg-white/10 transition-all">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 mb-3">
+                  <Globe className="h-5 w-5 text-white" />
+                </div>
+                <h3 className="text-sm font-semibold text-white mb-1">Admin Dashboard</h3>
+                <p className="text-xs text-slate-400">Manage users, settings, analytics</p>
+              </Link>
+            </div>
+            <div className="text-center mt-8">
+              <Link href="/enterprise" className="inline-flex items-center gap-2 text-sm font-semibold text-white hover:underline">
+                Learn more about Enterprise
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section className="py-16 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

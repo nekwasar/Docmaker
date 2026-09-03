@@ -281,7 +281,7 @@ export function Header() {
               <line x1="10" y1="16" x2="14" y2="16"/>
             </svg>
           </div>
-          <span className="text-xl font-bold text-slate-900">Docmaker</span>
+          <span className="text-xl font-bold text-slate-900" style={{ fontFamily: 'var(--font-playfair)' }}>Docmaker</span>
         </Link>
 
         <nav className="hidden lg:flex items-center gap-1">

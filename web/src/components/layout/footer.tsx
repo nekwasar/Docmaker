@@ -38,7 +38,7 @@ export function Footer() {
                   <line x1="10" y1="16" x2="14" y2="16"/>
                 </svg>
               </div>
-              <span className="text-xl font-bold text-slate-900">Docmaker</span>
+              <span className="text-xl font-bold text-slate-900" style={{ fontFamily: 'var(--font-playfair)' }}>Docmaker</span>
             </Link>
             <p className="text-sm text-slate-500">
               Documents, done smoothly. All-in-one document platform for everyone.

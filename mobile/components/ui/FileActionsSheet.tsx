@@ -116,7 +116,7 @@ export function FileActionsSheet({
             onPress={() => { onClose(); onConvert(); }}
           />
           <ActionItem
-            icon="pen"
+            icon="create"
             label="Sign"
             color={Colors.indigo}
             onPress={() => { onClose(); onSign(); }}

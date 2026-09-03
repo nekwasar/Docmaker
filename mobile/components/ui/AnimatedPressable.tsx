@@ -91,9 +91,13 @@ export function AnimatedPressable({
       disabled={disabled}
       style={[style, animatedStyle]}
     >
-      <Animated.View style={contentStyle}>
-        {children}
-      </Animated.View>
+      {contentStyle ? (
+        <Animated.View style={[{ flex: 1 }, contentStyle]}>
+          {children}
+        </Animated.View>
+      ) : (
+        children
+      )}
     </AnimatedPressableComponent>
   );
 }

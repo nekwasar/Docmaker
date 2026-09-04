@@ -1,6 +1,25 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { FileText, ArrowRight, Timer, Shield, Globe, Sparkles, Merge, Scissors, FileUp, Pen, Lock, Layers, RefreshCw, Camera, Type, PenTool, ArrowUpDown } from "lucide-react";
 import { Brand } from "@/config/site";
+
+export const metadata: Metadata = {
+  title: "Docmaker — Free PDF Tools, AI Document Generator, File Converter",
+  description: "Generate, convert, edit, sign, and compress documents for free. AI-powered document tools with no limits, no watermarks, no account required. 200+ format conversions.",
+  keywords: ["free pdf tools", "ai document generator", "free file converter", "merge pdf free", "compress pdf free", "ocr free", "e-sign free", "document generator", "pdf editor free"],
+  openGraph: {
+    title: "Docmaker — Free PDF Tools & AI Document Generator",
+    description: "Generate, convert, edit, sign documents for free. No limits, no watermarks. AI-powered.",
+    url: "https://docmaker.io",
+    images: [{ url: "https://docmaker.io/api/og?title=Docmaker&subtitle=Free+PDF+Tools+%26+AI+Document+Generator", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Docmaker — Free PDF Tools & AI Document Generator",
+    description: "Generate, convert, edit, sign documents for free. No limits, no watermarks.",
+  },
+  alternates: { canonical: "https://docmaker.io" },
+};
 
 const AI_TOOLS = [
   { icon: Sparkles, title: "AI Generate", description: "Create professional documents from text prompts", href: "/generate", color: Brand.navy },
@@ -34,8 +53,25 @@ const FEATURES = [
 ];
 
 export default function HomePage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "Docmaker",
+    url: "https://docmaker.io",
+    description: "Free PDF tools, AI document generator, and file converter. No limits, no watermarks.",
+    applicationCategory: "UtilitiesApplication",
+    operatingSystem: "Web, iOS, Android",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+  };
+
   return (
     <div className="bg-[#F4F6FB]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+
       {/* Hero Section */}
       <section className="relative overflow-hidden py-24 sm:py-32 lg:py-40">
         <div className="absolute inset-0 bg-gradient-to-br from-[#121660] to-[#1a1f6e]" />
@@ -58,10 +94,10 @@ export default function HomePage() {
                 Start Creating
               </Link>
               <Link
-                href="/features"
+                href="/how-it-works"
                 className="inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-base font-semibold border border-white/30 text-white hover:bg-white/10 transition-all"
               >
-                Explore Features
+                How It Works
                 <ArrowRight className="h-5 w-5" />
               </Link>
             </div>
@@ -73,7 +109,6 @@ export default function HomePage() {
       <section className="py-16 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Hero AI Card - spans 2 columns */}
             <Link href="/generate" className="md:col-span-2 rounded-3xl p-8 text-white transition-all hover:scale-[1.02] hover:shadow-xl" style={{ backgroundColor: Brand.navy }}>
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20">
@@ -84,8 +119,6 @@ export default function HomePage() {
               <h2 className="text-2xl sm:text-3xl font-bold mb-2">Generate Document</h2>
               <p className="text-white/75 text-lg">Create professional documents from text prompts</p>
             </Link>
-
-            {/* Quick Action Cards */}
             <div className="flex flex-col gap-4">
               <Link href="/camera/scanner" className="flex-1 rounded-3xl p-6 text-white transition-all hover:scale-[1.02] hover:shadow-xl" style={{ backgroundColor: Brand.yellow }}>
                 <Camera className="h-8 w-8 text-[#0F172A] mb-3" />
@@ -99,8 +132,6 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-
-          {/* Second row - 3 equal cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
             <Link href="/sign" className="rounded-3xl p-6 text-white transition-all hover:scale-[1.02] hover:shadow-xl" style={{ backgroundColor: Brand.blue }}>
               <PenTool className="h-8 w-8 text-white mb-3" />
@@ -126,17 +157,13 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">AI Tools</h2>
-            <Link href="/features" className="text-sm font-semibold text-[#121660] hover:underline">
+            <Link href="/generate" className="text-sm font-semibold text-[#121660] hover:underline">
               See All →
             </Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {AI_TOOLS.map((tool) => (
-              <Link
-                key={tool.href}
-                href={tool.href}
-                className="group rounded-2xl bg-[#F4F6FB] p-5 hover:bg-white border border-transparent hover:border-slate-200 transition-all hover:shadow-lg hover:-translate-y-1"
-              >
+              <Link key={tool.href} href={tool.href} className="group rounded-2xl bg-[#F4F6FB] p-5 hover:bg-white border border-transparent hover:border-slate-200 transition-all hover:shadow-lg hover:-translate-y-1">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl mb-3" style={{ backgroundColor: tool.color + '15' }}>
                   <tool.icon className="h-5 w-5" style={{ color: tool.color }} />
                 </div>
@@ -153,17 +180,11 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">PDF Tools</h2>
-            <Link href="/merge-pdf" className="text-sm font-semibold hover:underline" style={{ color: Brand.teal }}>
-              See All →
-            </Link>
+            <Link href="/merge-pdf" className="text-sm font-semibold hover:underline" style={{ color: Brand.teal }}>See All →</Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {PDF_TOOLS.map((tool) => (
-              <Link
-                key={tool.href}
-                href={tool.href}
-                className="group rounded-2xl bg-white p-5 border border-slate-200 hover:border-slate-300 transition-all hover:shadow-lg hover:-translate-y-1"
-              >
+              <Link key={tool.href} href={tool.href} className="group rounded-2xl bg-white p-5 border border-slate-200 hover:border-slate-300 transition-all hover:shadow-lg hover:-translate-y-1">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl mb-3" style={{ backgroundColor: tool.color + '15' }}>
                   <tool.icon className="h-5 w-5" style={{ color: tool.color }} />
                 </div>
@@ -180,17 +201,11 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">File Conversion</h2>
-            <Link href="/convert" className="text-sm font-semibold hover:underline" style={{ color: Brand.blue }}>
-              See All →
-            </Link>
+            <Link href="/convert" className="text-sm font-semibold hover:underline" style={{ color: Brand.blue }}>See All →</Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {CONVERSIONS.map((conv) => (
-              <Link
-                key={conv.href}
-                href={conv.href}
-                className="group rounded-2xl bg-[#F4F6FB] p-6 text-center hover:bg-white border border-transparent hover:border-slate-200 transition-all hover:shadow-lg"
-              >
+              <Link key={conv.href} href={conv.href} className="group rounded-2xl bg-[#F4F6FB] p-6 text-center hover:bg-white border border-transparent hover:border-slate-200 transition-all hover:shadow-lg">
                 <div className="flex items-center justify-center gap-3 mb-2">
                   <span className="text-xl font-bold text-slate-900">{conv.from}</span>
                   <ArrowRight className="h-5 w-5" style={{ color: Brand.blue }} />
@@ -218,7 +233,7 @@ export default function HomePage() {
               Enterprise Plan — $49/mo
               <ArrowRight className="h-5 w-5" />
             </Link>
-            <Link href="/contact" className="inline-flex items-center gap-2 px-8 py-4 text-base font-semibold text-slate-900 border-2 border-slate-200 hover:border-slate-400 transition-all">
+            <Link href="/contact" className="inline-flex items-center gap-2 px-8 py-4 text-base font-semibold border-2 border-slate-200 text-slate-900 hover:border-slate-400 transition-all">
               Talk to Sales
             </Link>
           </div>
@@ -248,19 +263,10 @@ export default function HomePage() {
       <section className="py-16 sm:py-24 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="rounded-3xl bg-gradient-to-br from-[#121660] to-[#1a1f6e] p-12 text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-              Ready to get started?
-            </h2>
-            <p className="text-lg text-slate-300 mb-8 max-w-2xl mx-auto">
-              Join thousands of users who trust Docmaker for their document needs. 
-              No account required — start using tools immediately.
-            </p>
-            <Link
-              href="/generate"
-              className="inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-base font-semibold bg-white text-slate-900 hover:bg-slate-100 transition-all hover:scale-105"
-            >
-              <Sparkles className="h-5 w-5" />
-              Start Creating for Free
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Ready to get started?</h2>
+            <p className="text-lg text-slate-300 mb-8 max-w-2xl mx-auto">Join thousands of users who trust Docmaker for their document needs. No account required.</p>
+            <Link href="/generate" className="inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-base font-semibold bg-white text-slate-900 hover:bg-slate-100 transition-all hover:scale-105">
+              <Sparkles className="h-5 w-5" /> Start Creating for Free
             </Link>
           </div>
         </div>

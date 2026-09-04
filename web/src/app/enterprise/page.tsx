@@ -2,8 +2,23 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 export default function EnterprisePage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: "Docmaker Enterprise",
+    description: "Enterprise document processing with API access, batch processing, team collaboration, and admin dashboard.",
+    brand: { "@type": "Brand", name: "Docmaker" },
+    offers: {
+      "@type": "Offer",
+      price: "49",
+      priceCurrency: "USD",
+      priceValidUntil: "2027-12-31",
+    },
+  };
+
   return (
     <div className="min-h-screen bg-white">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {/* Hero - Giant Typography */}
       <section className="py-32 sm:py-40">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">

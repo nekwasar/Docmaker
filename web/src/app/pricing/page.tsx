@@ -27,8 +27,21 @@ const ENTERPRISE_FEATURES = [
 ];
 
 export default function PricingPage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "Docmaker Pricing",
+    description: "All Docmaker tools are free. Enterprise plan for API access and teams at $49/month.",
+    provider: { "@type": "Organization", name: "Docmaker" },
+    offers: [
+      { "@type": "Offer", name: "Free", price: "0", priceCurrency: "USD" },
+      { "@type": "Offer", name: "Enterprise", price: "49", priceCurrency: "USD", billingIncrement: "P1M" },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-white">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
         {/* Giant Header */}
         <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold tracking-tight mb-8" style={{ fontFamily: 'var(--font-playfair)', color: '#0F172A' }}>

@@ -110,7 +110,7 @@ export default function HomePage() {
                   </svg>
                   <div>
                     <div className="text-xs font-semibold text-white">Mobile</div>
-                    <div className="text-[10px] text-slate-400">iOS & Android</div>
+                    <div className="text-[10px] text-slate-400">Android</div>
                   </div>
                 </Link>
                 <Link href="/enterprise" className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors">

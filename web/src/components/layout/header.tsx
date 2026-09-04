@@ -292,19 +292,6 @@ export function Header() {
           </Link>
         </nav>
 
-        <div className="hidden lg:flex items-center gap-3">
-          <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
-            Sign In
-          </Link>
-          <Link
-            href="/register"
-            className="rounded-full px-5 py-2.5 text-sm font-semibold text-white transition-all hover:scale-105"
-            style={{ backgroundColor: Brand.navy }}
-          >
-            Get Started
-          </Link>
-        </div>
-
         <button
           className="lg:hidden p-2"
           onClick={() => setMobileOpen(!mobileOpen)}
@@ -367,13 +354,6 @@ export function Header() {
             <Link href="/pricing" className="block text-sm font-semibold text-slate-900" onClick={() => setMobileOpen(false)}>
               Pricing
             </Link>
-
-            <div className="pt-4 border-t border-slate-200 flex flex-col gap-2">
-              <Link href="/login" className="text-center text-sm font-medium text-slate-600">Sign In</Link>
-              <Link href="/register" className="text-center rounded-full px-5 py-2.5 text-sm font-semibold text-white" style={{ backgroundColor: Brand.navy }}>
-                Get Started
-              </Link>
-            </div>
           </div>
         </div>
       )}

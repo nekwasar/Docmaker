@@ -73,33 +73,95 @@ export default function HomePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-24 sm:py-32 lg:py-40">
+      <section className="relative overflow-hidden py-20 sm:py-28 lg:py-36">
         <div className="absolute inset-0 bg-gradient-to-br from-[#121660] to-[#1a1f6e]" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold text-white tracking-tight mb-8">
-              Documents, done<br />
-              <span className="text-[#FFD140]">smoothly.</span>
-            </h1>
-            <p className="mx-auto max-w-2xl text-xl sm:text-2xl text-slate-300 mb-10 leading-relaxed">
-              Generate, convert, edit, translate, and sign documents — all in one place. 
-              No subscription required. No watermarks. No switching tabs.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left: Text Content */}
+            <div>
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white tracking-tight mb-6 leading-[0.95]">
+                Documents, done<br />
+                <span className="text-[#FFD140]">smoothly.</span>
+              </h1>
+              <p className="text-lg sm:text-xl text-slate-300 mb-8 leading-relaxed max-w-lg">
+                Free. Forever. No watermarks. No limits. 
+                Generate, convert, edit, sign — everything you need, all in one place.
+              </p>
               <Link
                 href="/generate"
-                className="inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-base font-semibold bg-white text-slate-900 hover:bg-slate-100 transition-all hover:scale-105"
+                className="inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-base font-semibold bg-white text-slate-900 hover:bg-slate-100 transition-all hover:scale-105 mb-10"
               >
                 <Sparkles className="h-5 w-5" />
                 Start Creating
               </Link>
-              <Link
-                href="/how-it-works"
-                className="inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-base font-semibold border border-white/30 text-white hover:bg-white/10 transition-all"
-              >
-                How It Works
-                <ArrowRight className="h-5 w-5" />
-              </Link>
+
+              {/* Platform Badges */}
+              <div className="flex flex-wrap gap-4">
+                <Link href="/" className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+                  <span className="text-lg">🖥</span>
+                  <div>
+                    <div className="text-xs font-semibold text-white">Web App</div>
+                    <div className="text-[10px] text-slate-400">docmaker.io</div>
+                  </div>
+                </Link>
+                <Link href="/mobile" className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+                  <span className="text-lg">📱</span>
+                  <div>
+                    <div className="text-xs font-semibold text-white">Mobile</div>
+                    <div className="text-[10px] text-slate-400">iOS & Android</div>
+                  </div>
+                </Link>
+                <Link href="/enterprise" className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+                  <span className="text-lg">🏢</span>
+                  <div>
+                    <div className="text-xs font-semibold text-white">Enterprise</div>
+                    <div className="text-[10px] text-slate-400">API & Teams</div>
+                  </div>
+                </Link>
+              </div>
+            </div>
+
+            {/* Right: Giant Document (Interactive Demo Placeholder) */}
+            <div className="hidden lg:block relative">
+              <div className="relative">
+                {/* Document Shadow */}
+                <div className="absolute inset-0 rounded-3xl bg-black/20 translate-x-4 translate-y-4" />
+                {/* Document */}
+                <div className="relative bg-white rounded-3xl p-8 shadow-2xl" style={{ transform: 'rotate(-2deg)' }}>
+                  {/* Document Header */}
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-[#121660] flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">D</span>
+                      </div>
+                      <span className="text-sm font-semibold text-slate-900">Docmaker</span>
+                    </div>
+                    <span className="text-xs text-slate-400">Document</span>
+                  </div>
+                  {/* Simulated Content */}
+                  <div className="space-y-3">
+                    <div className="h-4 bg-slate-200 rounded w-3/4" />
+                    <div className="h-3 bg-slate-100 rounded w-full" />
+                    <div className="h-3 bg-slate-100 rounded w-5/6" />
+                    <div className="h-3 bg-slate-100 rounded w-4/5" />
+                    <div className="h-8" />
+                    <div className="h-4 bg-slate-200 rounded w-1/2" />
+                    <div className="h-3 bg-slate-100 rounded w-full" />
+                    <div className="h-3 bg-slate-100 rounded w-3/4" />
+                    <div className="h-3 bg-slate-100 rounded w-5/6" />
+                    <div className="h-3 bg-slate-100 rounded w-2/3" />
+                    <div className="h-6" />
+                    <div className="h-3 bg-slate-200 rounded w-2/3" />
+                    <div className="h-3 bg-slate-100 rounded w-full" />
+                    <div className="h-3 bg-slate-100 rounded w-4/5" />
+                  </div>
+                  {/* Document Footer */}
+                  <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
+                    <span className="text-xs text-slate-400">Page 1 of 3</span>
+                    <span className="text-xs text-slate-400">docmaker.io</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

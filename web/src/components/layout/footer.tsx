@@ -30,7 +30,7 @@ export function Footer() {
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
               <div className="flex items-center justify-center">
-                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#3CAE8B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#0171DF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M8 5h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/>
                   <path d="M12 5V3.5A1.5 1.5 0 0 1 13.5 2h3A1.5 1.5 0 0 1 18 3.5v3a1.5 1.5 0 0 1-1.5 1.5H15"/>
                   <line x1="10" y1="10" x2="14" y2="10"/>

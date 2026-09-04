@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
   <rect width="32" height="32" rx="6" fill="#F4F6FB"/>
   <g transform="translate(4, 4)">
-    <path d="M8 5h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" fill="none" stroke="#3CAE8B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M12 5V3.5A1.5 1.5 0 0 1 13.5 2h3A1.5 1.5 0 0 1 18 3.5v3a1.5 1.5 0 0 1-1.5 1.5H15" fill="none" stroke="#3CAE8B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    <line x1="10" y1="10" x2="14" y2="10" stroke="#3CAE8B" stroke-width="1.2" stroke-linecap="round"/>
-    <line x1="10" y1="13" x2="13" y2="13" stroke="#3CAE8B" stroke-width="1.2" stroke-linecap="round"/>
-    <line x1="10" y1="16" x2="14" y2="16" stroke="#3CAE8B" stroke-width="1.2" stroke-linecap="round"/>
+    <path d="M8 5h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" fill="none" stroke="#0171DF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M12 5V3.5A1.5 1.5 0 0 1 13.5 2h3A1.5 1.5 0 0 1 18 3.5v3a1.5 1.5 0 0 1-1.5 1.5H15" fill="none" stroke="#0171DF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="10" y1="10" x2="14" y2="10" stroke="#0171DF" stroke-width="1.2" stroke-linecap="round"/>
+    <line x1="10" y1="13" x2="13" y2="13" stroke="#0171DF" stroke-width="1.2" stroke-linecap="round"/>
+    <line x1="10" y1="16" x2="14" y2="16" stroke="#0171DF" stroke-width="1.2" stroke-linecap="round"/>
   </g>
 </svg>

@@ -98,21 +98,21 @@ export default function HomePage() {
               {/* Platform Badges */}
               <div className="flex flex-wrap gap-4">
                 <Link href="/" className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
-                  <span className="text-lg">🖥</span>
+                  <Globe className="h-5 w-5 text-white" />
                   <div>
                     <div className="text-xs font-semibold text-white">Web App</div>
                     <div className="text-[10px] text-slate-400">docmaker.io</div>
                   </div>
                 </Link>
                 <Link href="/mobile" className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
-                  <span className="text-lg">📱</span>
+                  <Timer className="h-5 w-5 text-white" />
                   <div>
                     <div className="text-xs font-semibold text-white">Mobile</div>
                     <div className="text-[10px] text-slate-400">iOS & Android</div>
                   </div>
                 </Link>
                 <Link href="/enterprise" className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
-                  <span className="text-lg">🏢</span>
+                  <Layers className="h-5 w-5 text-white" />
                   <div>
                     <div className="text-xs font-semibold text-white">Enterprise</div>
                     <div className="text-[10px] text-slate-400">API & Teams</div>

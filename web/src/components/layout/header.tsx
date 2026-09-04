@@ -301,7 +301,7 @@ export function Header() {
       </div>
 
       {mobileOpen && (
-        <div className="border-t border-slate-200 bg-white px-4 py-4 lg:hidden">
+        <div className="absolute top-full left-0 right-0 border-t border-slate-200 bg-white px-4 py-4 lg:hidden z-50 relative">
           <div className="space-y-4">
             <div>
               <button

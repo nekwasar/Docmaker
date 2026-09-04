@@ -41,7 +41,7 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-br from-[#121660] to-[#1a1f6e]" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold text-white tracking-tight mb-8" style={{ fontFamily: 'var(--font-playfair)' }}>
+            <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold text-white tracking-tight mb-8">
               Documents, done<br />
               <span className="text-[#FFD140]">smoothly.</span>
             </h1>

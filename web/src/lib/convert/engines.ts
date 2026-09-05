@@ -263,6 +263,7 @@ export async function convertAudioVideo(
     const dockerOut = `/tmp/docmaker/${outPath.split("/").pop()}`;
 
     // Copy file into container
+    execSync(`docker exec ${FFMPEG_CONTAINER} mkdir -p /tmp/docmaker`);
     execSync(`docker cp ${inPath} ${FFMPEG_CONTAINER}:/tmp/docmaker/${inPath.split("/").pop()}`);
 
     // Build ffmpeg args
@@ -332,6 +333,7 @@ export async function pandocConvert(
     const dockerIn = `/tmp/docmaker/${inPath.split("/").pop()}`;
     const dockerOut = `/tmp/docmaker/${outPath.split("/").pop()}`;
 
+    execSync(`docker exec ${PANDOC_CONTAINER} mkdir -p /tmp/docmaker`);
     execSync(`docker cp ${inPath} ${PANDOC_CONTAINER}:${dockerIn}`);
 
     const pandocArgs = getPandocArgs(ext, targetFormat);

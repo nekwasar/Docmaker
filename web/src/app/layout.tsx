@@ -9,10 +9,10 @@ const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfa
 
 export const metadata: Metadata = {
   title: {
-    default: "Docmaker — Free PDF Tools, AI Document Generator, File Converter",
+    default: "Docmaker — Documents, Done Smoothly",
     template: "%s | Docmaker",
   },
-  description: "Generate, convert, edit, sign, and compress documents for free. AI-powered document tools with no limits, no watermarks, no account required. 200+ format conversions.",
+  description: "Generate, convert, edit, and sign documents for free. No limits, no watermarks. AI-powered.",
   keywords: [
     "free pdf tools", "ai document generator", "free file converter",
     "merge pdf free", "compress pdf free", "ocr free", "e-sign free",
@@ -31,16 +31,16 @@ export const metadata: Metadata = {
     icon: "/favicon.svg",
   },
   openGraph: {
-    title: "Docmaker — Free PDF Tools & AI Document Generator",
-    description: "Generate, convert, edit, sign documents for free. No limits, no watermarks. AI-powered.",
+    title: "Docmaker — Documents, Done Smoothly",
+    description: "Generate, convert, edit, and sign documents for free. No limits, no watermarks. AI-powered.",
     url: "https://docmaker.io",
     siteName: "Docmaker",
     images: [
       {
-        url: "https://docmaker.io/api/og?title=Docmaker&subtitle=Free+PDF+Tools+%26+AI+Document+Generator",
+        url: "https://docmaker.io/api/og?title=Docmaker&subtitle=Try+it+free!",
         width: 1200,
         height: 630,
-        alt: "Docmaker - Free PDF Tools & AI Document Generator",
+        alt: "Docmaker - Documents, Done Smoothly",
       },
     ],
     locale: "en_US",
@@ -48,9 +48,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Docmaker — Free PDF Tools & AI Document Generator",
-    description: "Generate, convert, edit, sign documents for free. No limits, no watermarks.",
-    images: ["https://docmaker.io/api/og?title=Docmaker&subtitle=Free+PDF+Tools+%26+AI+Document+Generator"],
+    title: "Docmaker — Documents, Done Smoothly",
+    description: "Generate, convert, edit, and sign documents for free. No limits, no watermarks. AI-powered.",
+    images: ["https://docmaker.io/api/og?title=Docmaker&subtitle=Try+it+free!"],
   },
   robots: {
     index: true,

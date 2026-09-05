@@ -69,6 +69,19 @@ const CONVERSION_CATEGORIES = [
       { name: "Excel Converter", from: "CSV", to: "XLSX", href: "/convert/excel" },
     ],
   },
+  {
+    title: "Ebook Conversion",
+    description: "Convert EPUB ebooks to PDF, DOCX, and more",
+    icon: <FileText className="h-6 w-6" />,
+    color: "#121660",
+    tools: [
+      { name: "EPUB to PDF", from: "EPUB", to: "PDF", href: "/convert/epub" },
+      { name: "EPUB to DOCX", from: "EPUB", to: "DOCX", href: "/convert/epub" },
+      { name: "PDF to EPUB", from: "PDF", to: "EPUB", href: "/convert/epub" },
+      { name: "HTML to EPUB", from: "HTML", to: "EPUB", href: "/convert/epub" },
+      { name: "Markdown to EPUB", from: "MD", to: "EPUB", href: "/convert/epub" },
+    ],
+  },
 ];
 
 export default function ConvertPage() {

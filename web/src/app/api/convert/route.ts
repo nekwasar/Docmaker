@@ -11,6 +11,7 @@ import {
   jsonToXlsx,
   convertAudioVideo,
   pandocConvert,
+  ebookConvert,
   mergePdfs,
   splitPdf,
   watermarkPdf,
@@ -21,6 +22,7 @@ import {
   isAudioFormat,
   isVideoFormat,
   isImageFormat,
+  isEbookFormat,
 } from "@/lib/convert/engines";
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
@@ -32,7 +34,7 @@ const CONVERSION_MAP: Record<string, string[]> = {
   doc: ["pdf"],
   odt: ["pdf"],
   rtf: ["pdf"],
-  txt: ["pdf", "html", "docx"],
+  txt: ["pdf", "html", "docx", "epub"],
   xlsx: ["pdf", "csv"],
   xls: ["pdf", "csv"],
   csv: ["pdf", "xlsx"],
@@ -42,7 +44,7 @@ const CONVERSION_MAP: Record<string, string[]> = {
   odp: ["pdf"],
   key: ["pdf"],
   // PDF →
-  pdf: ["jpg", "png", "txt", "html", "docx"],
+  pdf: ["jpg", "png", "txt", "html", "docx", "epub"],
   // Images
   jpg: ["pdf", "png", "webp"],
   jpeg: ["pdf", "png", "webp"],
@@ -66,9 +68,11 @@ const CONVERSION_MAP: Record<string, string[]> = {
   mkv: ["mp4", "mp3", "avi", "mov"],
   webm: ["mp4", "mp3"],
   // Markdown
-  md: ["pdf", "html", "docx", "txt"],
-  html: ["pdf"],
-  htm: ["pdf"],
+  md: ["pdf", "html", "docx", "txt", "epub"],
+  html: ["pdf", "epub"],
+  htm: ["pdf", "epub"],
+  // Ebook
+  epub: ["pdf", "docx", "txt", "html", "md"],
 };
 
 export async function POST(request: NextRequest) {
@@ -106,8 +110,24 @@ export async function POST(request: NextRequest) {
 
     let result: { buffer: Buffer; contentType: string; filename: string };
 
+    // ===== EPUB → PDF (Pandoc HTML → Gotenberg Chromium) =====
+    if (sourceFormat === "epub" && targetFormat === "pdf") {
+      const htmlResult = await ebookConvert(fileBuffer, file.name, "html");
+      const r = await htmlToPdf(htmlResult.buffer, "index.html");
+      result = { ...r, filename: `${file.name.split(".")[0]}.pdf` };
+    }
+    // ===== EPUB → DOCX/TXT/HTML/MD (Pandoc) =====
+    else if (sourceFormat === "epub" && ["docx", "txt", "html", "md"].includes(targetFormat)) {
+      const r = await ebookConvert(fileBuffer, file.name, targetFormat);
+      result = { ...r, filename: `${file.name.split(".")[0]}.${targetFormat}` };
+    }
+    // ===== MD/HTML/TXT → EPUB (Pandoc) =====
+    else if (["md", "html", "htm", "txt"].includes(sourceFormat) && targetFormat === "epub") {
+      const r = await ebookConvert(fileBuffer, file.name, "epub");
+      result = { ...r, filename: `${file.name.split(".")[0]}.epub` };
+    }
     // ===== OFFICE → PDF (Gotenberg) =====
-    if (isOfficeFormat(sourceFormat) && targetFormat === "pdf") {
+    else if (isOfficeFormat(sourceFormat) && targetFormat === "pdf") {
       if (sourceFormat === "html" || sourceFormat === "htm") {
         const r = await htmlToPdf(fileBuffer, file.name, options);
         result = { ...r, filename: `${file.name.split(".")[0]}.pdf` };
@@ -150,6 +170,11 @@ export async function POST(request: NextRequest) {
     else if (sourceFormat === "pdf" && targetFormat === "docx") {
       const r = await pandocConvert(fileBuffer, file.name, "docx");
       result = { ...r, filename: `${file.name.split(".")[0]}.docx` };
+    }
+    // ===== PDF → EPUB (Pandoc) =====
+    else if (sourceFormat === "pdf" && targetFormat === "epub") {
+      const r = await ebookConvert(fileBuffer, file.name, "epub");
+      result = { ...r, filename: `${file.name.split(".")[0]}.epub` };
     }
     // ===== PDF → HTML =====
     else if (sourceFormat === "pdf" && targetFormat === "html") {

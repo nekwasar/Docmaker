@@ -568,7 +568,7 @@ export function isOfficeFormat(ext: string): boolean {
     "xls", "xlsx", "xlsm", "xlsb", "xlt", "xltm", "xltx", "xlw", "ods", "fods", "ots", "csv", "numbers",
     "ppt", "pptx", "pptm", "pot", "potm", "potx", "pps", "odp", "fodp", "otp", "key",
     "odg", "fodg", "otg", "vsd", "vsdx", "svg", "wmf", "emf",
-    "html", "htm", "xhtml", "epub",
+    "html", "htm", "xhtml",
   ];
   return officeExts.includes(ext);
 }
@@ -587,4 +587,51 @@ export function isImageFormat(ext: string): boolean {
 
 export function isEbookFormat(ext: string): boolean {
   return ["epub", "mobi", "azw3", "azw", "fb2", "djvu"].includes(ext);
+}
+
+// ========== PANDOC: Ebook Conversions ==========
+export async function ebookConvert(
+  fileBuffer: Buffer,
+  filename: string,
+  targetFormat: string
+): Promise<{ buffer: Buffer; contentType: string }> {
+  await ensureTempDir();
+  const ext = filename.split(".").pop()?.toLowerCase() || "";
+  const inPath = tempPath(`${randomUUID()}.${ext}`);
+  const outPath = tempPath(`${randomUUID()}.${targetFormat}`);
+  await writeFile(inPath, fileBuffer);
+
+  try {
+    const dockerIn = `/tmp/docmaker/${inPath.split("/").pop()}`;
+    const dockerOut = `/tmp/docmaker/${outPath.split("/").pop()}`;
+
+    execSync(`docker exec ${PANDOC_CONTAINER} mkdir -p /tmp/docmaker`);
+    execSync(`docker cp ${inPath} ${PANDOC_CONTAINER}:${dockerIn}`);
+
+    const pandocArgs = getEbookArgs(ext, targetFormat);
+    execSync(
+      `docker exec ${PANDOC_CONTAINER} pandoc ${dockerIn} -o ${dockerOut} ${pandocArgs}`,
+      { maxBuffer: 100 * 1024 * 1024 }
+    );
+
+    execSync(`docker cp ${PANDOC_CONTAINER}:${dockerOut} ${outPath}`);
+    const resultBuffer = await readFile(outPath);
+    const contentType = getMimeType(targetFormat);
+    return { buffer: resultBuffer, contentType };
+  } finally {
+    await unlink(inPath).catch(() => {});
+    await unlink(outPath).catch(() => {});
+    execSync(`docker exec ${PANDOC_CONTAINER} rm -f /tmp/docmaker/* 2>/dev/null || true`);
+  }
+}
+
+function getEbookArgs(fromExt: string, toExt: string): string {
+  if (toExt === "epub") return "-t epub3 --standalone";
+  if (toExt === "pdf") return "--pdf-engine=xelatex";
+  if (toExt === "docx") return "-t docx";
+  if (toExt === "html") return "-t html5 --standalone";
+  if (toExt === "txt") return "-t plain";
+  if (toExt === "md") return "-t markdown";
+  if (toExt === "html") return "-t html5 --standalone";
+  return "";
 }

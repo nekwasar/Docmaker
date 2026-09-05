@@ -172,12 +172,20 @@ export async function watermarkPdf(
   fileBuffer: Buffer,
   filename: string,
   text: string,
-  options?: { opacity?: number; rotation?: number; fontSize?: number; color?: string; pages?: string }
+  options?: { opacity?: number; rotation?: number; fontSize?: number; color?: string; pages?: string; imageBuffer?: Buffer; imageFilename?: string }
 ): Promise<{ buffer: Buffer; contentType: string }> {
   const formData = new FormData();
   formData.append("files", new Blob([fileBuffer]), filename);
-  formData.append("watermarkSource", "text");
-  formData.append("watermarkExpression", text);
+
+  if (options?.imageBuffer && options?.imageFilename) {
+    formData.append("watermarkSource", "image");
+    formData.append("watermarkExpression", "watermark");
+    formData.append("watermark", new Blob([options.imageBuffer]), options.imageFilename);
+  } else {
+    formData.append("watermarkSource", "text");
+    formData.append("watermarkExpression", text);
+  }
+
   if (options?.pages) formData.append("watermarkPages", options.pages);
 
   const res = await fetch(`${GOTENBERG_URL}/forms/pdfengines/merge`, {
@@ -199,21 +207,18 @@ export async function stampPdf(
   fileBuffer: Buffer,
   filename: string,
   text: string,
-  options?: { opacity?: number; rotation?: number; fontSize?: number; color?: string }
+  options?: { opacity?: number; rotation?: number; fontSize?: number; color?: string; imageBuffer?: Buffer; imageFilename?: string }
 ): Promise<{ buffer: Buffer; contentType: string }> {
   const formData = new FormData();
   formData.append("files", new Blob([fileBuffer]), filename);
-  formData.append("stampSource", "text");
-  formData.append("stampExpression", text);
 
-  const stampOptions: Record<string, any> = {};
-  if (options?.opacity) stampOptions.opacity = options.opacity;
-  if (options?.rotation) stampOptions.rotation = options.rotation;
-  if (options?.fontSize) stampOptions.points = options.fontSize;
-  if (options?.color) stampOptions.color = options.color;
-
-  if (Object.keys(stampOptions).length > 0) {
-    formData.append("stampOptions", JSON.stringify(stampOptions));
+  if (options?.imageBuffer && options?.imageFilename) {
+    formData.append("stampSource", "image");
+    formData.append("stampExpression", "stamp");
+    formData.append("stamp", new Blob([options.imageBuffer]), options.imageFilename);
+  } else {
+    formData.append("stampSource", "text");
+    formData.append("stampExpression", text);
   }
 
   const res = await fetch(`${GOTENBERG_URL}/forms/pdfengines/merge`, {

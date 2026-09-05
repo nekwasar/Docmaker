@@ -172,7 +172,7 @@ export async function watermarkPdf(
   fileBuffer: Buffer,
   filename: string,
   text: string,
-  options?: { opacity?: number; rotation?: number; fontSize?: number; color?: string; pages?: string; imageBuffer?: Buffer; imageFilename?: string }
+  options?: { opacity?: number; rotation?: number; fontSize?: number; color?: string; pages?: string; imageBuffer?: Buffer; imageFilename?: string; scale?: number }
 ): Promise<{ buffer: Buffer; contentType: string }> {
   const { PDFDocument, rgb, StandardFonts, degrees } = await import("pdf-lib");
 
@@ -180,10 +180,11 @@ export async function watermarkPdf(
   const pages = pdfDoc.getPages();
   const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-  const opacity = options?.opacity ?? 0.3;
+  const opacity = options?.opacity ?? 0;
   const rotation = options?.rotation ?? -45;
   const fontSize = options?.fontSize ?? 72;
   const color = options?.color;
+  const scale = options?.scale ?? 50;
 
   if (options?.imageBuffer && options?.imageFilename) {
     // Image watermark
@@ -199,9 +200,10 @@ export async function watermarkPdf(
       const { width, height } = page.getSize();
       const imgWidth = img.width;
       const imgHeight = img.height;
-      const scale = Math.min(width / imgWidth, height / imgHeight) * 0.5;
-      const drawnW = imgWidth * scale;
-      const drawnH = imgHeight * scale;
+      const fitScale = Math.min(width / imgWidth, height / imgHeight);
+      const drawScale = fitScale * (scale / 100);
+      const drawnW = imgWidth * drawScale;
+      const drawnH = imgHeight * drawScale;
 
       page.drawImage(img, {
         x: (width - drawnW) / 2,
@@ -243,7 +245,7 @@ export async function stampPdf(
   fileBuffer: Buffer,
   filename: string,
   text: string,
-  options?: { opacity?: number; rotation?: number; fontSize?: number; color?: string; imageBuffer?: Buffer; imageFilename?: string }
+  options?: { opacity?: number; rotation?: number; fontSize?: number; color?: string; imageBuffer?: Buffer; imageFilename?: string; scale?: number }
 ): Promise<{ buffer: Buffer; contentType: string }> {
   const { PDFDocument, rgb, StandardFonts, degrees } = await import("pdf-lib");
 
@@ -251,10 +253,11 @@ export async function stampPdf(
   const pages = pdfDoc.getPages();
   const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-  const opacity = options?.opacity ?? 0.5;
+  const opacity = options?.opacity ?? 0;
   const rotation = options?.rotation ?? -15;
   const fontSize = options?.fontSize ?? 72;
   const color = options?.color;
+  const scale = options?.scale ?? 50;
 
   if (options?.imageBuffer && options?.imageFilename) {
     // Image stamp
@@ -270,9 +273,10 @@ export async function stampPdf(
       const { width, height } = page.getSize();
       const imgWidth = img.width;
       const imgHeight = img.height;
-      const scale = Math.min(width / imgWidth, height / imgHeight) * 0.5;
-      const drawnW = imgWidth * scale;
-      const drawnH = imgHeight * scale;
+      const fitScale = Math.min(width / imgWidth, height / imgHeight);
+      const drawScale = fitScale * (scale / 100);
+      const drawnW = imgWidth * drawScale;
+      const drawnH = imgHeight * drawScale;
 
       page.drawImage(img, {
         x: (width - drawnW) / 2,

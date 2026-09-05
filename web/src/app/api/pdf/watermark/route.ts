@@ -13,13 +13,14 @@ export async function POST(request: NextRequest) {
     const rotation = formData.get("rotation") ? parseInt(formData.get("rotation") as string) : undefined;
     const fontSize = formData.get("fontSize") ? parseInt(formData.get("fontSize") as string) : undefined;
     const color = formData.get("color") as string || undefined;
+    const scale = formData.get("scale") ? parseInt(formData.get("scale") as string) : undefined;
 
     if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
     if (!text && !image) return NextResponse.json({ error: "Watermark text or image is required" }, { status: 400 });
     if (file.size > MAX_FILE_SIZE) return NextResponse.json({ error: "File exceeds 50MB limit" }, { status: 400 });
 
     const arrayBuffer = await file.arrayBuffer();
-    const options: any = { opacity, rotation, fontSize, color };
+    const options: any = { opacity, rotation, fontSize, color, scale };
 
     if (image) {
       options.imageBuffer = Buffer.from(await image.arrayBuffer());

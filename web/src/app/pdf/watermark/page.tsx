@@ -3,14 +3,56 @@
 import { useState, useRef } from "react";
 import { PdfToolLayout } from "@/components/pdf/pdf-tool-layout";
 import { Brand } from "@/config/site";
-import { Upload, X, Image as ImageIcon } from "lucide-react";
+import { Upload, X, Image as ImageIcon, Minus, Plus } from "lucide-react";
+
+function NumberControl({
+  label,
+  value,
+  onChange,
+  min,
+  max,
+  step,
+  suffix,
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+  min: number;
+  max: number;
+  step: number;
+  suffix: string;
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-semibold text-slate-900 mb-2">{label}</label>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => onChange(Math.max(min, value - step))}
+          className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors"
+        >
+          <Minus className="h-3 w-3 text-slate-600" />
+        </button>
+        <div className="flex-1 text-center">
+          <span className="text-sm font-semibold text-slate-900">{value}{suffix}</span>
+        </div>
+        <button
+          onClick={() => onChange(Math.min(max, value + step))}
+          className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors"
+        >
+          <Plus className="h-3 w-3 text-slate-600" />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function WatermarkPdfPage() {
   const [mode, setMode] = useState<"text" | "image">("text");
   const [text, setText] = useState("CONFIDENTIAL");
-  const [opacity, setOpacity] = useState(0.3);
+  const [opacity, setOpacity] = useState(0);
   const [rotation, setRotation] = useState(-45);
   const [fontSize, setFontSize] = useState(72);
+  const [imageScale, setImageScale] = useState(50);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -33,6 +75,7 @@ export default function WatermarkPdfPage() {
     formData.append("opacity", String(opacity));
     formData.append("rotation", String(rotation));
     formData.append("fontSize", String(fontSize));
+    formData.append("scale", String(imageScale));
 
     if (mode === "image" && imageFile) {
       formData.append("image", imageFile);
@@ -142,47 +185,46 @@ export default function WatermarkPdfPage() {
           )}
 
           {/* Controls */}
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-slate-900 mb-2">Opacity</label>
-              <input
-                type="range"
-                min="0.05"
-                max="1"
-                step="0.05"
-                value={opacity}
-                onChange={(e) => setOpacity(parseFloat(e.target.value))}
-                className="w-full"
-              />
-              <p className="text-xs text-slate-500 text-center mt-1">{Math.round(opacity * 100)}%</p>
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-900 mb-2">Rotation</label>
-              <input
-                type="range"
-                min="-90"
-                max="90"
-                step="5"
-                value={rotation}
-                onChange={(e) => setRotation(parseInt(e.target.value))}
-                className="w-full"
-              />
-              <p className="text-xs text-slate-500 text-center mt-1">{rotation}°</p>
-            </div>
+          <div className="grid grid-cols-2 gap-4">
+            <NumberControl
+              label="Opacity"
+              value={Math.round(opacity * 100)}
+              onChange={(v) => setOpacity(v / 100)}
+              min={0}
+              max={100}
+              step={5}
+              suffix="%"
+            />
+            <NumberControl
+              label="Rotation"
+              value={rotation}
+              onChange={setRotation}
+              min={-90}
+              max={90}
+              step={5}
+              suffix="°"
+            />
             {mode === "text" && (
-              <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Font Size</label>
-                <input
-                  type="range"
-                  min="12"
-                  max="120"
-                  step="4"
-                  value={fontSize}
-                  onChange={(e) => setFontSize(parseInt(e.target.value))}
-                  className="w-full"
-                />
-                <p className="text-xs text-slate-500 text-center mt-1">{fontSize}pt</p>
-              </div>
+              <NumberControl
+                label="Font Size"
+                value={fontSize}
+                onChange={setFontSize}
+                min={12}
+                max={120}
+                step={4}
+                suffix="pt"
+              />
+            )}
+            {mode === "image" && (
+              <NumberControl
+                label="Size"
+                value={imageScale}
+                onChange={setImageScale}
+                min={10}
+                max={100}
+                step={5}
+                suffix="%"
+              />
             )}
           </div>
 
@@ -203,8 +245,8 @@ export default function WatermarkPdfPage() {
               <img
                 src={imagePreview}
                 alt="Preview"
-                className="h-16"
-                style={{ opacity, transform: `rotate(${rotation}deg)` }}
+                className="max-h-20"
+                style={{ opacity, transform: `rotate(${rotation}deg)`, width: `${imageScale}%` }}
               />
             ) : (
               <span className="text-xs text-slate-400">Preview</span>

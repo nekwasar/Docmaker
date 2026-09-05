@@ -28,8 +28,15 @@ export const metadata: Metadata = {
     address: false,
   },
   icons: {
-    icon: "/favicon.svg",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
   },
+  manifest: "/site.webmanifest",
+  themeColor: "#121660",
   openGraph: {
     title: "Docmaker — Documents, Done Smoothly",
     description: "Generate, convert, edit, and sign documents for free. No limits, no watermarks. AI-powered.",
@@ -40,7 +47,7 @@ export const metadata: Metadata = {
         url: "https://docmaker.io/api/og?title=Docmaker&subtitle=Try+it+free!",
         width: 1200,
         height: 630,
-        alt: "Docmaker - Documents, Done Smoothly",
+        alt: "Docmaker - Free PDF tools, AI document generator, and file converter",
       },
     ],
     locale: "en_US",
@@ -51,6 +58,7 @@ export const metadata: Metadata = {
     title: "Docmaker — Documents, Done Smoothly",
     description: "Generate, convert, edit, and sign documents for free. No limits, no watermarks. AI-powered.",
     images: ["https://docmaker.io/api/og?title=Docmaker&subtitle=Try+it+free!"],
+    site: "@docmaker",
   },
   robots: {
     index: true,

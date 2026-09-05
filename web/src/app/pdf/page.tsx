@@ -27,6 +27,7 @@ const PDF_TOOLS = [
       </svg>
     ),
   },
+  // Watermark and Stamp hidden until fixed — pages still exist at /pdf/watermark and /pdf/stamp
   // { name: "Watermark PDF", href: "/pdf/watermark" },
   // { name: "Stamp PDF", href: "/pdf/stamp" },
   {

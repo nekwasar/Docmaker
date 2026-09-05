@@ -28,8 +28,8 @@ const TOOLS_MEGA = {
         { label: "Split PDF", href: "/pdf/split", description: "Separate pages" },
         { label: "Compress PDF", href: "/pdf/compress", description: "Reduce file size" },
         { label: "Protect PDF", href: "/pdf/protect", description: "Password protect" },
-        { label: "Watermark", href: "/pdf/watermark", description: "Add watermarks" },
-        { label: "All PDF Tools", href: "/pdf", description: "12 tools available" },
+        // { label: "Watermark", href: "/pdf/watermark", description: "Add watermarks" },
+        { label: "All PDF Tools", href: "/pdf", description: "10 tools available" },
       ],
     },
     {

@@ -34,8 +34,8 @@ const PDF_TOOLS = [
   { icon: Scissors, title: "Split PDF", description: "Separate pages into individual files", href: "/pdf/split", color: Brand.teal },
   { icon: FileUp, title: "Compress PDF", description: "Reduce file size without quality loss", href: "/pdf/compress", color: Brand.teal },
   { icon: Lock, title: "Protect PDF", description: "Password-protect your documents", href: "/pdf/protect", color: Brand.teal },
-  { icon: Layers, title: "Watermark", description: "Add watermarks to PDF pages", href: "/pdf/watermark", color: Brand.teal },
-  { icon: FileText, title: "All PDF Tools", description: "12 free PDF tools", href: "/pdf", color: Brand.teal },
+  // { icon: Layers, title: "Watermark", description: "Add watermarks to PDF pages", href: "/pdf/watermark", color: Brand.teal },
+  { icon: FileText, title: "All PDF Tools", description: "10 free PDF tools", href: "/pdf", color: Brand.teal },
 ];
 
 const CONVERSIONS = [

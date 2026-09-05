@@ -30,12 +30,12 @@ const AI_TOOLS = [
 ];
 
 const PDF_TOOLS = [
-  { icon: Merge, title: "Merge PDF", description: "Combine multiple PDFs into one", href: "/merge-pdf", color: Brand.teal },
-  { icon: Scissors, title: "Split PDF", description: "Separate pages into individual files", href: "/split-pdf", color: Brand.teal },
-  { icon: FileUp, title: "Compress PDF", description: "Reduce file size without quality loss", href: "/compress-pdf", color: Brand.teal },
-  { icon: Pen, title: "Edit PDF", description: "Add text, images, shapes, annotations", href: "/edit-pdf", color: Brand.teal },
-  { icon: Lock, title: "Encrypt PDF", description: "Password-protect your documents", href: "/encrypt", color: Brand.teal },
-  { icon: Layers, title: "Watermark", description: "Add watermarks to PDF pages", href: "/watermark", color: Brand.teal },
+  { icon: Merge, title: "Merge PDF", description: "Combine multiple PDFs into one", href: "/pdf/merge", color: Brand.teal },
+  { icon: Scissors, title: "Split PDF", description: "Separate pages into individual files", href: "/pdf/split", color: Brand.teal },
+  { icon: FileUp, title: "Compress PDF", description: "Reduce file size without quality loss", href: "/pdf/compress", color: Brand.teal },
+  { icon: Lock, title: "Protect PDF", description: "Password-protect your documents", href: "/pdf/protect", color: Brand.teal },
+  { icon: Layers, title: "Watermark", description: "Add watermarks to PDF pages", href: "/pdf/watermark", color: Brand.teal },
+  { icon: FileText, title: "All PDF Tools", description: "12 free PDF tools", href: "/pdf", color: Brand.teal },
 ];
 
 const CONVERSIONS = [
@@ -244,7 +244,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">PDF Tools</h2>
-            <Link href="/merge-pdf" className="text-sm font-semibold hover:underline" style={{ color: Brand.teal }}>See All →</Link>
+            <Link href="/pdf" className="text-sm font-semibold hover:underline" style={{ color: Brand.teal }}>See All →</Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {PDF_TOOLS.map((tool) => (

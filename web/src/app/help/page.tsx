@@ -24,7 +24,7 @@ const HELP_TOPICS = [
     items: [
       { label: "Are PDF tools really free?", answer: "Yes. All PDF tools (merge, split, compress, edit, encrypt, watermark) are completely free with no limits." },
       { label: "Is there a file size limit?", answer: "Free users can process files up to 50MB. Pro users have no limits." },
-      { label: "How do I merge multiple PDFs?", answer: "Navigate to /merge-pdf, upload your files, arrange the order, and click Merge." },
+      { label: "How do I merge multiple PDFs?", answer: "Navigate to /pdf/merge, upload your files, arrange the order, and click Merge." },
     ],
   },
   {

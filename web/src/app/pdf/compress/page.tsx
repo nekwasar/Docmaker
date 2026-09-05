@@ -28,7 +28,7 @@ export default function CompressPdfPage() {
     setTimeout(() => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    }, 100);
+    }, 1000);
   };
 
   return (

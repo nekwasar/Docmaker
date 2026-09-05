@@ -12,13 +12,11 @@ export default function WatermarkPdfPage() {
 
   const handleProcess = async (files: File[], options: Record<string, any>) => {
     if (!text) throw new Error("Please enter watermark text");
+    if (!files[0]) throw new Error("No file selected");
 
     const formData = new FormData();
     formData.append("file", files[0]);
     formData.append("text", text);
-    formData.append("opacity", String(opacity));
-    formData.append("rotation", String(rotation));
-    formData.append("fontSize", String(fontSize));
 
     const res = await fetch("/api/pdf/watermark", { method: "POST", body: formData });
     if (!res.ok) {
@@ -27,16 +25,17 @@ export default function WatermarkPdfPage() {
     }
 
     const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${files[0].name.replace(/\.pdf$/i, "")}-watermarked.pdf`;
-    document.body.appendChild(a);
-    a.click();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${files[0].name.replace(/\.pdf$/i, "")}-watermarked.pdf`;
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
     setTimeout(() => {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 100);
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    }, 5000);
   };
 
   return (

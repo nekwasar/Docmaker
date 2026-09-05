@@ -10,6 +10,9 @@ const presets = ["APPROVED", "DRAFT", "CONFIDENTIAL", "REJECTED", "FINAL", "COPY
 export default function StampPdfPage() {
   const [mode, setMode] = useState<"text" | "image">("text");
   const [text, setText] = useState("APPROVED");
+  const [opacity, setOpacity] = useState(0.5);
+  const [rotation, setRotation] = useState(-15);
+  const [fontSize, setFontSize] = useState(72);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -29,6 +32,9 @@ export default function StampPdfPage() {
     const formData = new FormData();
     formData.append("file", files[0]);
     formData.append("text", text || "");
+    formData.append("opacity", String(opacity));
+    formData.append("rotation", String(rotation));
+    formData.append("fontSize", String(fontSize));
 
     if (mode === "image" && imageFile) {
       formData.append("image", imageFile);
@@ -139,27 +145,84 @@ export default function StampPdfPage() {
                 >
                   <Upload className="h-8 w-8 mx-auto mb-2 text-slate-400" />
                   <p className="text-sm text-slate-600">Click to upload image</p>
-                  <p className="text-xs text-slate-400 mt-1">PNG, JPG, SVG</p>
+                  <p className="text-xs text-slate-400 mt-1">PNG, JPG</p>
                 </div>
               )}
               <input
                 ref={inputRef}
                 type="file"
-                accept="image/png,image/jpeg,image/svg+xml"
+                accept="image/png,image/jpeg"
                 onChange={handleImageChange}
                 className="hidden"
               />
             </div>
           )}
 
+          {/* Controls */}
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">Opacity</label>
+              <input
+                type="range"
+                min="0.05"
+                max="1"
+                step="0.05"
+                value={opacity}
+                onChange={(e) => setOpacity(parseFloat(e.target.value))}
+                className="w-full"
+              />
+              <p className="text-xs text-slate-500 text-center mt-1">{Math.round(opacity * 100)}%</p>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">Rotation</label>
+              <input
+                type="range"
+                min="-90"
+                max="90"
+                step="5"
+                value={rotation}
+                onChange={(e) => setRotation(parseInt(e.target.value))}
+                className="w-full"
+              />
+              <p className="text-xs text-slate-500 text-center mt-1">{rotation}°</p>
+            </div>
+            {mode === "text" && (
+              <div>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">Font Size</label>
+                <input
+                  type="range"
+                  min="12"
+                  max="120"
+                  step="4"
+                  value={fontSize}
+                  onChange={(e) => setFontSize(parseInt(e.target.value))}
+                  className="w-full"
+                />
+                <p className="text-xs text-slate-500 text-center mt-1">{fontSize}pt</p>
+              </div>
+            )}
+          </div>
+
           {/* Preview */}
           <div className="relative h-24 bg-slate-100 rounded-xl overflow-hidden flex items-center justify-center">
             {mode === "text" ? (
-              <div className="text-4xl font-bold text-red-400/30 rotate-[-15deg] select-none pointer-events-none">
+              <div
+                className="text-4xl font-bold text-red-400/30 select-none pointer-events-none"
+                style={{
+                  fontSize: `${Math.min(fontSize / 2, 48)}px`,
+                  opacity,
+                  transform: `rotate(${rotation}deg)`,
+                }}
+              >
                 {text || "STAMP"}
               </div>
             ) : imagePreview ? (
-              <img src={imagePreview} alt="Preview" className="h-16 opacity-50" />
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="h-16"
+                style={{ opacity, transform: `rotate(${rotation}deg)` }}
+              />
             ) : (
               <span className="text-xs text-slate-400">Preview</span>
             )}

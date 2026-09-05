@@ -174,32 +174,67 @@ export async function watermarkPdf(
   text: string,
   options?: { opacity?: number; rotation?: number; fontSize?: number; color?: string; pages?: string; imageBuffer?: Buffer; imageFilename?: string }
 ): Promise<{ buffer: Buffer; contentType: string }> {
-  const formData = new FormData();
-  formData.append("files", new Blob([fileBuffer]), filename);
+  const { PDFDocument, rgb, StandardFonts, degrees } = await import("pdf-lib");
+
+  const pdfDoc = await PDFDocument.load(fileBuffer);
+  const pages = pdfDoc.getPages();
+  const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+  const opacity = options?.opacity ?? 0.3;
+  const rotation = options?.rotation ?? -45;
+  const fontSize = options?.fontSize ?? 72;
 
   if (options?.imageBuffer && options?.imageFilename) {
-    formData.append("watermarkSource", "image");
-    formData.append("watermarkExpression", "watermark");
-    formData.append("watermark", new Blob([options.imageBuffer]), options.imageFilename);
+    // Image watermark
+    const ext = options.imageFilename.split(".").pop()?.toLowerCase() || "";
+    let img;
+    if (ext === "png") {
+      img = await pdfDoc.embedPng(options.imageBuffer);
+    } else {
+      img = await pdfDoc.embedJpg(options.imageBuffer);
+    }
+
+    for (const page of pages) {
+      const { width, height } = page.getSize();
+      const imgWidth = img.width;
+      const imgHeight = img.height;
+      const scale = Math.min(width / imgWidth, height / imgHeight) * 0.5;
+      const drawnW = imgWidth * scale;
+      const drawnH = imgHeight * scale;
+
+      page.drawImage(img, {
+        x: (width - drawnW) / 2,
+        y: (height - drawnH) / 2,
+        width: drawnW,
+        height: drawnH,
+        opacity,
+        rotate: degrees(rotation),
+      });
+    }
   } else {
-    formData.append("watermarkSource", "text");
-    formData.append("watermarkExpression", text);
+    // Text watermark
+    const r = parseInt(color?.slice(1, 3) || "80", 16) / 255;
+    const g = parseInt(color?.slice(3, 5) || "80", 16) / 255;
+    const b = parseInt(color?.slice(5, 7) || "80", 16) / 255;
+
+    for (const page of pages) {
+      const { width, height } = page.getSize();
+      const textWidth = font.widthOfTextAtSize(text, fontSize);
+
+      page.drawText(text, {
+        x: (width - textWidth * Math.cos(rotation * Math.PI / 180)) / 2,
+        y: height / 2,
+        size: fontSize,
+        font,
+        color: rgb(r, g, b),
+        opacity,
+        rotate: degrees(rotation),
+      });
+    }
   }
 
-  if (options?.pages) formData.append("watermarkPages", options.pages);
-
-  const res = await fetch(`${GOTENBERG_URL}/forms/pdfengines/merge`, {
-    method: "POST",
-    body: formData,
-  });
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Gotenberg watermark error: ${err}`);
-  }
-
-  const arrBuf = await res.arrayBuffer();
-  return { buffer: Buffer.from(arrBuf), contentType: "application/pdf" };
+  const pdfBytes = await pdfDoc.save();
+  return { buffer: Buffer.from(pdfBytes), contentType: "application/pdf" };
 }
 
 // --- Stamp ---
@@ -209,24 +244,68 @@ export async function stampPdf(
   text: string,
   options?: { opacity?: number; rotation?: number; fontSize?: number; color?: string; imageBuffer?: Buffer; imageFilename?: string }
 ): Promise<{ buffer: Buffer; contentType: string }> {
-  const formData = new FormData();
-  formData.append("files", new Blob([fileBuffer]), filename);
+  const { PDFDocument, rgb, StandardFonts, degrees } = await import("pdf-lib");
+
+  const pdfDoc = await PDFDocument.load(fileBuffer);
+  const pages = pdfDoc.getPages();
+  const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+  const opacity = options?.opacity ?? 0.5;
+  const rotation = options?.rotation ?? -15;
+  const fontSize = options?.fontSize ?? 72;
 
   if (options?.imageBuffer && options?.imageFilename) {
-    formData.append("stampSource", "image");
-    formData.append("stampExpression", "stamp");
-    formData.append("stamp", new Blob([options.imageBuffer]), options.imageFilename);
+    // Image stamp
+    const ext = options.imageFilename.split(".").pop()?.toLowerCase() || "";
+    let img;
+    if (ext === "png") {
+      img = await pdfDoc.embedPng(options.imageBuffer);
+    } else {
+      img = await pdfDoc.embedJpg(options.imageBuffer);
+    }
+
+    for (const page of pages) {
+      const { width, height } = page.getSize();
+      const imgWidth = img.width;
+      const imgHeight = img.height;
+      const scale = Math.min(width / imgWidth, height / imgHeight) * 0.5;
+      const drawnW = imgWidth * scale;
+      const drawnH = imgHeight * scale;
+
+      page.drawImage(img, {
+        x: (width - drawnW) / 2,
+        y: (height - drawnH) / 2,
+        width: drawnW,
+        height: drawnH,
+        opacity,
+        rotate: degrees(rotation),
+      });
+    }
   } else {
-    formData.append("stampSource", "text");
-    formData.append("stampExpression", text);
+    // Text stamp
+    const r = parseInt(color?.slice(1, 3) || "80", 16) / 255;
+    const g = parseInt(color?.slice(3, 5) || "80", 16) / 255;
+    const b = parseInt(color?.slice(5, 7) || "80", 16) / 255;
+
+    for (const page of pages) {
+      const { width, height } = page.getSize();
+      const textWidth = font.widthOfTextAtSize(text, fontSize);
+
+      page.drawText(text, {
+        x: (width - textWidth * Math.cos(rotation * Math.PI / 180)) / 2,
+        y: height / 2,
+        size: fontSize,
+        font,
+        color: rgb(r, g, b),
+        opacity,
+        rotate: degrees(rotation),
+      });
+    }
   }
 
-  const res = await fetch(`${GOTENBERG_URL}/forms/pdfengines/merge`, {
-    method: "POST",
-    body: formData,
-  });
-
-  if (!res.ok) {
+  const pdfBytes = await pdfDoc.save();
+  return { buffer: Buffer.from(pdfBytes), contentType: "application/pdf" };
+}
     const err = await res.text();
     throw new Error(`Gotenberg stamp error: ${err}`);
   }

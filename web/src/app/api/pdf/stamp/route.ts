@@ -9,17 +9,20 @@ export async function POST(request: NextRequest) {
     const file = formData.get("file") as File | null;
     const text = formData.get("text") as string;
     const image = formData.get("image") as File | null;
+    const opacity = formData.get("opacity") ? parseFloat(formData.get("opacity") as string) : undefined;
+    const rotation = formData.get("rotation") ? parseInt(formData.get("rotation") as string) : undefined;
+    const fontSize = formData.get("fontSize") ? parseInt(formData.get("fontSize") as string) : undefined;
+    const color = formData.get("color") as string || undefined;
 
     if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
     if (!text && !image) return NextResponse.json({ error: "Stamp text or image is required" }, { status: 400 });
     if (file.size > MAX_FILE_SIZE) return NextResponse.json({ error: "File exceeds 50MB limit" }, { status: 400 });
 
     const arrayBuffer = await file.arrayBuffer();
-    const options: any = {};
+    const options: any = { opacity, rotation, fontSize, color };
 
     if (image) {
-      const imageBuffer = Buffer.from(await image.arrayBuffer());
-      options.imageBuffer = imageBuffer;
+      options.imageBuffer = Buffer.from(await image.arrayBuffer());
       options.imageFilename = image.name;
     }
 

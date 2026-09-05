@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/header";
@@ -36,7 +36,6 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   manifest: "/site.webmanifest",
-  themeColor: "#121660",
   openGraph: {
     title: "Docmaker — Documents, Done Smoothly",
     description: "Generate, convert, edit, and sign documents for free. No limits, no watermarks. AI-powered.",
@@ -74,6 +73,10 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://docmaker.io",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#121660",
 };
 
 export default function RootLayout({

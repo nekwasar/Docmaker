@@ -115,6 +115,8 @@ export async function markdownToPdf(
 }
 
 // ========== GOTENBERG: PDF Manipulation ==========
+
+// --- Merge ---
 export async function mergePdfs(
   files: { buffer: Buffer; filename: string }[]
 ): Promise<{ buffer: Buffer; contentType: string }> {
@@ -141,14 +143,16 @@ export async function splitPdf(
   fileBuffer: Buffer,
   filename: string,
   mode: "intervals" | "pages",
-  span: string
+  span: string,
+  unify?: boolean
 ): Promise<{ buffer: Buffer; contentType: string }> {
   const formData = new FormData();
   formData.append("files", new Blob([fileBuffer]), filename);
   formData.append("splitMode", mode);
   formData.append("splitSpan", span);
+  if (unify) formData.append("splitUnify", "true");
 
-  const res = await fetch(`${GOTENBERG_URL}/forms/libreoffice/convert`, {
+  const res = await fetch(`${GOTENBERG_URL}/forms/pdfengines/split`, {
     method: "POST",
     body: formData,
   });
@@ -159,19 +163,23 @@ export async function splitPdf(
   }
 
   const arrBuf = await res.arrayBuffer();
-  return { buffer: Buffer.from(arrBuf), contentType: "application/zip" };
+  const contentType = res.headers.get("content-type") || "application/pdf";
+  return { buffer: Buffer.from(arrBuf), contentType };
 }
 
 export async function watermarkPdf(
   fileBuffer: Buffer,
   filename: string,
-  text: string
+  text: string,
+  options?: { opacity?: number; rotation?: number; fontSize?: number; color?: string; pages?: string }
 ): Promise<{ buffer: Buffer; contentType: string }> {
   const formData = new FormData();
   formData.append("files", new Blob([fileBuffer]), filename);
-  formData.append("nativeWatermarkText", text);
+  formData.append("watermarkSource", "text");
+  formData.append("watermarkExpression", text);
+  if (options?.pages) formData.append("watermarkPages", options.pages);
 
-  const res = await fetch(`${GOTENBERG_URL}/forms/libreoffice/convert`, {
+  const res = await fetch(`${GOTENBERG_URL}/forms/pdfengines/merge`, {
     method: "POST",
     body: formData,
   });
@@ -185,16 +193,55 @@ export async function watermarkPdf(
   return { buffer: Buffer.from(arrBuf), contentType: "application/pdf" };
 }
 
+// --- Stamp ---
+export async function stampPdf(
+  fileBuffer: Buffer,
+  filename: string,
+  text: string,
+  options?: { opacity?: number; rotation?: number; fontSize?: number; color?: string }
+): Promise<{ buffer: Buffer; contentType: string }> {
+  const formData = new FormData();
+  formData.append("files", new Blob([fileBuffer]), filename);
+  formData.append("stampSource", "text");
+  formData.append("stampExpression", text);
+
+  const stampOptions: Record<string, any> = {};
+  if (options?.opacity) stampOptions.opacity = options.opacity;
+  if (options?.rotation) stampOptions.rotation = options.rotation;
+  if (options?.fontSize) stampOptions.points = options.fontSize;
+  if (options?.color) stampOptions.color = options.color;
+
+  if (Object.keys(stampOptions).length > 0) {
+    formData.append("stampOptions", JSON.stringify(stampOptions));
+  }
+
+  const res = await fetch(`${GOTENBERG_URL}/forms/pdfengines/merge`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Gotenberg stamp error: ${err}`);
+  }
+
+  const arrBuf = await res.arrayBuffer();
+  return { buffer: Buffer.from(arrBuf), contentType: "application/pdf" };
+}
+
+// --- Rotate ---
 export async function rotatePdf(
   fileBuffer: Buffer,
   filename: string,
-  angle: 90 | 180 | 270
+  angle: 90 | 180 | 270,
+  pages?: string
 ): Promise<{ buffer: Buffer; contentType: string }> {
   const formData = new FormData();
   formData.append("files", new Blob([fileBuffer]), filename);
   formData.append("rotateAngle", String(angle));
+  if (pages) formData.append("rotatePages", pages);
 
-  const res = await fetch(`${GOTENBERG_URL}/forms/libreoffice/convert`, {
+  const res = await fetch(`${GOTENBERG_URL}/forms/pdfengines/merge`, {
     method: "POST",
     body: formData,
   });
@@ -212,33 +259,82 @@ export async function encryptPdf(
   fileBuffer: Buffer,
   filename: string,
   userPassword: string,
-  ownerPassword?: string
-): Promise<{ buffer: Buffer; contentType: string }> {
-  await ensureTempDir();
-  const inPath = tempPath(`${randomUUID()}.pdf`);
-  await writeFile(inPath, fileBuffer);
-
-  try {
-    const formData = new FormData();
-    formData.append("files", new Blob([fileBuffer]), filename);
-    formData.append("userPassword", userPassword);
-    if (ownerPassword) formData.append("ownerPassword", ownerPassword);
-
-    const res = await fetch(`${GOTENBERG_URL}/forms/libreoffice/convert`, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`Gotenberg encrypt error: ${err}`);
-    }
-
-    const arrBuf = await res.arrayBuffer();
-    return { buffer: Buffer.from(arrBuf), contentType: "application/pdf" };
-  } finally {
-    await unlink(inPath).catch(() => {});
+  ownerPassword?: string,
+  permissions?: {
+    allowPrinting?: boolean;
+    allowCopying?: boolean;
+    allowModifying?: boolean;
   }
+): Promise<{ buffer: Buffer; contentType: string }> {
+  const formData = new FormData();
+  formData.append("files", new Blob([fileBuffer]), filename);
+  formData.append("userPassword", userPassword);
+  if (ownerPassword) formData.append("ownerPassword", ownerPassword);
+  if (permissions?.allowPrinting === false) formData.append("allowPrinting", "false");
+  if (permissions?.allowCopying === false) formData.append("allowCopying", "false");
+  if (permissions?.allowModifying === false) formData.append("allowModifying", "false");
+
+  const res = await fetch(`${GOTENBERG_URL}/forms/pdfengines/merge`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Gotenberg encrypt error: ${err}`);
+  }
+
+  const arrBuf = await res.arrayBuffer();
+  return { buffer: Buffer.from(arrBuf), contentType: "application/pdf" };
+}
+
+// --- Compress ---
+export async function compressPdf(
+  fileBuffer: Buffer,
+  filename: string,
+  quality: "low" | "medium" | "high" = "medium"
+): Promise<{ buffer: Buffer; contentType: string }> {
+  const qualityMap = { low: 50, medium: 75, high: 90 };
+  const formData = new FormData();
+  formData.append("files", new Blob([fileBuffer]), filename);
+  formData.append("optimizeImages", "true");
+  formData.append("imageQuality", String(qualityMap[quality]));
+
+  const res = await fetch(`${GOTENBERG_URL}/forms/pdfengines/merge`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Gotenberg compress error: ${err}`);
+  }
+
+  const arrBuf = await res.arrayBuffer();
+  return { buffer: Buffer.from(arrBuf), contentType: "application/pdf" };
+}
+
+// --- Flatten ---
+export async function flattenPdf(
+  fileBuffer: Buffer,
+  filename: string
+): Promise<{ buffer: Buffer; contentType: string }> {
+  const formData = new FormData();
+  formData.append("files", new Blob([fileBuffer]), filename);
+  formData.append("flatten", "true");
+
+  const res = await fetch(`${GOTENBERG_URL}/forms/pdfengines/merge`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Gotenberg flatten error: ${err}`);
+  }
+
+  const arrBuf = await res.arrayBuffer();
+  return { buffer: Buffer.from(arrBuf), contentType: "application/pdf" };
 }
 
 // ========== FFMPEG: Audio/Video Conversion ==========

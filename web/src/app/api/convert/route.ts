@@ -166,9 +166,11 @@ export async function POST(request: NextRequest) {
         filename: `${file.name.split(".")[0]}.txt`,
       };
     }
-    // ===== PDF → DOCX (Pandoc) =====
+    // ===== PDF → DOCX (extract text then Pandoc) =====
     else if (sourceFormat === "pdf" && targetFormat === "docx") {
-      const r = await pandocConvert(fileBuffer, file.name, "docx");
+      const text = await pdfToText(fileBuffer);
+      const mdBuffer = Buffer.from(text, "utf-8");
+      const r = await pandocConvert(mdBuffer, "input.md", "docx");
       result = { ...r, filename: `${file.name.split(".")[0]}.docx` };
     }
     // ===== PDF → EPUB (Pandoc) =====

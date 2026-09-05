@@ -53,17 +53,6 @@ const PDF_TOOLS = [
     ),
   },
   {
-    name: "Stamp PDF",
-    description: "Add text stamp on top of PDF pages",
-    href: "/pdf/stamp",
-    color: "#121660",
-    icon: (
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-  },
-  {
     name: "Flatten PDF",
     description: "Make form fields non-editable",
     href: "/pdf/flatten",
@@ -125,7 +114,7 @@ export default function PdfToolsPage() {
     <ToolPageLayout title="PDF Tools" color="navy">
       <div className="space-y-6">
         <p className="text-lg text-slate-600">
-          12 free PDF tools. No limits, no watermarks. All processing happens on our servers.
+          10 free PDF tools. No limits, no watermarks. All processing happens on our servers.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

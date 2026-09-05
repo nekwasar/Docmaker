@@ -168,72 +168,92 @@ export async function splitPdf(
   return { buffer: Buffer.from(arrBuf), contentType };
 }
 
+// ========== PDF Watermark/Stamp with baked opacity ==========
+
+async function bakeImageOpacity(imageBuffer: Buffer, opacity: number): Promise<Buffer> {
+  const sharpMod = (await import("sharp")).default;
+  const { data, info } = await sharpMod(imageBuffer).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const modified = Buffer.from(data);
+  for (let i = 3; i < modified.length; i += 4) {
+    modified[i] = Math.round(modified[i] * opacity);
+  }
+  return sharpMod(modified, {
+    raw: { width: info.width, height: info.height, channels: 4 },
+  }).png().toBuffer();
+}
+
+async function textToImage(
+  text: string,
+  fontSize: number,
+  colorHex: string,
+  opacity: number
+): Promise<Buffer> {
+  const { createCanvas } = await import("canvas");
+  const r = parseInt(colorHex?.slice(1, 3) || "80", 16);
+  const g = parseInt(colorHex?.slice(3, 5) || "80", 16);
+  const b = parseInt(colorHex?.slice(5, 7) || "80", 16);
+
+  const canvas = createCanvas(800, fontSize * 2);
+  const ctx = canvas.getContext("2d");
+  ctx.font = `bold ${fontSize}px Helvetica, Arial, sans-serif`;
+  ctx.fillStyle = `rgb(${r},${g},${b})`;
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, 0, fontSize);
+
+  let imgBuffer = canvas.toBuffer("image/png");
+
+  if (opacity < 1) {
+    imgBuffer = await bakeImageOpacity(imgBuffer, opacity);
+  }
+
+  return imgBuffer;
+}
+
 export async function watermarkPdf(
   fileBuffer: Buffer,
   filename: string,
   text: string,
   options?: { opacity?: number; rotation?: number; fontSize?: number; color?: string; pages?: string; imageBuffer?: Buffer; imageFilename?: string; scale?: number }
 ): Promise<{ buffer: Buffer; contentType: string }> {
-  const { PDFDocument, rgb, StandardFonts, degrees } = await import("pdf-lib");
+  const { PDFDocument, degrees } = await import("pdf-lib");
 
   const pdfDoc = await PDFDocument.load(fileBuffer);
   const pages = pdfDoc.getPages();
-  const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
   const opacity = options?.opacity ?? 0;
   const rotation = options?.rotation ?? -45;
   const fontSize = options?.fontSize ?? 72;
-  const color = options?.color;
+  const color = options?.color ?? "#808080";
   const scale = options?.scale ?? 50;
 
+  let imgBuffer: Buffer;
+
   if (options?.imageBuffer && options?.imageFilename) {
-    // Image watermark
-    const ext = options.imageFilename.split(".").pop()?.toLowerCase() || "";
-    let img;
-    if (ext === "png") {
-      img = await pdfDoc.embedPng(options.imageBuffer);
-    } else {
-      img = await pdfDoc.embedJpg(options.imageBuffer);
-    }
-
-    for (const page of pages) {
-      const { width, height } = page.getSize();
-      const imgWidth = img.width;
-      const imgHeight = img.height;
-      const fitScale = Math.min(width / imgWidth, height / imgHeight);
-      const drawScale = fitScale * (scale / 100);
-      const drawnW = imgWidth * drawScale;
-      const drawnH = imgHeight * drawScale;
-
-      page.drawImage(img, {
-        x: (width - drawnW) / 2,
-        y: (height - drawnH) / 2,
-        width: drawnW,
-        height: drawnH,
-        opacity,
-        rotate: degrees(rotation),
-      });
-    }
+    // Image watermark — bake opacity into the image
+    imgBuffer = opacity < 1
+      ? await bakeImageOpacity(options.imageBuffer, opacity)
+      : options.imageBuffer;
   } else {
-    // Text watermark
-    const r = parseInt(color?.slice(1, 3) || "80", 16) / 255;
-    const g = parseInt(color?.slice(3, 5) || "80", 16) / 255;
-    const b = parseInt(color?.slice(5, 7) || "80", 16) / 255;
+    // Text watermark — render text to image with baked opacity
+    imgBuffer = await textToImage(text, fontSize, color, opacity);
+  }
 
-    for (const page of pages) {
-      const { width, height } = page.getSize();
-      const textWidth = font.widthOfTextAtSize(text, fontSize);
+  const img = await pdfDoc.embedPng(imgBuffer);
 
-      page.drawText(text, {
-        x: (width - textWidth) / 2,
-        y: height / 2,
-        size: fontSize,
-        font,
-        color: rgb(r, g, b),
-        opacity,
-        rotate: degrees(rotation),
-      });
-    }
+  for (const page of pages) {
+    const { width, height } = page.getSize();
+    const fitScale = Math.min(width / img.width, height / img.height);
+    const drawScale = fitScale * (scale / 100);
+    const drawnW = img.width * drawScale;
+    const drawnH = img.height * drawScale;
+
+    page.drawImage(img, {
+      x: (width - drawnW) / 2,
+      y: (height - drawnH) / 2,
+      width: drawnW,
+      height: drawnH,
+      rotate: degrees(rotation),
+    });
   }
 
   const pdfBytes = await pdfDoc.save();
@@ -247,66 +267,45 @@ export async function stampPdf(
   text: string,
   options?: { opacity?: number; rotation?: number; fontSize?: number; color?: string; imageBuffer?: Buffer; imageFilename?: string; scale?: number }
 ): Promise<{ buffer: Buffer; contentType: string }> {
-  const { PDFDocument, rgb, StandardFonts, degrees } = await import("pdf-lib");
+  const { PDFDocument, degrees } = await import("pdf-lib");
 
   const pdfDoc = await PDFDocument.load(fileBuffer);
   const pages = pdfDoc.getPages();
-  const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
   const opacity = options?.opacity ?? 0;
   const rotation = options?.rotation ?? -15;
   const fontSize = options?.fontSize ?? 72;
-  const color = options?.color;
+  const color = options?.color ?? "#808080";
   const scale = options?.scale ?? 50;
 
+  let imgBuffer: Buffer;
+
   if (options?.imageBuffer && options?.imageFilename) {
-    // Image stamp
-    const ext = options.imageFilename.split(".").pop()?.toLowerCase() || "";
-    let img;
-    if (ext === "png") {
-      img = await pdfDoc.embedPng(options.imageBuffer);
-    } else {
-      img = await pdfDoc.embedJpg(options.imageBuffer);
-    }
-
-    for (const page of pages) {
-      const { width, height } = page.getSize();
-      const imgWidth = img.width;
-      const imgHeight = img.height;
-      const fitScale = Math.min(width / imgWidth, height / imgHeight);
-      const drawScale = fitScale * (scale / 100);
-      const drawnW = imgWidth * drawScale;
-      const drawnH = imgHeight * drawScale;
-
-      page.drawImage(img, {
-        x: (width - drawnW) / 2,
-        y: (height - drawnH) / 2,
-        width: drawnW,
-        height: drawnH,
-        opacity,
-        rotate: degrees(rotation),
-      });
-    }
+    // Image stamp — bake opacity into the image
+    imgBuffer = opacity < 1
+      ? await bakeImageOpacity(options.imageBuffer, opacity)
+      : options.imageBuffer;
   } else {
-    // Text stamp
-    const r = parseInt(color?.slice(1, 3) || "80", 16) / 255;
-    const g = parseInt(color?.slice(3, 5) || "80", 16) / 255;
-    const b = parseInt(color?.slice(5, 7) || "80", 16) / 255;
+    // Text stamp — render text to image with baked opacity
+    imgBuffer = await textToImage(text, fontSize, color, opacity);
+  }
 
-    for (const page of pages) {
-      const { width, height } = page.getSize();
-      const textWidth = font.widthOfTextAtSize(text, fontSize);
+  const img = await pdfDoc.embedPng(imgBuffer);
 
-      page.drawText(text, {
-        x: (width - textWidth) / 2,
-        y: height / 2,
-        size: fontSize,
-        font,
-        color: rgb(r, g, b),
-        opacity,
-        rotate: degrees(rotation),
-      });
-    }
+  for (const page of pages) {
+    const { width, height } = page.getSize();
+    const fitScale = Math.min(width / img.width, height / img.height);
+    const drawScale = fitScale * (scale / 100);
+    const drawnW = img.width * drawScale;
+    const drawnH = img.height * drawScale;
+
+    page.drawImage(img, {
+      x: (width - drawnW) / 2,
+      y: (height - drawnH) / 2,
+      width: drawnW,
+      height: drawnH,
+      rotate: degrees(rotation),
+    });
   }
 
   const pdfBytes = await pdfDoc.save();

@@ -5,12 +5,14 @@ import { ToolPageLayout } from "@/components/layout/tool-page-layout";
 import { ArrowRight } from "lucide-react";
 
 const TARGET_FORMATS = [
-  { id: "docx", label: "DOCX" },
-  { id: "txt", label: "TXT" },
-  { id: "html", label: "HTML" },
+  { id: "jpg", label: "JPG" },
+  { id: "png", label: "PNG" },
+  { id: "webp", label: "WEBP" },
+  { id: "gif", label: "GIF" },
+  { id: "tiff", label: "TIFF" },
 ];
 
-export default function PDFToWordPage() {
+export default function ImageConvertPage() {
   const handleConvert = async (file: File, targetFormat: string) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -34,30 +36,30 @@ export default function PDFToWordPage() {
   };
 
   return (
-    <ToolPageLayout title="PDF to Word" color="blue">
+    <ToolPageLayout title="Convert Images" color="blue">
       <div className="space-y-8">
-        <p className="text-lg text-slate-600">Convert PDF documents to editable Word files, text, or HTML.</p>
+        <p className="text-lg text-slate-600">Convert images between formats. JPG, PNG, WEBP, GIF, TIFF, and more.</p>
 
         <div className="flex items-center justify-center gap-6 py-4">
           <div className="text-center">
             <div className="w-16 h-16 rounded-2xl bg-[#0171DF]/10 flex items-center justify-center mb-2">
-              <span className="text-lg font-bold text-[#0171DF]">PDF</span>
+              <span className="text-lg font-bold text-[#0171DF]">IMG</span>
             </div>
           </div>
           <ArrowRight className="h-6 w-6 text-slate-400" />
           <div className="text-center">
             <div className="w-16 h-16 rounded-2xl bg-[#0171DF]/10 flex items-center justify-center mb-2">
-              <span className="text-lg font-bold text-[#0171DF]">DOCX</span>
+              <span className="text-lg font-bold text-[#0171DF]">IMG</span>
             </div>
           </div>
         </div>
 
         <FileUpload
-          accept=".pdf"
+          accept=".jpg,.jpeg,.png,.webp,.gif,.tiff,.tif,.bmp,.avif"
           onConvert={handleConvert}
           targetFormats={TARGET_FORMATS}
-          title="Drop a PDF here"
-          description="Converts to DOCX, TXT, or HTML"
+          title="Drop images here"
+          description="Supports JPG, PNG, WEBP, GIF, TIFF, BMP, AVIF"
           color="#0171DF"
         />
       </div>

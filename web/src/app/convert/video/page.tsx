@@ -5,12 +5,16 @@ import { ToolPageLayout } from "@/components/layout/tool-page-layout";
 import { ArrowRight } from "lucide-react";
 
 const TARGET_FORMATS = [
-  { id: "docx", label: "DOCX" },
-  { id: "txt", label: "TXT" },
-  { id: "html", label: "HTML" },
+  { id: "mp3", label: "MP3 (audio only)" },
+  { id: "mp4", label: "MP4" },
+  { id: "avi", label: "AVI" },
+  { id: "mov", label: "MOV" },
+  { id: "mkv", label: "MKV" },
+  { id: "webm", label: "WEBM" },
+  { id: "gif", label: "GIF" },
 ];
 
-export default function PDFToWordPage() {
+export default function VideoConvertPage() {
   const handleConvert = async (file: File, targetFormat: string) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -34,30 +38,30 @@ export default function PDFToWordPage() {
   };
 
   return (
-    <ToolPageLayout title="PDF to Word" color="blue">
+    <ToolPageLayout title="Convert Video" color="blue">
       <div className="space-y-8">
-        <p className="text-lg text-slate-600">Convert PDF documents to editable Word files, text, or HTML.</p>
+        <p className="text-lg text-slate-600">Convert video files between formats. MP4, AVI, MOV, MKV, and more.</p>
 
         <div className="flex items-center justify-center gap-6 py-4">
           <div className="text-center">
             <div className="w-16 h-16 rounded-2xl bg-[#0171DF]/10 flex items-center justify-center mb-2">
-              <span className="text-lg font-bold text-[#0171DF]">PDF</span>
+              <span className="text-lg font-bold text-[#0171DF]">MP4</span>
             </div>
           </div>
           <ArrowRight className="h-6 w-6 text-slate-400" />
           <div className="text-center">
             <div className="w-16 h-16 rounded-2xl bg-[#0171DF]/10 flex items-center justify-center mb-2">
-              <span className="text-lg font-bold text-[#0171DF]">DOCX</span>
+              <span className="text-lg font-bold text-[#0171DF]">AVI</span>
             </div>
           </div>
         </div>
 
         <FileUpload
-          accept=".pdf"
+          accept=".mp4,.avi,.mov,.mkv,.webm,.wmv,.flv,.3gp"
           onConvert={handleConvert}
           targetFormats={TARGET_FORMATS}
-          title="Drop a PDF here"
-          description="Converts to DOCX, TXT, or HTML"
+          title="Drop video files here"
+          description="Supports MP4, AVI, MOV, MKV, WEBM, WMV, FLV, 3GP"
           color="#0171DF"
         />
       </div>

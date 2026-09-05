@@ -6,11 +6,22 @@ export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   try {
+    // Serve the static OG image
+    const imagePath = join(process.cwd(), 'public', 'og', 'default.png');
+    const imageBuffer = await readFile(imagePath);
+
+    return new Response(imageBuffer, {
+      headers: {
+        'Content-Type': 'image/png',
+        'Cache-Control': 'public, max-age=86400, immutable',
+      },
+    });
+  } catch (error) {
+    // Fallback: generate SVG if PNG not found
     const { searchParams } = new URL(request.url);
     const title = searchParams.get('title') || 'Docmaker';
     const subtitle = searchParams.get('subtitle') || 'Documents, done smoothly.';
 
-    // Generate dynamic OG image using SVG (works for most platforms)
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
       <defs>
         <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -31,8 +42,5 @@ export async function GET(request: NextRequest) {
         'Cache-Control': 'public, max-age=86400, immutable',
       },
     });
-  } catch (error) {
-    console.error('OG Image generation failed:', error);
-    return new Response('Failed to generate image', { status: 500 });
   }
 }

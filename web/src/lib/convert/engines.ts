@@ -183,6 +183,7 @@ export async function watermarkPdf(
   const opacity = options?.opacity ?? 0.3;
   const rotation = options?.rotation ?? -45;
   const fontSize = options?.fontSize ?? 72;
+  const color = options?.color;
 
   if (options?.imageBuffer && options?.imageFilename) {
     // Image watermark
@@ -253,6 +254,7 @@ export async function stampPdf(
   const opacity = options?.opacity ?? 0.5;
   const rotation = options?.rotation ?? -15;
   const fontSize = options?.fontSize ?? 72;
+  const color = options?.color;
 
   if (options?.imageBuffer && options?.imageFilename) {
     // Image stamp
@@ -305,13 +307,6 @@ export async function stampPdf(
 
   const pdfBytes = await pdfDoc.save();
   return { buffer: Buffer.from(pdfBytes), contentType: "application/pdf" };
-}
-    const err = await res.text();
-    throw new Error(`Gotenberg stamp error: ${err}`);
-  }
-
-  const arrBuf = await res.arrayBuffer();
-  return { buffer: Buffer.from(arrBuf), contentType: "application/pdf" };
 }
 
 // --- Rotate ---

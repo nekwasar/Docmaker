@@ -417,8 +417,9 @@ export async function pdfToImages(
 ): Promise<{ buffer: Buffer; contentType: string }> {
   const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
   const { createCanvas } = await import("canvas");
+  const pdfjsWorker = await import("pdfjs-dist/build/pdf.worker.min.mjs");
 
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "";
+  pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker.default || "";
 
   const doc = await pdfjsLib.getDocument({ data: new Uint8Array(fileBuffer) }).promise;
   const scale = (options?.dpi || 150) / 72;
@@ -454,7 +455,8 @@ export async function pdfToImages(
 // ========== PDF → Text ==========
 export async function pdfToText(fileBuffer: Buffer): Promise<string> {
   const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "";
+  const pdfjsWorker = await import("pdfjs-dist/build/pdf.worker.min.mjs");
+  pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker.default || "";
 
   const doc = await pdfjsLib.getDocument({ data: new Uint8Array(fileBuffer) }).promise;
   let text = "";

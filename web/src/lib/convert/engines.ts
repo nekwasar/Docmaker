@@ -8,6 +8,7 @@ const GOTENBERG_URL = process.env.GOTENBERG_URL || "http://localhost:3101";
 const FFMPEG_CONTAINER = "ffmpeg";
 const PANDOC_CONTAINER = "pandoc";
 const CALIBRE_CONTAINER = "calibre";
+const GHOSTSCRIPT_CONTAINER = "ghostscript";
 
 const TEMP_DIR = join(tmpdir(), "docmaker-convert");
 
@@ -288,30 +289,53 @@ export async function encryptPdf(
   return { buffer: Buffer.from(arrBuf), contentType: "application/pdf" };
 }
 
-// --- Compress ---
+// --- Compress (Ghostscript) ---
 export async function compressPdf(
   fileBuffer: Buffer,
   filename: string,
-  quality: "low" | "medium" | "high" = "medium"
-): Promise<{ buffer: Buffer; contentType: string }> {
-  const qualityMap = { low: 50, medium: 75, high: 90 };
-  const formData = new FormData();
-  formData.append("files", new Blob([fileBuffer]), filename);
-  formData.append("optimizeImages", "true");
-  formData.append("imageQuality", String(qualityMap[quality]));
+  quality: "screen" | "ebook" | "printer" | "prepress" = "ebook"
+): Promise<{ buffer: Buffer; contentType: string; originalSize: number; compressedSize: number }> {
+  await ensureTempDir();
+  const inPath = tempPath(`${randomUUID()}.pdf`);
+  const outPath = tempPath(`${randomUUID()}-compressed.pdf`);
+  await writeFile(inPath, fileBuffer);
 
-  const res = await fetch(`${GOTENBERG_URL}/forms/pdfengines/merge`, {
-    method: "POST",
-    body: formData,
-  });
+  const containerIn = `/tmp/docmaker/${inPath.split("/").pop()}`;
+  const containerOut = `/tmp/docmaker/${outPath.split("/").pop()}`;
 
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Gotenberg compress error: ${err}`);
+  try {
+    execSync(`docker exec ${GHOSTSCRIPT_CONTAINER} mkdir -p /tmp/docmaker`);
+    execSync(`docker cp ${inPath} ${GHOSTSCRIPT_CONTAINER}:${containerIn}`);
+
+    const presetMap: Record<string, string> = {
+      screen: "/screen",
+      ebook: "/ebook",
+      printer: "/printer",
+      prepress: "/prepress",
+    };
+    const preset = presetMap[quality] || "/ebook";
+
+    execSync(
+      `docker exec ${GHOSTSCRIPT_CONTAINER} gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 ` +
+      `-dPDFSETTINGS=${preset} -dNOPAUSE -dQUIET -dBATCH ` +
+      `-sOutputFile=${containerOut} ${containerIn}`,
+      { maxBuffer: 100 * 1024 * 1024 }
+    );
+
+    execSync(`docker cp ${GHOSTSCRIPT_CONTAINER}:${containerOut} ${outPath}`);
+
+    const resultBuffer = await readFile(outPath);
+    return {
+      buffer: resultBuffer,
+      contentType: "application/pdf",
+      originalSize: fileBuffer.length,
+      compressedSize: resultBuffer.length,
+    };
+  } finally {
+    await unlink(inPath).catch(() => {});
+    await unlink(outPath).catch(() => {});
+    execSync(`docker exec ${GHOSTSCRIPT_CONTAINER} rm -f /tmp/docmaker/* 2>/dev/null || true`);
   }
-
-  const arrBuf = await res.arrayBuffer();
-  return { buffer: Buffer.from(arrBuf), contentType: "application/pdf" };
 }
 
 // --- Flatten ---

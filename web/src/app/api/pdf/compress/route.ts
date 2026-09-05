@@ -7,15 +7,10 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
-    const quality = (formData.get("quality") as "low" | "medium" | "high") || "medium";
+    const quality = (formData.get("quality") as "screen" | "ebook" | "printer" | "prepress") || "ebook";
 
-    if (!file) {
-      return NextResponse.json({ error: "No file provided" }, { status: 400 });
-    }
-
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json({ error: "File exceeds 50MB limit" }, { status: 400 });
-    }
+    if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    if (file.size > MAX_FILE_SIZE) return NextResponse.json({ error: "File exceeds 50MB limit" }, { status: 400 });
 
     const arrayBuffer = await file.arrayBuffer();
     const result = await compressPdf(Buffer.from(arrayBuffer), file.name, quality);
@@ -25,6 +20,9 @@ export async function POST(request: NextRequest) {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="${baseName}-compressed.pdf"`,
+        "X-Original-Size": String(result.originalSize),
+        "X-Compressed-Size": String(result.compressedSize),
+        "X-Compression-Ratio": String(Math.max(0, Math.round((1 - result.compressedSize / result.originalSize) * 100))),
       },
     });
   } catch (error: any) {

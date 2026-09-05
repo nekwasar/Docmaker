@@ -71,6 +71,72 @@ const PDF_TOOLS = [
       </svg>
     ),
   },
+  {
+    name: "Stamp PDF",
+    description: "Add text stamp on top of PDF pages",
+    href: "/pdf/stamp",
+    color: "#121660",
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
+  {
+    name: "Flatten PDF",
+    description: "Make form fields non-editable",
+    href: "/pdf/flatten",
+    color: "#0171DF",
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+      </svg>
+    ),
+  },
+  {
+    name: "Page Numbers",
+    description: "Add page numbers to PDF",
+    href: "/pdf/page-numbers",
+    color: "#3CAE8B",
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+      </svg>
+    ),
+  },
+  {
+    name: "PDF to PDF/A",
+    description: "Convert to archival standard",
+    href: "/pdf/pdfa",
+    color: "#121660",
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+      </svg>
+    ),
+  },
+  {
+    name: "Unlock PDF",
+    description: "Remove PDF password",
+    href: "/pdf/unlock",
+    color: "#0171DF",
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+      </svg>
+    ),
+  },
+  {
+    name: "Repair PDF",
+    description: "Fix corrupted PDF files",
+    href: "/pdf/repair",
+    color: "#3CAE8B",
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      </svg>
+    ),
+  },
 ];
 
 export default function PdfToolsPage() {
@@ -78,7 +144,7 @@ export default function PdfToolsPage() {
     <ToolPageLayout title="PDF Tools" color="navy">
       <div className="space-y-6">
         <p className="text-lg text-slate-600">
-          Free PDF tools. No limits, no watermarks. All processing happens on our servers.
+          12 free PDF tools. No limits, no watermarks. All processing happens on our servers.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

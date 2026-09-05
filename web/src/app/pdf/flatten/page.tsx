@@ -21,8 +21,10 @@ export default function FlattenPdfPage() {
     a.download = `${files[0].name.replace(/\.pdf$/i, "")}-flattened.pdf`;
     document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
   };
 
   return (

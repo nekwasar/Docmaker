@@ -225,7 +225,7 @@ export async function watermarkPdf(
       const textWidth = font.widthOfTextAtSize(text, fontSize);
 
       page.drawText(text, {
-        x: (width - textWidth * Math.cos(rotation * Math.PI / 180)) / 2,
+        x: (width - textWidth) / 2,
         y: height / 2,
         size: fontSize,
         font,
@@ -298,7 +298,7 @@ export async function stampPdf(
       const textWidth = font.widthOfTextAtSize(text, fontSize);
 
       page.drawText(text, {
-        x: (width - textWidth * Math.cos(rotation * Math.PI / 180)) / 2,
+        x: (width - textWidth) / 2,
         y: height / 2,
         size: fontSize,
         font,

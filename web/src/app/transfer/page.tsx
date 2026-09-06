@@ -49,7 +49,17 @@ export default function TransferPage() {
   };
 
   const copyCode = () => {
-    navigator.clipboard.writeText(transferCode);
+    try {
+      navigator.clipboard.writeText(transferCode);
+    } catch {
+      // Fallback for older browsers
+      const textarea = document.createElement("textarea");
+      textarea.value = transferCode;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { ToolPageLayout } from "@/components/layout/tool-page-layout";
-import { Upload, ArrowRight, ChevronDown, Check, Loader2, AlertCircle, X } from "lucide-react";
+import { Upload, ArrowRight, ChevronDown, Check, Loader2, AlertCircle, FileText } from "lucide-react";
 import { Brand } from "@/config/site";
 import {
   FORMAT_LABELS,

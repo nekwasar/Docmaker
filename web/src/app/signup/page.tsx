@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
 import { Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
 
 export default function SignupPage() {
@@ -41,27 +40,29 @@ export default function SignupPage() {
         }
 
         // Auto-login after signup
-        const signInResult = await signIn("credentials", {
-          email,
-          password,
-          redirect: false,
+        const loginRes = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
         });
 
-        if (signInResult?.error) {
+        const loginData = await loginRes.json();
+        if (!loginRes.ok) {
           setError("Account created but login failed. Please try logging in.");
           setLoading(false);
           return;
         }
       } else {
         // Login
-        const signInResult = await signIn("credentials", {
-          email,
-          password,
-          redirect: false,
+        const loginRes = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
         });
 
-        if (signInResult?.error) {
-          setError("Invalid email or password");
+        const loginData = await loginRes.json();
+        if (!loginRes.ok) {
+          setError(loginData.error || "Invalid email or password");
           setLoading(false);
           return;
         }

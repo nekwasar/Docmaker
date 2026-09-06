@@ -20,6 +20,8 @@ export default function TransferPage() {
   const [copied, setCopied] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [modalPhase, setModalPhase] = useState<"initial" | "redirecting">("initial");
+  const [receiveCode, setReceiveCode] = useState("");
+  const [connecting, setConnecting] = useState(false);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -123,8 +125,32 @@ export default function TransferPage() {
                 <p className="text-slate-600">Enter the code from the sending device.</p>
                 <div className="p-6 border border-slate-200 rounded-2xl bg-white">
                   <label className="block text-sm font-semibold text-slate-900 mb-2">Transfer Code</label>
-                  <input type="text" maxLength={6} placeholder="Enter 6-character code" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-center text-2xl font-bold tracking-widest uppercase focus:outline-none focus:ring-2 focus:ring-[#FFD140]/20 focus:border-[#FFD140]" />
-                  <button className="w-full mt-4 py-3 rounded-xl bg-[#FFD140] text-slate-900 font-semibold hover:bg-[#e6bc3a] transition-colors">Connect & Receive</button>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={receiveCode}
+                    onChange={(e) => setReceiveCode(e.target.value.toUpperCase())}
+                    placeholder="Enter 6-character code"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 text-center text-2xl font-bold tracking-widest uppercase focus:outline-none focus:ring-2 focus:ring-[#FFD140]/20 focus:border-[#FFD140]"
+                  />
+                  <button
+                    onClick={() => {
+                      if (!receiveCode || receiveCode.length < 6) return;
+                      setConnecting(true);
+                      setTimeout(() => {
+                        setConnecting(false);
+                        alert(`Connected to code: ${receiveCode}\n\nFile transfer is coming soon.`);
+                      }, 1500);
+                    }}
+                    disabled={!receiveCode || receiveCode.length < 6 || connecting}
+                    className="w-full mt-4 py-3 rounded-xl bg-[#FFD140] text-slate-900 font-semibold hover:bg-[#e6bc3a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {connecting ? (
+                      <><Loader2 className="h-4 w-4 animate-spin" /> Connecting...</>
+                    ) : (
+                      "Connect & Receive"
+                    )}
+                  </button>
                 </div>
                 <button onClick={() => setMode(null)} className="text-sm text-slate-500 hover:text-slate-700">← Back to options</button>
               </div>

@@ -25,6 +25,7 @@ model User {
   refreshTokens RefreshToken[]
   payments      Payment[]
   subscriptions Subscription[]
+  transfers     Transfer[]
 }
 
 model Document {
@@ -89,4 +90,34 @@ model Subscription {
   updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model Transfer {
+  id              String   @id @default(cuid())
+  senderId        String
+  code            String   @unique
+  fileName        String
+  fileSize        Int
+  fileMimeType    String   @default("application/octet-stream")
+  fileHash        String
+  encryptedKey    String
+  status          String   @default("pending") // pending, active, completed, expired, deleted
+  maxDownloads    Int      @default(1)
+  downloadCount   Int      @default(0)
+  retentionDays   Int      @default(1)
+  expiresAt       DateTime
+  createdAt       DateTime @default(now())
+
+  sender          User     @relation(fields: [senderId], references: [id])
+  chunks          TransferChunk[]
+}
+
+model TransferChunk {
+  id              String   @id @default(cuid())
+  transferId      String
+  chunkIndex      Int
+  filePath        String
+  createdAt       DateTime @default(now())
+
+  transfer        Transfer @relation(fields: [transferId], references: [id])
 }

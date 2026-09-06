@@ -1,14 +1,12 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ToolPageLayout } from "@/components/layout/tool-page-layout";
-import { Upload, ArrowRight, ChevronDown, Check, Loader2, AlertCircle } from "lucide-react";
+import { Upload, ArrowRight, ChevronDown, Check, Loader2, AlertCircle, X } from "lucide-react";
 import { Brand } from "@/config/site";
 import {
-  CONVERSION_MAP,
   FORMAT_LABELS,
   getTargets,
-  getAcceptAttribute,
 } from "@/lib/convert/formats";
 
 interface ConverterPageProps {
@@ -16,6 +14,85 @@ interface ConverterPageProps {
   description: string;
   color?: string;
   formats: readonly string[];
+}
+
+function CustomDropdown({
+  value,
+  options,
+  onChange,
+  placeholder,
+  disabled,
+  label,
+  color,
+}: {
+  value: string;
+  options: string[];
+  onChange: (v: string) => void;
+  placeholder: string;
+  disabled?: boolean;
+  label: string;
+  color: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div className="relative" ref={ref}>
+      <label className="block text-sm font-semibold text-slate-900 mb-2">{label}</label>
+      <button
+        type="button"
+        onClick={() => !disabled && setOpen(!open)}
+        disabled={disabled}
+        className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border text-sm font-medium bg-white transition-all ${
+          disabled
+            ? "border-slate-200 opacity-50 cursor-not-allowed"
+            : open
+            ? "border-[#0171DF] ring-2 ring-[#0171DF]/20"
+            : "border-slate-200 hover:border-slate-300"
+        }`}
+      >
+        <span className={value ? "text-slate-900" : "text-slate-400"}>
+          {value ? FORMAT_LABELS[value] || value.toUpperCase() : placeholder}
+        </span>
+        <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 max-h-60 overflow-auto">
+          {options.length === 0 ? (
+            <div className="px-4 py-3 text-sm text-slate-400">No options available</div>
+          ) : (
+            options.map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => {
+                  onChange(opt);
+                  setOpen(false);
+                }}
+                className={`w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors ${
+                  value === opt
+                    ? "bg-[#0171DF]/5 text-[#0171DF] font-medium"
+                    : "text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                <span>{FORMAT_LABELS[opt] || opt.toUpperCase()}</span>
+                {value === opt && <Check className="h-4 w-4" />}
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function ConverterPage({
@@ -120,53 +197,41 @@ export function ConverterPage({
         <p className="text-lg text-slate-600">{description}</p>
 
         {/* From / To selectors */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-end gap-4">
           <div className="flex-1">
-            <label className="block text-sm font-semibold text-slate-900 mb-2">From</label>
-            <div className="relative">
-              <select
-                value={sourceFormat}
-                onChange={(e) => {
-                  setSourceFormat(e.target.value);
-                  setTargetFormat("");
-                  setResult(null);
-                }}
-                className="w-full appearance-none px-4 py-3 rounded-xl border border-slate-200 text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-[#0171DF]/20 focus:border-[#0171DF]"
-              >
-                <option value="">Select format...</option>
-                {allFormats.map((f) => (
-                  <option key={f} value={f}>{FORMAT_LABELS[f] || f.toUpperCase()}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-            </div>
+            <CustomDropdown
+              value={sourceFormat}
+              options={allFormats}
+              onChange={(v) => {
+                setSourceFormat(v);
+                setTargetFormat("");
+                setResult(null);
+              }}
+              placeholder="Select format..."
+              label="From"
+              color={color}
+            />
           </div>
 
-          <div className="pt-6">
+          <div className="pb-3">
             <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
               <ArrowRight className="h-5 w-5 text-slate-400" />
             </div>
           </div>
 
           <div className="flex-1">
-            <label className="block text-sm font-semibold text-slate-900 mb-2">To</label>
-            <div className="relative">
-              <select
-                value={targetFormat}
-                onChange={(e) => {
-                  setTargetFormat(e.target.value);
-                  setResult(null);
-                }}
-                disabled={!sourceFormat}
-                className="w-full appearance-none px-4 py-3 rounded-xl border border-slate-200 text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-[#0171DF]/20 focus:border-[#0171DF] disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <option value="">Select format...</option>
-                {targets.map((f) => (
-                  <option key={f} value={f}>{FORMAT_LABELS[f] || f.toUpperCase()}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-            </div>
+            <CustomDropdown
+              value={targetFormat}
+              options={targets}
+              onChange={(v) => {
+                setTargetFormat(v);
+                setResult(null);
+              }}
+              placeholder="Select format..."
+              disabled={!sourceFormat}
+              label="To"
+              color={color}
+            />
           </div>
         </div>
 
@@ -194,7 +259,7 @@ export function ConverterPage({
           <input
             ref={inputRef}
             type="file"
-            accept={sourceFormat ? `.${sourceFormat}` : getAcceptAttribute(allFormats)}
+            accept={sourceFormat ? `.${sourceFormat}` : undefined}
             onChange={handleChange}
             className="hidden"
           />

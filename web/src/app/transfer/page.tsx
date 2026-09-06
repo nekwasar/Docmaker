@@ -15,22 +15,22 @@ export default function TransferPage() {
 
         {!mode ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <AnimatedPressable
-              onPress={() => setMode("send")}
+            <button
+              onClick={() => setMode("send")}
               className="p-8 rounded-lg border border-slate-200 hover:border-[#FFD140] transition-colors cursor-pointer text-center"
             >
               <Upload className="h-12 w-12 mx-auto mb-4" style={{ color: '#FFD140' }} />
               <h3 className="text-xl font-semibold text-slate-900 mb-2">Send Files</h3>
               <p className="text-slate-500">Share files to another device</p>
-            </AnimatedPressable>
-            <AnimatedPressable
-              onPress={() => setMode("receive")}
+            </button>
+            <button
+              onClick={() => setMode("receive")}
               className="p-8 rounded-lg border border-slate-200 hover:border-[#FFD140] transition-colors cursor-pointer text-center"
             >
               <Download className="h-12 w-12 mx-auto mb-4" style={{ color: '#FFD140' }} />
               <h3 className="text-xl font-semibold text-slate-900 mb-2">Receive Files</h3>
               <p className="text-slate-500">Get files from another device</p>
-            </AnimatedPressable>
+            </button>
           </div>
         ) : mode === "send" ? (
           <div className="space-y-6">

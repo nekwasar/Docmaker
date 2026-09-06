@@ -37,10 +37,11 @@ const TOOLS_MEGA = {
       icon: Globe,
       color: Brand.blue,
       items: [
-        { label: "Convert Files", href: "/convert", description: "200+ format pairs" },
-        { label: "PDF to Word", href: "/convert/pdf-to-docx", description: "PDF → DOCX" },
-        { label: "JPG to PDF", href: "/convert/jpg-to-pdf", description: "Images → PDF" },
-        { label: "Word to PDF", href: "/convert/docx-to-pdf", description: "DOCX → PDF" },
+        { label: "Convert Files", href: "/convert", description: "38+ format pairs" },
+        { label: "Audio", href: "/convert/audio", description: "MP3, WAV, AAC, FLAC" },
+        { label: "Video", href: "/convert/video", description: "MP4, AVI, MOV, MKV" },
+        { label: "Image", href: "/convert/image", description: "JPG, PNG, WEBP, GIF" },
+        { label: "Document", href: "/convert/file", description: "DOCX, CSV, TXT, HTML" },
       ],
     },
     {

@@ -2,130 +2,95 @@
 
 import Link from "next/link";
 import { ToolPageLayout } from "@/components/layout/tool-page-layout";
-import { FileText, FileImage, Film, Music, FileSpreadsheet, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
-const CONVERSION_CATEGORIES = [
+const CATEGORIES = [
   {
-    title: "Document to PDF",
-    description: "Convert Word, Excel, PowerPoint, and more to PDF",
-    icon: <FileText className="h-6 w-6" />,
-    color: "#0171DF",
-    tools: [
-      { name: "Word to PDF", from: "DOCX", to: "PDF", href: "/convert/docx-to-pdf" },
-      { name: "Excel to PDF", from: "XLSX", to: "PDF", href: "/convert/docx-to-pdf" },
-      { name: "PowerPoint to PDF", from: "PPTX", to: "PDF", href: "/convert/docx-to-pdf" },
-      { name: "HTML to PDF", from: "HTML", to: "PDF", href: "/convert/docx-to-pdf" },
-      { name: "EPUB to PDF", from: "EPUB", to: "PDF", href: "/convert/docx-to-pdf" },
-    ],
-  },
-  {
-    title: "PDF to Other Formats",
-    description: "Convert PDF to Word, images, text, and more",
-    icon: <FileText className="h-6 w-6" />,
-    color: "#3CAE8B",
-    tools: [
-      { name: "PDF to Word", from: "PDF", to: "DOCX", href: "/convert/pdf-to-docx" },
-      { name: "PDF to Images", from: "PDF", to: "JPG/PNG", href: "/convert/pdf-to-jpg" },
-      { name: "PDF to Text", from: "PDF", to: "TXT", href: "/convert/pdf-to-docx" },
-      { name: "PDF to HTML", from: "PDF", to: "HTML", href: "/convert/pdf-to-docx" },
-    ],
-  },
-  {
-    title: "Image Conversion",
-    description: "Convert between JPG, PNG, WEBP, GIF, and more",
-    icon: <FileImage className="h-6 w-6" />,
-    color: "#121660",
-    tools: [
-      { name: "Image Converter", from: "IMG", to: "IMG", href: "/convert/image" },
-      { name: "Images to PDF", from: "IMG", to: "PDF", href: "/convert/jpg-to-pdf" },
-    ],
-  },
-  {
-    title: "Audio Conversion",
-    description: "Convert between MP3, WAV, AAC, FLAC, and more",
-    icon: <Music className="h-6 w-6" />,
+    name: "Audio",
+    description: "Convert between MP3, WAV, AAC, FLAC, OGG, M4A",
+    href: "/convert/audio",
     color: "#FFD140",
-    tools: [
-      { name: "Audio Converter", from: "AUDIO", to: "AUDIO", href: "/convert/audio" },
-    ],
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+      </svg>
+    ),
   },
   {
-    title: "Video Conversion",
-    description: "Convert between MP4, AVI, MOV, MKV, and more",
-    icon: <Film className="h-6 w-6" />,
+    name: "Video",
+    description: "Convert between MP4, AVI, MOV, MKV, WEBM",
+    href: "/convert/video",
     color: "#0171DF",
-    tools: [
-      { name: "Video Converter", from: "VIDEO", to: "VIDEO", href: "/convert/video" },
-      { name: "Video to Audio", from: "VIDEO", to: "MP3", href: "/convert/video" },
-      { name: "Video to GIF", from: "VIDEO", to: "GIF", href: "/convert/video" },
-    ],
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+      </svg>
+    ),
   },
   {
-    title: "Spreadsheet Conversion",
-    description: "Convert between CSV, XLSX, and JSON",
-    icon: <FileSpreadsheet className="h-6 w-6" />,
+    name: "Image",
+    description: "Convert between JPG, PNG, WEBP, GIF, TIFF, BMP",
+    href: "/convert/image",
     color: "#3CAE8B",
-    tools: [
-      { name: "Excel Converter", from: "CSV", to: "XLSX", href: "/convert/excel" },
-    ],
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+    ),
   },
   {
-    title: "Ebook Conversion",
-    description: "Convert EPUB ebooks to PDF, DOCX, and more",
-    icon: <FileText className="h-6 w-6" />,
+    name: "Document",
+    description: "Convert between DOCX, XLSX, CSV, TXT, HTML, MD, EPUB",
+    href: "/convert/file",
     color: "#121660",
-    tools: [
-      { name: "EPUB to PDF", from: "EPUB", to: "PDF", href: "/convert/epub" },
-      { name: "EPUB to DOCX", from: "EPUB", to: "DOCX", href: "/convert/epub" },
-      { name: "PDF to EPUB", from: "PDF", to: "EPUB", href: "/convert/epub" },
-      { name: "HTML to EPUB", from: "HTML", to: "EPUB", href: "/convert/epub" },
-      { name: "Markdown to EPUB", from: "MD", to: "EPUB", href: "/convert/epub" },
-    ],
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    ),
+  },
+  {
+    name: "Mixed",
+    description: "Cross-format: PDF ↔ Images, Video → Audio, and more",
+    href: "/convert/mixed",
+    color: "#0171DF",
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+      </svg>
+    ),
   },
 ];
 
 export default function ConvertPage() {
   return (
     <ToolPageLayout title="Convert Files" color="blue">
-      <div className="space-y-8">
+      <div className="space-y-6">
         <p className="text-lg text-slate-600">
-          Convert between 38+ file formats. Documents, images, audio, video, and spreadsheets.
+          Convert between 38+ file formats. Select a category to get started.
         </p>
 
-        <div className="grid gap-4">
-          {CONVERSION_CATEGORIES.map((category) => (
-            <div key={category.title} className="rounded-2xl bg-white border border-slate-200 p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ backgroundColor: `${category.color}10`, color: category.color }}
-                >
-                  {category.icon}
-                </div>
-                <div>
-                  <h3 className="font-semibold text-slate-900">{category.title}</h3>
-                  <p className="text-sm text-slate-500">{category.description}</p>
-                </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {CATEGORIES.map((cat) => (
+            <Link
+              key={cat.name}
+              href={cat.href}
+              className="group p-6 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all"
+            >
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+                style={{ backgroundColor: `${cat.color}15`, color: cat.color }}
+              >
+                {cat.icon}
               </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {category.tools.map((tool) => (
-                  <Link
-                    key={tool.name}
-                    href={tool.href}
-                    className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors group"
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-slate-900">{tool.name}</p>
-                      <p className="text-xs text-slate-500">
-                        {tool.from} → {tool.to}
-                      </p>
-                    </div>
-                    <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
-                  </Link>
-                ))}
+              <h3 className="font-semibold text-slate-900 group-hover:text-[#0171DF] transition-colors">
+                {cat.name}
+              </h3>
+              <p className="text-sm text-slate-500 mt-1">{cat.description}</p>
+              <div className="flex items-center gap-1 mt-3 text-sm font-medium" style={{ color: cat.color }}>
+                Convert now <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

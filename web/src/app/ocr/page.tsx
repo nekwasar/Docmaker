@@ -12,7 +12,6 @@ import type { PageResult } from "@/lib/ocr-engine";
 
 export default function OCRPage() {
   const [file, setFile] = useState<File | null>(null);
-  const [language, setLanguage] = useState("eng");
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState("");
@@ -41,7 +40,7 @@ export default function OCRPage() {
         setCurrentStep("Loading PDF...");
         setProgress(5);
 
-        const result = await extractTextFromPDF(file, language, (prog, page, total) => {
+        const result = await extractTextFromPDF(file, (prog, page, total) => {
           setProgress(prog);
           setCurrentPage(page);
           setTotalPages(total);
@@ -57,7 +56,7 @@ export default function OCRPage() {
         setCurrentStep("Loading language model...");
         setProgress(10);
 
-        const result = await extractTextFromImage(file, language, (prog) => {
+        const result = await extractTextFromImage(file, (prog) => {
           setProgress(prog);
           if (prog < 30) {
             setCurrentStep("Loading language model...");
@@ -92,7 +91,7 @@ export default function OCRPage() {
     <ToolPageLayout title="Extract Text (OCR)" color="yellow">
       <div className="space-y-6">
         <p className="text-lg text-slate-600">
-          Extract text from images, scanned documents, and PDFs using AI-powered OCR.
+          Extract text from images, scanned documents, and PDFs. Language is auto-detected.
         </p>
 
         {/* Upload */}
@@ -102,15 +101,13 @@ export default function OCRPage() {
           onClear={() => { setFile(null); setPages([]); setFullText(""); setError(""); }}
         />
 
-        {/* Language & Progress */}
+        {/* Progress */}
         <OCRProgress
           isProcessing={processing}
           progress={progress}
           currentStep={currentStep}
           currentPage={currentPage}
           totalPages={totalPages}
-          selectedLanguage={language}
-          onLanguageChange={setLanguage}
         />
 
         {/* Error */}

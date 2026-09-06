@@ -36,17 +36,19 @@ export const OCR_LANGUAGES: Record<string, { code: string; name: string }> = {
   nld: { code: "nld", name: "Dutch" },
 };
 
+// All supported languages for auto-detection
+const ALL_LANGUAGES = "eng+deu+jpn+kor+chi_sim+chi_tra+spa+ita+por+fra+nld";
+
 /**
- * Extract text from an image using Tesseract.js
+ * Extract text from an image using Tesseract.js with auto language detection
  */
 export async function extractTextFromImage(
   file: File,
-  language: string = "eng",
   onProgress?: (progress: number) => void
 ): Promise<OCRResult> {
   onProgress?.(10);
 
-  const worker = await Tesseract.createWorker(language, 1, {
+  const worker = await Tesseract.createWorker(ALL_LANGUAGES, 1, {
     logger: (m) => {
       if (m.status === "recognizing text" && m.progress) {
         onProgress?.(10 + Math.round(m.progress * 80));
@@ -71,11 +73,10 @@ export async function extractTextFromImage(
 }
 
 /**
- * Extract text from a PDF using pdfjs-dist + Tesseract.js
+ * Extract text from a PDF using pdfjs-dist + Tesseract.js with auto language detection
  */
 export async function extractTextFromPDF(
   file: File,
-  language: string = "eng",
   onProgress?: (progress: number, page: number, totalPages: number) => void
 ): Promise<PDFOCRResult> {
   const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
@@ -88,8 +89,8 @@ export async function extractTextFromPDF(
   const totalPages = doc.numPages;
   const pages: PageResult[] = [];
 
-  // Create worker
-  const worker = await Tesseract.createWorker(language, 1, {
+  // Create worker with all languages for auto-detection
+  const worker = await Tesseract.createWorker(ALL_LANGUAGES, 1, {
     logger: (m) => {
       if (m.status === "recognizing text" && m.progress) {
         const pageProgress = 5 + ((currentPage - 1) / totalPages) * 90 + m.progress * (90 / totalPages);

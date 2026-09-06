@@ -1,7 +1,6 @@
 "use client";
 
 import { Loader2, Globe } from "lucide-react";
-import { OCR_LANGUAGES } from "@/lib/ocr-engine";
 
 interface OCRProgressProps {
   isProcessing: boolean;
@@ -9,8 +8,6 @@ interface OCRProgressProps {
   currentStep: string;
   currentPage?: number;
   totalPages?: number;
-  selectedLanguage: string;
-  onLanguageChange: (lang: string) => void;
 }
 
 export function OCRProgress({
@@ -19,32 +16,13 @@ export function OCRProgress({
   currentStep,
   currentPage,
   totalPages,
-  selectedLanguage,
-  onLanguageChange,
 }: OCRProgressProps) {
   return (
     <div className="space-y-4">
-      {/* Language Selector */}
-      <div>
-        <label className="block text-sm font-semibold text-slate-900 mb-2 flex items-center gap-1.5">
-          <Globe className="h-4 w-4" /> Language
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {Object.entries(OCR_LANGUAGES).map(([code, lang]) => (
-            <button
-              key={code}
-              onClick={() => onLanguageChange(code)}
-              disabled={isProcessing}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                selectedLanguage === code
-                  ? "bg-[#FFD140] text-[#0F172A]"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              } disabled:opacity-50`}
-            >
-              {lang.name}
-            </button>
-          ))}
-        </div>
+      {/* Auto-detect notice */}
+      <div className="flex items-center gap-2 p-3 rounded-xl bg-blue-50 text-blue-700 text-sm">
+        <Globe className="h-4 w-4 flex-shrink-0" />
+        <span>Language is auto-detected. Supports English, German, Japanese, Korean, Chinese, Spanish, Italian, Portuguese, French, Dutch.</span>
       </div>
 
       {/* Progress Bar */}

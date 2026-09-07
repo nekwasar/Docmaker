@@ -207,7 +207,7 @@ export default function HomePage() {
             <Link href="/transfer" className="rounded-3xl p-6 text-white transition-all hover:scale-[1.02] hover:shadow-xl" style={{ backgroundColor: Brand.teal }}>
               <ArrowUpDown className="h-8 w-8 text-white mb-3" />
               <h3 className="text-lg font-bold text-white">File Transfer</h3>
-              <p className="text-sm text-white/75">Send files between devices</p>
+              <p className="text-sm text-white/75">Mobile only — download the app</p>
             </Link>
             <Link href="/convert" className="rounded-3xl p-6 text-white transition-all hover:scale-[1.02] hover:shadow-xl" style={{ backgroundColor: Brand.navy }}>
               <RefreshCw className="h-8 w-8 text-white mb-3" />

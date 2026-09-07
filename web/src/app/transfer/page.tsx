@@ -55,7 +55,7 @@ export default function TransferPage() {
                   className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-slate-100 text-slate-700 rounded-2xl font-semibold text-base hover:bg-slate-200 transition-all"
                 >
                   Learn More
-                </a>
+                </Link>
               </div>
 
               {/* Trust indicators */}

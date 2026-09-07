@@ -7,7 +7,7 @@ const FOOTER_LINKS = {
     { label: "Convert Files", href: "/convert" },
     { label: "PDF Tools", href: "/merge-pdf" },
     { label: "E-Sign", href: "/sign" },
-    { label: "OCR", href: "/ocr" },
+    // { label: "OCR", href: "/ocr" },
   ],
   Company: [
     { label: "About", href: "/about" },

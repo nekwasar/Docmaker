@@ -6,7 +6,7 @@ import { Brand } from "@/config/site";
 export const metadata: Metadata = {
   title: "Docmaker — Free PDF Tools, AI Document Generator, File Converter",
   description: "Generate, convert, edit, sign, and compress documents for free. AI-powered document tools with no limits, no watermarks, no account required. 200+ format conversions.",
-  keywords: ["free pdf tools", "ai document generator", "free file converter", "merge pdf free", "compress pdf free", "ocr free", "e-sign free", "document generator", "pdf editor free"],
+  keywords: ["free pdf tools", "ai document generator", "free file converter", "merge pdf free", "compress pdf free", "e-sign free", "document generator", "pdf editor free"],
   openGraph: {
     title: "Docmaker — Free PDF Tools & AI Document Generator",
     description: "Generate, convert, edit, sign documents for free. No limits, no watermarks. AI-powered.",
@@ -189,11 +189,13 @@ export default function HomePage() {
                 <h3 className="text-lg font-bold text-[#0F172A]">Scan</h3>
                 <p className="text-sm text-[#0F172A]/75">Scan documents</p>
               </Link>
+              {/* OCR tool hidden until fixed
               <Link href="/ocr" className="flex-1 rounded-3xl p-6 text-white transition-all hover:scale-[1.02] hover:shadow-xl" style={{ backgroundColor: Brand.teal }}>
                 <Type className="h-8 w-8 text-white mb-3" />
                 <h3 className="text-lg font-bold text-white">OCR</h3>
                 <p className="text-sm text-white/75">Extract text</p>
               </Link>
+              */}
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">

@@ -49,7 +49,7 @@ const TOOLS_MEGA = {
       icon: Timer,
       color: Brand.yellow,
       items: [
-        { label: "OCR", href: "/ocr", description: "Extract text from images" },
+        // { label: "OCR", href: "/ocr", description: "Extract text from images" },
         { label: "File Transfer", href: "/transfer", description: "Send files between devices" },
       ],
     },

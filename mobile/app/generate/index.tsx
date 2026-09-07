@@ -1,15 +1,15 @@
-import { useState, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Animated as RNAnimated } from 'react-native';
+import { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Colors, Brand, Spacing, Radius, Shadow, Typography } from '../../lib/theme';
 import { useRouter } from 'expo-router';
 import { AnimatedPressable } from '../../components/ui/AnimatedPressable';
+import { RelatedTools } from '../../components/ui/RelatedTools';
 import { DOCUMENT_TEMPLATES, TEMPLATE_PREVIEWS } from '../../lib/ai/prompts';
 
 const STRUCTURES = ['Auto', 'Invoice', 'Report', 'Contract', 'Proposal', 'Resume', 'Essay', 'Letter', 'Memo', 'Meeting Notes'];
 
-// Quick-field configs per structure
 const QUICK_FIELDS: Record<string, { label: string; placeholder: string }[]> = {
   invoice: [
     { label: 'Client Name', placeholder: 'Acme Corp' },
@@ -41,6 +41,13 @@ const QUICK_FIELDS: Record<string, { label: string; placeholder: string }[]> = {
   ],
 };
 
+const RELATED_TOOLS = [
+  { id: 'edit', icon: 'create', color: Colors.white, title: 'AI Edit', route: '/edit' },
+  { id: 'qa', icon: 'help-circle', color: Colors.white, title: 'AI Q&A', route: '/qa' },
+  { id: 'summarize', icon: 'reader', color: Colors.white, title: 'Summarize', route: '/summarize' },
+  { id: 'style', icon: 'color-palette', color: Colors.white, title: 'Change Style', route: '/change-style' },
+];
+
 export default function GenerateScreen() {
   const router = useRouter();
   const [text, setText] = useState('');
@@ -50,22 +57,22 @@ export default function GenerateScreen() {
   const [showTemplates, setShowTemplates] = useState(false);
   const [quickFieldValues, setQuickFieldValues] = useState<Record<string, string>>({});
   const [output, setOutput] = useState('');
-  const scrollViewRef = useRef<ScrollView>(null);
 
   const estimatedPages = text.length > 0 ? Math.max(1, Math.round(text.length / 3000)) : 0;
 
   const handleTypeSelect = (type: string) => {
     setStructure(type);
-    const template = DOCUMENT_TEMPLATES[type.toLowerCase().replace(' ', '_')];
+    const key = type.toLowerCase().replace(' ', '_');
+    const template = DOCUMENT_TEMPLATES[key];
     if (template?.prompt) {
       setText(template.prompt);
     }
-    // Show quick-fields if available
-    setShowQuickFields(!!QUICK_FIELDS[type.toLowerCase().replace(' ', '_')]);
+    setShowQuickFields(!!QUICK_FIELDS[key]);
   };
 
   const handleTemplateSelect = (template: typeof TEMPLATE_PREVIEWS[0]) => {
-    setStructure(template.category.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
+    const typeName = template.category.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    setStructure(typeName);
     setText(template.prompt);
     setShowTemplates(false);
     setShowQuickFields(!!QUICK_FIELDS[template.category]);
@@ -120,7 +127,7 @@ export default function GenerateScreen() {
         </View>
       </View>
 
-      <ScrollView ref={scrollViewRef} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         {/* Document Structure Pills */}
         <Animated.View entering={FadeInDown.delay(100).duration(400)}>
           <View style={styles.card}>
@@ -163,30 +170,19 @@ export default function GenerateScreen() {
         <Animated.View entering={FadeInDown.delay(150).duration(400)}>
           <View style={styles.card}>
             <Text style={styles.label}>Describe your document</Text>
-            <View style={styles.textAreaContainer}>
-              <TextInput
-                style={styles.textInput}
-                placeholder="e.g., Create a professional invoice..."
-                placeholderTextColor={Colors.textSecondary}
-                value={text}
-                onChangeText={setText}
-                multiline
-                numberOfLines={6}
-                textAlignVertical="top"
-              />
-              {/* Inline Action Bar */}
-              <View style={styles.inlineBar}>
-                <AnimatedPressable onPress={() => {}} haptic="light" style={styles.inlineBtn}>
-                  <Ionicons name="camera" size={16} color={Brand.navy} />
-                  <Text style={styles.inlineBtnText}>Image</Text>
-                </AnimatedPressable>
-                <AnimatedPressable onPress={() => {}} haptic="light" style={styles.inlineBtn}>
-                  <Ionicons name="mic" size={16} color={Brand.navy} />
-                  <Text style={styles.inlineBtnText}>Voice</Text>
-                </AnimatedPressable>
-                <View style={styles.pageEstimate}>
-                  <Text style={styles.pageEstimateText}>~{estimatedPages} {estimatedPages === 1 ? 'Page' : 'Pages'} • Formal</Text>
-                </View>
+            <TextInput style={styles.textInput} placeholder="e.g., Create a professional invoice..." placeholderTextColor={Colors.textSecondary} value={text} onChangeText={setText} multiline numberOfLines={6} textAlignVertical="top" />
+            {/* Inline Action Bar */}
+            <View style={styles.inlineBar}>
+              <AnimatedPressable onPress={() => {}} haptic="light" style={styles.inlineBtn}>
+                <Ionicons name="camera" size={16} color={Brand.navy} />
+                <Text style={styles.inlineBtnText}>Image</Text>
+              </AnimatedPressable>
+              <AnimatedPressable onPress={() => {}} haptic="light" style={styles.inlineBtn}>
+                <Ionicons name="mic" size={16} color={Brand.navy} />
+                <Text style={styles.inlineBtnText}>Voice</Text>
+              </AnimatedPressable>
+              <View style={styles.pageEstimate}>
+                <Text style={styles.pageEstimateText}>~{estimatedPages} {estimatedPages === 1 ? 'Page' : 'Pages'} • Formal</Text>
               </View>
             </View>
           </View>
@@ -194,23 +190,8 @@ export default function GenerateScreen() {
 
         {/* Generate Button */}
         <Animated.View entering={FadeInDown.delay(200).duration(400)}>
-          <AnimatedPressable
-            onPress={handleGenerate}
-            haptic="medium"
-            style={[styles.actionBtn, (!text.trim() || isGenerating) && styles.actionBtnDisabled]}
-            disabled={!text.trim() || isGenerating}
-          >
-            {isGenerating ? (
-              <View style={styles.generateContent}>
-                <Ionicons name="hourglass" size={20} color={Colors.white} />
-                <Text style={styles.actionBtnText}>Generating...</Text>
-              </View>
-            ) : (
-              <View style={styles.generateContent}>
-                <Text style={styles.actionBtnText}>Generate Document</Text>
-                <Ionicons name="sparkles" size={20} color={Colors.white} />
-              </View>
-            )}
+          <AnimatedPressable onPress={handleGenerate} haptic="medium" style={[styles.actionBtn, (!text.trim() || isGenerating) && styles.actionBtnDisabled]} disabled={!text.trim() || isGenerating}>
+            {isGenerating ? <Text style={styles.actionBtnText}>Generating...</Text> : <><Ionicons name="sparkles" size={20} color={Colors.white} /><Text style={styles.actionBtnText}>Generate Document</Text></>}
           </AnimatedPressable>
         </Animated.View>
 
@@ -250,6 +231,8 @@ export default function GenerateScreen() {
             </ScrollView>
           </View>
         </Animated.View>
+
+        <RelatedTools tools={RELATED_TOOLS} onToolPress={(route) => router.push(route as any)} />
       </ScrollView>
     </View>
   );
@@ -269,7 +252,6 @@ const styles = StyleSheet.create({
   pillActive: { backgroundColor: Brand.navy, borderColor: Brand.navy },
   pillText: { ...Typography.caption, fontWeight: '600' },
   pillTextActive: { color: Colors.white },
-  textAreaContainer: {},
   textInput: { backgroundColor: Colors.canvas, borderRadius: Radius.lg, borderWidth: 1, borderColor: Colors.border, padding: Spacing.lg, fontSize: 15, fontWeight: '500', color: Colors.textPrimary, minHeight: 140 },
   inlineBar: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginTop: Spacing.sm, paddingTop: Spacing.sm, borderTopWidth: 1, borderTopColor: '#F1F5F9' },
   inlineBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: Spacing.sm + 4, paddingVertical: 6, borderRadius: Radius.full, backgroundColor: Colors.canvas },
@@ -285,7 +267,6 @@ const styles = StyleSheet.create({
   actionBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.sm, backgroundColor: Brand.navy, borderRadius: Radius.full, paddingVertical: Spacing.lg, marginBottom: Spacing.xxl, ...Shadow.md },
   actionBtnDisabled: { opacity: 0.5 },
   actionBtnText: { ...Typography.body, color: Colors.white, fontWeight: '600' },
-  generateContent: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   outputCard: { backgroundColor: Colors.white, borderRadius: Radius.xl, borderWidth: 1, borderColor: Colors.border, marginBottom: Spacing.md, overflow: 'hidden' },
   outputHeader: { paddingHorizontal: Spacing.xl, paddingVertical: Spacing.sm, borderBottomWidth: 1, borderBottomColor: '#F1F5F9' },
   outputTitle: { ...Typography.caption, fontWeight: '600' },

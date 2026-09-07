@@ -262,9 +262,12 @@ export function Header() {
       </div>
 
       {/* Mobile Full-Screen Menu */}
-      {mobileOpen && (
-        <div className="fixed inset-0 top-16 bg-white z-[60] lg:hidden overflow-y-auto">
-          {activeSection === "main" && (
+      <div
+        className={`fixed inset-0 top-16 bg-white z-[60] lg:hidden overflow-y-auto transition-opacity duration-200 ${
+          mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        {activeSection === "main" && (
             <div className="px-6 py-8 space-y-2">
               {/* Main Nav Items */}
               <button
@@ -394,7 +397,6 @@ export function Header() {
             </div>
           )}
         </div>
-      )}
     </header>
   );
 }

@@ -173,46 +173,31 @@ export default function HomePage() {
       <section className="py-16 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Link href="/generate" className="md:col-span-2 rounded-3xl p-8 text-white transition-all hover:scale-[1.02] hover:shadow-xl" style={{ backgroundColor: Brand.navy }}>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20">
-                  <Sparkles className="h-6 w-6 text-white" />
-                </div>
-                <span className="px-3 py-1 text-xs font-bold bg-white/20 rounded-full">AI</span>
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-bold mb-2">Generate Document</h2>
-              <p className="text-white/75 text-lg">Create professional documents from text prompts</p>
+            {/* Generate Document - navy */}
+            <Link href="/generate" className="rounded-3xl p-6 text-white transition-all hover:scale-[1.02] hover:shadow-xl" style={{ backgroundColor: Brand.navy }}>
+              <Sparkles className="h-8 w-8 text-white mb-3" />
+              <h3 className="text-lg font-bold text-white">Generate Document</h3>
+              <p className="text-sm text-white/75">Create professional documents from text prompts</p>
             </Link>
-            <div className="flex flex-col gap-4">
-              <Link href="/camera/scanner" className="flex-1 rounded-3xl p-6 text-white transition-all hover:scale-[1.02] hover:shadow-xl" style={{ backgroundColor: Brand.yellow }}>
-                <Camera className="h-8 w-8 text-[#0F172A] mb-3" />
-                <h3 className="text-lg font-bold text-[#0F172A]">Scan</h3>
-                <p className="text-sm text-[#0F172A]/75">Scan documents</p>
-              </Link>
-              {/* OCR tool hidden until fixed
-              <Link href="/ocr" className="flex-1 rounded-3xl p-6 text-white transition-all hover:scale-[1.02] hover:shadow-xl" style={{ backgroundColor: Brand.teal }}>
-                <Type className="h-8 w-8 text-white mb-3" />
-                <h3 className="text-lg font-bold text-white">OCR</h3>
-                <p className="text-sm text-white/75">Extract text</p>
-              </Link>
-              */}
-            </div>
+            {/* PDF Tools - yellow */}
+            <Link href="/pdf" className="rounded-3xl p-6 text-[#0F172A] transition-all hover:scale-[1.02] hover:shadow-xl" style={{ backgroundColor: Brand.yellow }}>
+              <FileText className="h-8 w-8 text-[#0F172A] mb-3" />
+              <h3 className="text-lg font-bold text-[#0F172A]">PDF Tools</h3>
+              <p className="text-sm text-[#0F172A]/75">Merge, split, compress & more</p>
+            </Link>
+            {/* Convert - green */}
+            <Link href="/convert" className="rounded-3xl p-6 text-white transition-all hover:scale-[1.02] hover:shadow-xl" style={{ backgroundColor: Brand.teal }}>
+              <RefreshCw className="h-8 w-8 text-white mb-3" />
+              <h3 className="text-lg font-bold text-white">Convert</h3>
+              <p className="text-sm text-white/75">38+ format pairs</p>
+            </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-            <Link href="/sign" className="rounded-3xl p-6 text-white transition-all hover:scale-[1.02] hover:shadow-xl" style={{ backgroundColor: Brand.blue }}>
-              <PenTool className="h-8 w-8 text-white mb-3" />
-              <h3 className="text-lg font-bold text-white">Sign Document</h3>
-              <p className="text-sm text-white/75">Sign documents digitally</p>
-            </Link>
-            <Link href="/transfer" className="rounded-3xl p-6 text-white transition-all hover:scale-[1.02] hover:shadow-xl" style={{ backgroundColor: Brand.teal }}>
+            {/* Transfer - light blue */}
+            <Link href="/transfer" className="rounded-3xl p-6 text-white transition-all hover:scale-[1.02] hover:shadow-xl" style={{ backgroundColor: Brand.blue }}>
               <ArrowUpDown className="h-8 w-8 text-white mb-3" />
-              <h3 className="text-lg font-bold text-white">File Transfer</h3>
+              <h3 className="text-lg font-bold text-white">Transfer</h3>
               <p className="text-sm text-white/75">Mobile only — download the app</p>
-            </Link>
-            <Link href="/convert" className="rounded-3xl p-6 text-white transition-all hover:scale-[1.02] hover:shadow-xl" style={{ backgroundColor: Brand.navy }}>
-              <RefreshCw className="h-8 w-8 text-white mb-3" />
-              <h3 className="text-lg font-bold text-white">Convert Files</h3>
-              <p className="text-sm text-white/75">200+ format pairs</p>
             </Link>
           </div>
         </div>

@@ -41,7 +41,7 @@ const CATEGORIES = [
   {
     name: "Document",
     description: "Convert between DOCX, XLSX, CSV, TXT, HTML, MD, EPUB",
-    href: "/convert/file",
+    href: "/convert/document",
     color: "#121660",
     icon: (
       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

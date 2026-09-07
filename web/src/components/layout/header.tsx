@@ -105,8 +105,6 @@ export function Header() {
               )}
             </div>
 
-            <Link href="/pricing" onClick={() => setMenuOpen(false)} className="block py-4 px-4 text-base font-semibold text-slate-900 rounded-xl hover:bg-slate-50">Pricing</Link>
-
             {/* Resources with submenu */}
             <div className="border-b border-slate-100 pb-4 mb-2">
               <button
@@ -126,6 +124,8 @@ export function Header() {
                 </div>
               )}
             </div>
+
+            <Link href="/pricing" onClick={() => setMenuOpen(false)} className="block py-4 px-4 text-base font-semibold text-slate-900 rounded-xl hover:bg-slate-50">Pricing</Link>
 
             <div className="pt-6">
               <Link href="/signup" onClick={() => setMenuOpen(false)} className="block w-full text-center py-3.5 rounded-2xl font-semibold text-white" style={{ backgroundColor: Brand.navy }}>

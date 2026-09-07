@@ -330,12 +330,12 @@ export function Header() {
                 <ChevronDown className={`h-4 w-4 transition-transform ${toolsAccordion ? "rotate-180" : ""}`} />
               </button>
               {toolsAccordion && (
-                <div className="mt-2 space-y-3 pl-2">
+                <div className="mt-2 grid grid-cols-2 gap-1">
                   {TOOLS_MEGA.categories.map((cat) => (
                     <div key={cat.title}>
-                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">{cat.title}</p>
+                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1 px-2">{cat.title}</p>
                       {cat.items.map((item) => (
-                        <Link key={item.href} href={item.href} className="block py-1 text-sm text-slate-600" onClick={() => setMobileOpen(false)}>
+                        <Link key={item.href} href={item.href} className="block py-1.5 px-2 text-sm text-slate-600 rounded-lg hover:bg-slate-50" onClick={() => setMobileOpen(false)}>
                           {item.label}
                         </Link>
                       ))}
@@ -354,12 +354,12 @@ export function Header() {
                 <ChevronDown className={`h-4 w-4 transition-transform ${resourcesAccordion ? "rotate-180" : ""}`} />
               </button>
               {resourcesAccordion && (
-                <div className="mt-2 space-y-3 pl-2">
+                <div className="mt-2 grid grid-cols-2 gap-1">
                   {RESOURCES_MEGA.categories.map((cat) => (
                     <div key={cat.title}>
-                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">{cat.title}</p>
+                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1 px-2">{cat.title}</p>
                       {cat.items.map((item) => (
-                        <Link key={item.href} href={item.href} className="block py-1 text-sm text-slate-600" onClick={() => setMobileOpen(false)}>
+                        <Link key={item.href} href={item.href} className="block py-1.5 px-2 text-sm text-slate-600 rounded-lg hover:bg-slate-50" onClick={() => setMobileOpen(false)}>
                           {item.label}
                         </Link>
                       ))}

@@ -263,7 +263,7 @@ export function Header() {
 
       {/* Mobile Full-Screen Menu */}
       {mobileOpen && (
-        <div className="fixed inset-0 top-16 bg-white z-40 lg:hidden overflow-y-auto">
+        <div className="fixed inset-0 top-16 bg-white z-[60] lg:hidden overflow-y-auto">
           {activeSection === "main" && (
             <div className="px-6 py-8 space-y-2">
               {/* Main Nav Items */}

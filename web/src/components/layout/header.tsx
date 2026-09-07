@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Menu, X, FileText, ChevronDown, Sparkles, Globe, Timer, BookOpen, HelpCircle, MessageSquare, Code, Layers, Users } from "lucide-react";
+import { Menu, X, ChevronDown, Sparkles, FileText, Globe, Timer, Layers } from "lucide-react";
 import { Brand } from "@/config/site";
 
 const TOOLS_MEGA = {
@@ -28,7 +28,6 @@ const TOOLS_MEGA = {
         { label: "Split PDF", href: "/pdf/split", description: "Separate pages" },
         { label: "Compress PDF", href: "/pdf/compress", description: "Reduce file size" },
         { label: "Protect PDF", href: "/pdf/protect", description: "Password protect" },
-        // { label: "Watermark", href: "/pdf/watermark", description: "Add watermarks" },
         { label: "All PDF Tools", href: "/pdf", description: "10 tools available" },
       ],
     },
@@ -49,19 +48,7 @@ const TOOLS_MEGA = {
       icon: Timer,
       color: Brand.yellow,
       items: [
-        // { label: "OCR", href: "/ocr", description: "Extract text from images" },
-        { label: "File Transfer", href: "/transfer", description: "Send files between devices" },
-      ],
-    },
-    {
-      title: "Enterprise",
-      icon: Layers,
-      color: Brand.navy,
-      items: [
-        { label: "API Access", href: "/api-docs", description: "Integrate into your apps" },
-        { label: "Batch Processing", href: "/enterprise#batch", description: "Process 100+ files" },
-        { label: "Team Collaboration", href: "/enterprise#team", description: "Work together" },
-        { label: "Admin Dashboard", href: "/enterprise#admin", description: "Manage users & settings" },
+        { label: "File Transfer", href: "/transfer", description: "Mobile only" },
       ],
     },
   ],
@@ -71,40 +58,35 @@ const RESOURCES_MEGA = {
   categories: [
     {
       title: "Help",
-      icon: HelpCircle,
       items: [
-        { label: "Help Center", href: "/help", description: "Get help with Docmaker" },
-        { label: "FAQ", href: "/help#faq", description: "Frequently asked questions" },
-        { label: "How It Works", href: "/how-it-works", description: "Step-by-step walkthrough" },
-        { label: "Contact Us", href: "/contact", description: "Reach our team" },
+        { label: "Help Center", href: "/help" },
+        { label: "FAQ", href: "/help#faq" },
+        { label: "How It Works", href: "/how-it-works" },
+        { label: "Contact Us", href: "/contact" },
       ],
     },
     {
       title: "Blog",
-      icon: BookOpen,
       items: [
-        { label: "All Posts", href: "/blog", description: "Tips, guides, and insights" },
-        { label: "Tutorials", href: "/blog?tutorials", description: "Step-by-step guides" },
-        { label: "Updates", href: "/blog?updates", description: "Product news" },
-        { label: "Case Studies", href: "/blog?cases", description: "Success stories" },
+        { label: "All Posts", href: "/blog" },
+        { label: "Tutorials", href: "/blog?tutorials" },
+        { label: "Updates", href: "/blog?updates" },
       ],
     },
     {
       title: "Legals",
-      icon: MessageSquare,
       items: [
-        { label: "Privacy Policy", href: "/privacy", description: "How we handle data" },
-        { label: "Terms of Service", href: "/terms", description: "Usage terms" },
-        { label: "Cookie Policy", href: "/cookies", description: "Cookie usage" },
+        { label: "Privacy Policy", href: "/privacy" },
+        { label: "Terms of Service", href: "/terms" },
+        { label: "Cookie Policy", href: "/cookies" },
       ],
     },
     {
       title: "Company",
-      icon: MessageSquare,
       items: [
-        { label: "About", href: "/about", description: "About Docmaker" },
-        { label: "Pricing", href: "/pricing", description: "Free for everyone" },
-        { label: "Mobile App", href: "/mobile", description: "iOS & Android" },
+        { label: "About", href: "/about" },
+        { label: "Pricing", href: "/pricing" },
+        { label: "Mobile App", href: "/mobile" },
       ],
     },
   ],
@@ -115,45 +97,26 @@ function MegaMenu({ label, data }: { label: string; data: typeof TOOLS_MEGA }) {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setIsOpen(true);
   }, []);
 
   const handleMouseLeave = useCallback(() => {
-    timeoutRef.current = setTimeout(() => {
-      setIsOpen(false);
-    }, 150); // 150ms delay before closing
+    timeoutRef.current = setTimeout(() => setIsOpen(false), 150);
   }, []);
 
   useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
+    return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
   }, []);
 
   return (
-    <div
-      className="relative"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      <button
-        className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors rounded-lg hover:bg-slate-50"
-      >
+    <div className="relative" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+      <button className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors rounded-lg hover:bg-slate-50">
         {label}
         <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
       </button>
-
       {isOpen && (
-        <div
-          className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[850px] rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl z-50"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
+        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[850px] rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl z-50" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
           <div className="grid grid-cols-5 gap-4">
             {data.categories.map((cat) => (
               <div key={cat.title}>
@@ -166,10 +129,7 @@ function MegaMenu({ label, data }: { label: string; data: typeof TOOLS_MEGA }) {
                 <ul className="space-y-1">
                   {cat.items.map((item) => (
                     <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        className="block rounded-lg px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-                      >
+                      <Link href={item.href} className="block rounded-lg px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
                         {item.label}
                       </Link>
                     </li>
@@ -194,61 +154,39 @@ function ResourcesMenu() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setIsOpen(true);
   }, []);
 
   const handleMouseLeave = useCallback(() => {
-    timeoutRef.current = setTimeout(() => {
-      setIsOpen(false);
-    }, 150);
+    timeoutRef.current = setTimeout(() => setIsOpen(false), 150);
   }, []);
 
   useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
+    return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
   }, []);
 
   return (
-    <div
-      className="relative"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      <button
-        className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors rounded-lg hover:bg-slate-50"
-      >
+    <div className="relative" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+      <button className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors rounded-lg hover:bg-slate-50">
         Resources
         <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
       </button>
-
       {isOpen && (
-        <div
-          className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[700px] rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl z-50"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
+        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[700px] rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl z-50" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
           <div className="grid grid-cols-4 gap-4">
             {RESOURCES_MEGA.categories.map((cat) => (
               <div key={cat.title}>
                 <div className="flex items-center gap-2 mb-3">
                   <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100">
-                    <cat.icon className="h-4 w-4 text-slate-600" />
+                    <Layers className="h-4 w-4 text-slate-600" />
                   </div>
                   <span className="text-sm font-semibold text-slate-900">{cat.title}</span>
                 </div>
                 <ul className="space-y-1">
                   {cat.items.map((item) => (
                     <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        className="block rounded-lg px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-                      >
+                      <Link href={item.href} className="block rounded-lg px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
                         {item.label}
                       </Link>
                     </li>
@@ -265,8 +203,7 @@ function ResourcesMenu() {
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [toolsAccordion, setToolsAccordion] = useState(false);
-  const [resourcesAccordion, setResourcesAccordion] = useState(false);
+  const [activeSection, setActiveSection] = useState<"main" | "tools" | "resources">("main");
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -285,6 +222,11 @@ export function Header() {
       document.body.style.width = "";
     };
   }, [mobileOpen]);
+
+  const closeMenu = () => {
+    setMobileOpen(false);
+    setActiveSection("main");
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
@@ -311,68 +253,146 @@ export function Header() {
         </nav>
 
         <button
-          className="lg:hidden p-2"
-          onClick={() => setMobileOpen(!mobileOpen)}
+          className="lg:hidden p-2 -mr-2"
+          onClick={() => { setMobileOpen(!mobileOpen); setActiveSection("main"); }}
+          aria-label={mobileOpen ? "Close menu" : "Open menu"}
         >
           {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       </div>
 
+      {/* Mobile Full-Screen Menu */}
       {mobileOpen && (
-        <div className="absolute top-full left-0 right-0 border-t border-slate-200 bg-white px-4 py-4 lg:hidden" style={{ zIndex: 100 }}>
-          <div className="space-y-4">
-            <div>
+        <div className="fixed inset-0 top-16 bg-white z-40 lg:hidden overflow-y-auto">
+          {activeSection === "main" && (
+            <div className="px-6 py-8 space-y-2">
+              {/* Main Nav Items */}
               <button
-                className="flex w-full items-center justify-between text-sm font-semibold text-slate-900"
-                onClick={() => setToolsAccordion(!toolsAccordion)}
+                onClick={() => setActiveSection("tools")}
+                className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors"
               >
-                Tools
-                <ChevronDown className={`h-4 w-4 transition-transform ${toolsAccordion ? "rotate-180" : ""}`} />
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${Brand.navy}10` }}>
+                    <Sparkles className="h-5 w-5" style={{ color: Brand.navy }} />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold text-slate-900">Tools</p>
+                    <p className="text-xs text-slate-500">AI, PDF, Convert, and more</p>
+                  </div>
+                </div>
+                <ChevronDown className="h-5 w-5 text-slate-400 -rotate-90" />
               </button>
-              {toolsAccordion && (
-                <div className="mt-2 grid grid-cols-2 gap-1">
-                  {TOOLS_MEGA.categories.map((cat) => (
-                    <div key={cat.title}>
-                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1 px-2">{cat.title}</p>
+
+              <button
+                onClick={() => setActiveSection("resources")}
+                className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${Brand.blue}10` }}>
+                    <Layers className="h-5 w-5" style={{ color: Brand.blue }} />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold text-slate-900">Resources</p>
+                    <p className="text-xs text-slate-500">Help, blog, and company info</p>
+                  </div>
+                </div>
+                <ChevronDown className="h-5 w-5 text-slate-400 -rotate-90" />
+              </button>
+
+              <Link
+                href="/pricing"
+                onClick={closeMenu}
+                className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${Brand.teal}10` }}>
+                    <span className="text-lg font-bold" style={{ color: Brand.teal }}>$</span>
+                  </div>
+                  <p className="font-semibold text-slate-900">Pricing</p>
+                </div>
+                <ChevronDown className="h-5 w-5 text-slate-400 -rotate-90" />
+              </Link>
+
+              {/* CTA */}
+              <div className="pt-6">
+                <Link
+                  href="/signup"
+                  onClick={closeMenu}
+                  className="block w-full text-center py-3.5 rounded-2xl font-semibold text-white transition-all"
+                  style={{ backgroundColor: Brand.navy }}
+                >
+                  Get Started Free
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {activeSection === "tools" && (
+            <div className="px-6 py-8">
+              <button
+                onClick={() => setActiveSection("main")}
+                className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-900 mb-6"
+              >
+                ← Back
+              </button>
+              <h2 className="text-xl font-bold text-slate-900 mb-6">Tools</h2>
+              <div className="space-y-4">
+                {TOOLS_MEGA.categories.map((cat) => (
+                  <div key={cat.title}>
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">{cat.title}</p>
+                    <div className="space-y-1">
                       {cat.items.map((item) => (
-                        <Link key={item.href} href={item.href} className="block py-1.5 px-2 text-sm text-slate-600 rounded-lg hover:bg-slate-50" onClick={() => setMobileOpen(false)}>
-                          {item.label}
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={closeMenu}
+                          className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors"
+                        >
+                          <div>
+                            <p className="text-sm font-medium text-slate-900">{item.label}</p>
+                            <p className="text-xs text-slate-500">{item.description}</p>
+                          </div>
+                          <ChevronDown className="h-4 w-4 text-slate-400 -rotate-90" />
                         </Link>
                       ))}
                     </div>
-                  ))}
-                </div>
-              )}
+                  </div>
+                ))}
+              </div>
             </div>
+          )}
 
-            <div>
+          {activeSection === "resources" && (
+            <div className="px-6 py-8">
               <button
-                className="flex w-full items-center justify-between text-sm font-semibold text-slate-900"
-                onClick={() => setResourcesAccordion(!resourcesAccordion)}
+                onClick={() => setActiveSection("main")}
+                className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-900 mb-6"
               >
-                Resources
-                <ChevronDown className={`h-4 w-4 transition-transform ${resourcesAccordion ? "rotate-180" : ""}`} />
+                ← Back
               </button>
-              {resourcesAccordion && (
-                <div className="mt-2 grid grid-cols-2 gap-1">
-                  {RESOURCES_MEGA.categories.map((cat) => (
-                    <div key={cat.title}>
-                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1 px-2">{cat.title}</p>
+              <h2 className="text-xl font-bold text-slate-900 mb-6">Resources</h2>
+              <div className="space-y-4">
+                {RESOURCES_MEGA.categories.map((cat) => (
+                  <div key={cat.title}>
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">{cat.title}</p>
+                    <div className="space-y-1">
                       {cat.items.map((item) => (
-                        <Link key={item.href} href={item.href} className="block py-1.5 px-2 text-sm text-slate-600 rounded-lg hover:bg-slate-50" onClick={() => setMobileOpen(false)}>
-                          {item.label}
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={closeMenu}
+                          className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors"
+                        >
+                          <p className="text-sm font-medium text-slate-900">{item.label}</p>
+                          <ChevronDown className="h-4 w-4 text-slate-400 -rotate-90" />
                         </Link>
                       ))}
                     </div>
-                  ))}
-                </div>
-              )}
+                  </div>
+                ))}
+              </div>
             </div>
-
-            <Link href="/pricing" className="block text-sm font-semibold text-slate-900" onClick={() => setMobileOpen(false)}>
-              Pricing
-            </Link>
-          </div>
+          )}
         </div>
       )}
     </header>

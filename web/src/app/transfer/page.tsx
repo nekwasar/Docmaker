@@ -1,24 +1,10 @@
 import Link from "next/link";
-import { Smartphone, Shield, Zap, Lock, ArrowRight, QrCode, FileUp, FileDown } from "lucide-react";
+import { Smartphone, Shield, Zap, Lock, FileUp, FileDown } from "lucide-react";
 import { Brand } from "@/config/site";
 
 export default function TransferPage() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Top bar */}
-      <div className="border-b border-slate-100">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#121660" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M8 5h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/>
-              <path d="M12 5V3.5A1.5 1.5 0 0 1 13.5 2h3A1.5 1.5 0 0 1 18 3.5v3a1.5 1.5 0 0 1-1.5 1.5H15"/>
-            </svg>
-            <span className="text-lg font-bold text-slate-900" style={{ fontFamily: 'var(--font-playfair)' }}>Docmaker</span>
-          </Link>
-          <span className="text-xs font-medium px-3 py-1 rounded-full bg-[#121660] text-white">Mobile App</span>
-        </div>
-      </div>
-
       {/* Hero — asymmetric split */}
       <section className="relative overflow-hidden">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-20 sm:py-32">

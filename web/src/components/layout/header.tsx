@@ -106,7 +106,26 @@ export function Header() {
             </div>
 
             <Link href="/pricing" onClick={() => setMenuOpen(false)} className="block py-4 px-4 text-base font-semibold text-slate-900 rounded-xl hover:bg-slate-50">Pricing</Link>
-            <Link href="/help" onClick={() => setMenuOpen(false)} className="block py-4 px-4 text-base font-semibold text-slate-900 rounded-xl hover:bg-slate-50">Help</Link>
+
+            {/* Resources with submenu */}
+            <div className="border-b border-slate-100 pb-4 mb-2">
+              <button
+                onClick={() => setMobileSubmenu(mobileSubmenu === "resources" ? null : "resources")}
+                className="w-full flex items-center justify-between py-3 px-4 rounded-xl hover:bg-slate-50"
+              >
+                <span className="text-base font-semibold text-slate-900">Resources</span>
+                <ChevronDown className={`h-5 w-5 text-slate-400 transition-transform ${mobileSubmenu === "resources" ? "rotate-180" : ""}`} />
+              </button>
+              {mobileSubmenu === "resources" && (
+                <div className="mt-2 ml-4 space-y-1">
+                  <Link href="/help" onClick={() => setMenuOpen(false)} className="block py-2.5 px-4 text-sm text-slate-700 rounded-lg hover:bg-slate-50">Help Center</Link>
+                  <Link href="/blog" onClick={() => setMenuOpen(false)} className="block py-2.5 px-4 text-sm text-slate-700 rounded-lg hover:bg-slate-50">Blog</Link>
+                  <Link href="/about" onClick={() => setMenuOpen(false)} className="block py-2.5 px-4 text-sm text-slate-700 rounded-lg hover:bg-slate-50">About</Link>
+                  <Link href="/contact" onClick={() => setMenuOpen(false)} className="block py-2.5 px-4 text-sm text-slate-700 rounded-lg hover:bg-slate-50">Contact</Link>
+                  <Link href="/enterprise" onClick={() => setMenuOpen(false)} className="block py-2.5 px-4 text-sm text-slate-700 rounded-lg hover:bg-slate-50">Enterprise</Link>
+                </div>
+              )}
+            </div>
 
             <div className="pt-6">
               <Link href="/signup" onClick={() => setMenuOpen(false)} className="block w-full text-center py-3.5 rounded-2xl font-semibold text-white" style={{ backgroundColor: Brand.navy }}>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Menu, X, Sparkles, FileText, Globe, ArrowUpDown, ChevronRight } from "lucide-react";
+import { Home, Menu, X, Sparkles, FileText, Globe, ArrowUpDown } from "lucide-react";
 import { useState } from "react";
 import { Brand } from "@/config/site";
 
@@ -90,7 +90,7 @@ export function BottomNav() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setMenuOpen(false)}
-                  className={`flex items-center justify-between px-4 py-3 rounded-xl transition-colors ${
+                  className={`flex items-center px-4 py-3 rounded-xl transition-colors ${
                     pathname === item.href ? "bg-[#f4f4f5]" : "hover:bg-[#f4f4f5]"
                   }`}
                 >
@@ -98,7 +98,6 @@ export function BottomNav() {
                     {item.icon && <span className="text-slate-500">{item.icon}</span>}
                     <span className="text-sm font-medium text-slate-900">{item.label}</span>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-slate-400" />
                 </Link>
               ))}
             </div>

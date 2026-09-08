@@ -6,7 +6,7 @@ import { ToolPageLayout } from "@/components/layout/tool-page-layout";
 import { Brand } from "@/config/site";
 import { DOCUMENT_TEMPLATES, TEMPLATE_PREVIEWS } from "@/lib/ai/prompts";
 
-const TYPES = ["Auto", "Invoice", "Report", "Contract", "Proposal", "Resume", "Essay", "Letter", "Memo"];
+const TYPES = ["Auto", "Business", "Personal", "Academic", "Meeting"];
 
 export default function GeneratePage() {
   const [text, setText] = useState("");

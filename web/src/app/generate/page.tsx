@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Sparkles, Paperclip, Mic, Loader2, Copy, Download } from "lucide-react";
+import { Sparkles, Paperclip, Mic, Loader2, Copy, Download, X, User, Eye } from "lucide-react";
 import { ToolPageLayout } from "@/components/layout/tool-page-layout";
 import { Brand } from "@/config/site";
-import { DOCUMENT_TEMPLATES, TEMPLATE_PREVIEWS } from "@/lib/ai/prompts";
+import { DOCUMENT_TEMPLATES } from "@/lib/ai/prompts";
+import { templates, type Template } from "@/data/templates";
 
 const TYPES = ["Auto", "Business", "Personal", "Academic", "Meeting"];
 
@@ -13,6 +14,7 @@ export default function GeneratePage() {
   const [type, setType] = useState("Auto");
   const [generating, setGenerating] = useState(false);
   const [output, setOutput] = useState("");
+  const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const outputRef = useRef<HTMLDivElement>(null);
 
@@ -67,7 +69,20 @@ export default function GeneratePage() {
     }
   };
 
-  const copy = () => { navigator.clipboard.writeText(output); };
+  const useTemplate = (tpl: Template) => {
+    setText(tpl.content);
+    const mapped = tpl.category.charAt(0).toUpperCase() + tpl.category.slice(1);
+    if (TYPES.map((x) => x.toLowerCase()).includes(mapped.toLowerCase())) {
+      setType(mapped);
+    }
+    setPreviewTemplate(null);
+    textareaRef.current?.focus();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const copy = () => {
+    navigator.clipboard.writeText(output);
+  };
   const download = () => {
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([output], { type: "text/markdown" }));
@@ -78,7 +93,6 @@ export default function GeneratePage() {
   return (
     <ToolPageLayout title="AI Generate" color="yellow">
       <div className="space-y-6">
-        {/* Type selector */}
         <div>
           <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">Document type</p>
           <div className="flex flex-wrap gap-2">
@@ -98,7 +112,6 @@ export default function GeneratePage() {
           </div>
         </div>
 
-        {/* Textarea */}
         <div>
           <textarea
             ref={textareaRef}
@@ -110,35 +123,45 @@ export default function GeneratePage() {
           />
           <div className="flex items-center justify-between mt-2 px-1">
             <div className="flex gap-2">
-              <button className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600">
+              <span className="flex items-center gap-1 text-xs text-slate-400">
                 <Paperclip className="h-3.5 w-3.5" /> Attach
-              </button>
-              <button className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600">
+              </span>
+              <span className="flex items-center gap-1 text-xs text-slate-400">
                 <Mic className="h-3.5 w-3.5" /> Voice
-              </button>
+              </span>
             </div>
             {pages > 0 && <span className="text-xs text-slate-400">~{pages} {pages === 1 ? "page" : "pages"}</span>}
           </div>
         </div>
 
-        {/* Generate */}
         <button
           onClick={generate}
           disabled={!text.trim() || generating}
           className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           style={{ backgroundColor: Brand.navy }}
         >
-          {generating ? <><Loader2 className="h-4 w-4 animate-spin" /> Generating...</> : <>Generate <Sparkles className="h-4 w-4" /></>}
+          {generating ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" /> Generating...
+            </>
+          ) : (
+            <>
+              Generate <Sparkles className="h-4 w-4" />
+            </>
+          )}
         </button>
 
-        {/* Output */}
         {output && (
           <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
             <div className="flex items-center justify-between px-4 py-2 border-b border-slate-100">
               <span className="text-xs font-medium text-slate-500">Output</span>
               <div className="flex gap-1">
-                <button onClick={copy} className="p-1.5 rounded hover:bg-slate-100"><Copy className="h-3.5 w-3.5 text-slate-400" /></button>
-                <button onClick={download} className="p-1.5 rounded hover:bg-slate-100"><Download className="h-3.5 w-3.5 text-slate-400" /></button>
+                <button onClick={copy} className="p-1.5 rounded hover:bg-slate-100" aria-label="Copy output">
+                  <Copy className="h-3.5 w-3.5 text-slate-400" />
+                </button>
+                <button onClick={download} className="p-1.5 rounded hover:bg-slate-100" aria-label="Download output">
+                  <Download className="h-3.5 w-3.5 text-slate-400" />
+                </button>
               </div>
             </div>
             <div ref={outputRef} className="p-4 max-h-96 overflow-y-auto">
@@ -147,22 +170,86 @@ export default function GeneratePage() {
           </div>
         )}
 
-        {/* Templates */}
         <div>
-          <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">Templates</p>
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            {TEMPLATE_PREVIEWS.map((tpl) => (
+          <div className="flex items-baseline justify-between mb-2">
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wide">Templates</p>
+            <span className="text-xs text-slate-400">{templates.length} curated</span>
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-3 -mx-1 px-1 scrollbar-thin">
+            {templates.map((tpl) => (
               <button
                 key={tpl.id}
-                onClick={() => { setType(tpl.category.split("_").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")); setText(tpl.prompt); }}
-                className="flex-shrink-0 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-600 hover:border-slate-300 transition-colors text-left"
+                onClick={() => setPreviewTemplate(tpl)}
+                className="group flex-shrink-0 w-[220px] text-left bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-slate-300 hover:shadow-sm transition-all"
               >
-                {tpl.name}
+                <div className="h-[124px] bg-slate-100 overflow-hidden flex">
+                  {tpl.thumbnails.slice(0, 2).map((src) => (
+                    <img key={src} src={src} alt="" className="w-1/2 h-full object-cover group-hover:scale-[1.02] transition-transform" loading="lazy" />
+                  ))}
+                </div>
+                <div className="p-3">
+                  <p className="text-sm font-semibold text-slate-900 leading-tight line-clamp-1">{tpl.title}</p>
+                  <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                    <User className="h-3 w-3" /> {tpl.author}
+                    <span className="mx-1">•</span>
+                    <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">{tpl.category}</span>
+                  </p>
+                </div>
               </button>
             ))}
           </div>
         </div>
       </div>
+
+      {previewTemplate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <button aria-label="Close preview" onClick={() => setPreviewTemplate(null)} className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" />
+          <div className="relative w-full max-w-2xl max-h-[85vh] overflow-hidden bg-white rounded-2xl shadow-xl flex flex-col">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+              <div>
+                <h2 className="text-base font-semibold text-slate-900">{previewTemplate.title}</h2>
+                <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
+                  <User className="h-3.5 w-3.5" /> {previewTemplate.author}
+                  <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600 ml-1">{previewTemplate.category}</span>
+                </p>
+              </div>
+              <button onClick={() => setPreviewTemplate(null)} className="p-2 rounded-full hover:bg-slate-100 text-slate-500" aria-label="Close">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="overflow-y-auto p-5 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                {previewTemplate.thumbnails.map((src, i) => (
+                  <div key={i} className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
+                    <img src={src} alt={`Thumbnail ${i + 1} for ${previewTemplate.title}`} className="w-full h-40 object-cover" loading="lazy" />
+                    <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-1 text-[10px] font-medium text-slate-700 shadow">
+                      <Eye className="h-3 w-3" /> {i + 1} / {previewTemplate.thumbnails.length}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 max-h-56 overflow-auto">
+                <pre className="text-xs text-slate-700 whitespace-pre-wrap font-mono leading-relaxed">{previewTemplate.content}</pre>
+              </div>
+            </div>
+
+            <div className="p-5 border-t border-slate-100 flex gap-3">
+              <button onClick={() => setPreviewTemplate(null)} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                Close
+              </button>
+              <button
+                onClick={() => useTemplate(previewTemplate)}
+                className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-white hover:opacity-90"
+                style={{ backgroundColor: Brand.navy }}
+              >
+                Use this template
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </ToolPageLayout>
   );
 }

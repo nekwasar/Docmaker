@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/layout/header";
+import { BottomNav } from "@/components/layout/bottom-nav";
 import { Footer } from "@/components/layout/footer";
 import { SessionProvider } from "@/components/providers/session-provider";
 
@@ -90,8 +90,8 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} ${playfair.variable}`}>
         <SessionProvider>
-          <Header />
-          <main className="min-h-screen">{children}</main>
+          <main className="min-h-screen pb-24">{children}</main>
+          <BottomNav />
           <Footer />
         </SessionProvider>
       </body>

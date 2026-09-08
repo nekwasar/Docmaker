@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Sparkles, Paperclip, Mic, Loader2, Copy, Check, Download } from "lucide-react";
-import Link from "next/link";
+import { Sparkles, Paperclip, Mic, Loader2, Copy, Download } from "lucide-react";
+import { ToolPageLayout } from "@/components/layout/tool-page-layout";
 import { Brand } from "@/config/site";
 import { DOCUMENT_TEMPLATES, TEMPLATE_PREVIEWS } from "@/lib/ai/prompts";
 
@@ -13,7 +13,6 @@ export default function GeneratePage() {
   const [type, setType] = useState("Auto");
   const [generating, setGenerating] = useState(false);
   const [output, setOutput] = useState("");
-  const [copied, setCopied] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const outputRef = useRef<HTMLDivElement>(null);
 
@@ -68,7 +67,7 @@ export default function GeneratePage() {
     }
   };
 
-  const copy = () => { navigator.clipboard.writeText(output); setCopied(true); setTimeout(() => setCopied(false), 2000); };
+  const copy = () => { navigator.clipboard.writeText(output); };
   const download = () => {
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([output], { type: "text/markdown" }));
@@ -77,18 +76,9 @@ export default function GeneratePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F6FB]">
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
-          <Link href="/" className="p-2 rounded-xl hover:bg-slate-100 transition-colors">
-            <ArrowLeft className="h-5 w-5 text-slate-600" />
-          </Link>
-          <h1 className="text-lg font-semibold text-slate-900">AI Generate</h1>
-        </div>
-      </div>
-
-      <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-        {/* Type selector — simple text row */}
+    <ToolPageLayout title="AI Generate" color="yellow">
+      <div className="space-y-6">
+        {/* Type selector */}
         <div>
           <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">Document type</p>
           <div className="flex flex-wrap gap-2">
@@ -173,6 +163,6 @@ export default function GeneratePage() {
           </div>
         </div>
       </div>
-    </div>
+    </ToolPageLayout>
   );
 }

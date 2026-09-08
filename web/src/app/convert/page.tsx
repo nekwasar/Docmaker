@@ -64,7 +64,7 @@ const CATEGORIES = [
 
 export default function ConvertPage() {
   return (
-    <ToolPageLayout title="Convert Files" color="blue">
+    <ToolPageLayout title="Convert Files" color="teal">
       <div className="space-y-6">
         <p className="text-lg text-slate-600">
           Convert between 38+ file formats. Select a category to get started.

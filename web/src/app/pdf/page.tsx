@@ -111,7 +111,7 @@ const PDF_TOOLS = [
 
 export default function PdfToolsPage() {
   return (
-    <ToolPageLayout title="PDF Tools" color="navy">
+    <ToolPageLayout title="PDF Tools" color="blue">
       <div className="space-y-6">
         <p className="text-lg text-slate-600">
           10 free PDF tools. No limits, no watermarks. All processing happens on our servers.

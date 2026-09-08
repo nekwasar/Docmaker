@@ -293,20 +293,23 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-16 sm:py-24">
+      {/* Features Section - minimal list, no cards/icons */}
+      <section className="py-16 sm:py-24 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 text-center mb-12">Why Docmaker?</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {FEATURES.map((feature) => (
-              <div key={feature.title} className="rounded-2xl bg-white p-6 border border-slate-200 text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl mb-4" style={{ backgroundColor: Brand.navy }}>
-                  <feature.icon className="h-6 w-6 text-white" />
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 mb-3" style={{ fontFamily: 'var(--font-playfair)' }}>Why Docmaker?</h2>
+            <p className="text-slate-500 mb-10">Four reasons teams switch — and stay.</p>
+            <div className="divide-y divide-slate-200 border-y border-slate-200">
+              {FEATURES.map((feature, i) => (
+                <div key={feature.title} className="flex gap-6 py-7">
+                  <span className="text-sm font-mono font-bold text-slate-300 mt-1">0{i + 1}</span>
+                  <div>
+                    <h3 className="text-base font-semibold text-slate-900">{feature.title}</h3>
+                    <p className="text-sm text-slate-500 mt-1 leading-relaxed">{feature.description}</p>
+                  </div>
                 </div>
-                <h3 className="text-base font-semibold text-slate-900 mb-2">{feature.title}</h3>
-                <p className="text-sm text-slate-500">{feature.description}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>

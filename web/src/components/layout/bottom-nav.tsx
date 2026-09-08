@@ -11,7 +11,7 @@ const PAGE_COLORS: Record<string, { bg: string; text: string }> = {
   "/generate": { bg: Brand.yellow, text: "#0F172A" },
   "/convert": { bg: Brand.teal, text: "#FFFFFF" },
   "/pdf": { bg: Brand.blue, text: "#FFFFFF" },
-  "/transfer": { bg: Brand.blue, text: "#FFFFFF" },
+  "/transfer": { bg: Brand.navy, text: "#FFFFFF" },
   "/pricing": { bg: Brand.navy, text: "#FFFFFF" },
   "/help": { bg: Brand.navy, text: "#FFFFFF" },
 };

@@ -32,9 +32,12 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
+      { url: "/favicon.ico", sizes: "any" },
       { url: "/favicon.svg", type: "image/svg+xml" },
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
     ],
     apple: "/apple-touch-icon.png",
   },
@@ -90,9 +93,34 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const orgLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Docmaker",
+    url: "https://docmaker.io",
+    logo: "https://docmaker.io/favicon.svg",
+    sameAs: ["https://twitter.com/docmaker", "https://github.com/nekwasar/Docmaker"],
+  };
+  const websiteLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Docmaker",
+    url: "https://docmaker.io",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: "https://docmaker.io/search?q={search_term_string}",
+      "query-input": "required name=search_term_string",
+    },
+  };
+
   return (
     <html lang="en">
+      <head>
+        <link rel="search" type="application/opensearchdescription+xml" title="Docmaker" href="/opensearch.xml" />
+      </head>
       <body className={`${inter.className} ${playfair.variable}`}>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteLd) }} />
         <SessionProvider>
           <div className="hidden lg:block">
             <Header />

@@ -195,8 +195,8 @@ export default function GeneratePage() {
                 className="group flex-shrink-0 w-[220px] text-left bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-slate-300 hover:shadow-sm transition-all"
               >
                 <div className="h-[124px] bg-slate-100 overflow-hidden flex">
-                  {tpl.thumbnails.slice(0, 2).map((src) => (
-                    <img key={src} src={src} alt="" className="w-1/2 h-full object-cover group-hover:scale-[1.02] transition-transform" loading="lazy" />
+                  {tpl.thumbnails.slice(0, 2).map((src, idx) => (
+                    <img key={src} src={src} alt={`${tpl.title} preview ${idx + 1}`} className="w-1/2 h-full object-cover group-hover:scale-[1.02] transition-transform" loading="lazy" />
                   ))}
                 </div>
                 <div className="p-3">

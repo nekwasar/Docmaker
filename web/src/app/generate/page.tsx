@@ -117,7 +117,7 @@ export default function GeneratePage() {
             ref={textareaRef}
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Describe what you want to create..."
+            placeholder="Describe or paste what you want to turn into a document — just paste any copied text and we'll format it beautifully..."
             rows={5}
             className="w-full px-4 py-3 bg-transparent text-sm text-slate-900 placeholder-slate-400 resize-none focus:outline-none min-h-[120px]"
           />

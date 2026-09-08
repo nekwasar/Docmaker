@@ -1,46 +1,33 @@
-import { NextRequest } from 'next/server';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
+import { ImageResponse } from "next/og";
 
-export const runtime = 'nodejs';
+export const runtime = "edge";
 
-export async function GET(request: NextRequest) {
-  try {
-    // Serve the static OG image
-    const imagePath = join(process.cwd(), 'public', 'og', 'default.png');
-    const imageBuffer = await readFile(imagePath);
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const title = (searchParams.get("title") || "Docmaker").slice(0, 60);
+  const subtitle = (searchParams.get("subtitle") || "Documents, done smoothly.").slice(0, 80);
 
-    return new Response(imageBuffer, {
-      headers: {
-        'Content-Type': 'image/png',
-        'Cache-Control': 'public, max-age=86400, immutable',
-      },
-    });
-  } catch (error) {
-    // Fallback: generate SVG if PNG not found
-    const { searchParams } = new URL(request.url);
-    const title = searchParams.get('title') || 'Docmaker';
-    const subtitle = searchParams.get('subtitle') || 'Documents, done smoothly.';
-
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-      <defs>
-        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:#121660;stop-opacity:1" />
-          <stop offset="100%" style="stop-color:#1a1f6e;stop-opacity:1" />
-        </linearGradient>
-      </defs>
-      <rect width="1200" height="630" fill="url(#grad)"/>
-      <text x="80" y="120" fill="#FFD140" font-size="20" font-weight="bold" font-family="Arial, sans-serif" letter-spacing="2">DOCMAKER</text>
-      <text x="80" y="280" fill="white" font-size="64" font-weight="bold" font-family="Arial, sans-serif">${title.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</text>
-      <text x="80" y="360" fill="white" font-size="64" font-weight="bold" font-family="Arial, sans-serif">smoothly.</text>
-      <text x="80" y="420" fill="rgba(255,255,255,0.7)" font-size="24" font-family="Arial, sans-serif">${subtitle.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</text>
-    </svg>`;
-
-    return new Response(svg, {
-      headers: {
-        'Content-Type': 'image/svg+xml',
-        'Cache-Control': 'public, max-age=86400, immutable',
-      },
-    });
-  }
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: 1200,
+          height: 630,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          padding: "80px",
+          background: "linear-gradient(135deg, #121660 0%, #1a1f6e 100%)",
+        }}
+      >
+        <div style={{ color: "#FFD140", fontSize: 20, fontWeight: 700, letterSpacing: 2, marginBottom: 40 }}>
+          DOCMAKER
+        </div>
+        <div style={{ color: "white", fontSize: 64, fontWeight: 800, lineHeight: 1.1 }}>{title}</div>
+        <div style={{ color: "#FFD140", fontSize: 64, fontWeight: 800, lineHeight: 1.1, marginBottom: 30 }}>smoothly.</div>
+        <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 24 }}>{subtitle}</div>
+      </div>
+    ),
+    { width: 1200, height: 630 }
+  );
 }

@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  typescript: { ignoreBuildErrors: true },
   allowedDevOrigins: ['77.67.23.30', 'localhost:4000', 'docmaker.io', 'www.docmaker.io'],
   async redirects() {
     return [

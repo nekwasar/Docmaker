@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
 
-export default function SignupPage() {
+export const dynamic = "force-dynamic";
+
+function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
@@ -85,11 +87,11 @@ export default function SignupPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
             <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#121660" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M8 5h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/>
-              <path d="M12 5V3.5A1.5 1.5 0 0 1 13.5 2h3A1.5 1.5 0 0 1 18 3.5v3a1.5 1.5 0 0 1-1.5 1.5H15"/>
-              <line x1="10" y1="10" x2="14" y2="10"/>
-              <line x1="10" y1="13" x2="13" y2="13"/>
-              <line x1="10" y1="16" x2="14" y2="16"/>
+              <path d="M8 5h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />
+              <path d="M12 5V3.5A1.5 1.5 0 0 1 13.5 2h3A1.5 1.5 0 0 1 18 3.5v3a1.5 1.5 0 0 1-1.5 1.5H15" />
+              <line x1="10" y1="10" x2="14" y2="10" />
+              <line x1="10" y1="13" x2="13" y2="13" />
+              <line x1="10" y1="16" x2="14" y2="16" />
             </svg>
             <span className="text-2xl font-bold text-slate-900">Docmaker</span>
           </Link>
@@ -198,5 +200,13 @@ export default function SignupPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#F4F6FB] flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-slate-400" /></div>}>
+      <SignupForm />
+    </Suspense>
   );
 }

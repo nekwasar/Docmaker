@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { SessionProvider } from "@/components/providers/session-provider";
 
@@ -9,6 +10,7 @@ const inter = Inter({ subsets: ["latin"] });
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://docmaker.io"),
   title: {
     default: "Docmaker — AI Document Generator & Free PDF Tools",
     template: "%s | Docmaker",
@@ -51,7 +53,6 @@ export const metadata: Metadata = {
         alt: "Docmaker - AI document generator and free PDF tools",
       },
     ],
-    logo: "https://docmaker.io/favicon.svg",
     locale: "en_US",
   },
   twitter: {
@@ -78,7 +79,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
   themeColor: "#121660",
+  colorScheme: "light",
 };
 
 export default function RootLayout({
@@ -90,6 +94,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} ${playfair.variable}`}>
         <SessionProvider>
+          <div className="hidden lg:block">
+            <Header />
+          </div>
           <main className="min-h-screen pb-24">{children}</main>
           <BottomNav />
           <Footer />

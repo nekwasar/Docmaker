@@ -94,7 +94,6 @@ export function Header() {
                 className="w-full flex items-center justify-between py-3 px-4 rounded-xl hover:bg-slate-50"
               >
                 <span className="text-base font-semibold text-slate-900">Tools</span>
-                <ChevronDown className={`h-5 w-5 text-slate-400 transition-transform ${mobileSubmenu === "tools" ? "rotate-180" : ""}`} />
               </button>
               {mobileSubmenu === "tools" && (
                 <div className="mt-2 ml-4 space-y-1">
@@ -112,7 +111,6 @@ export function Header() {
                 className="w-full flex items-center justify-between py-3 px-4 rounded-xl hover:bg-slate-50"
               >
                 <span className="text-base font-semibold text-slate-900">Resources</span>
-                <ChevronDown className={`h-5 w-5 text-slate-400 transition-transform ${mobileSubmenu === "resources" ? "rotate-180" : ""}`} />
               </button>
               {mobileSubmenu === "resources" && (
                 <div className="mt-2 ml-4 space-y-1">

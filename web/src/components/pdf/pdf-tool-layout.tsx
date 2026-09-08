@@ -6,6 +6,7 @@ import {
   GripVertical, ChevronUp, ChevronDown,
 } from "lucide-react";
 import { Brand } from "@/config/site";
+import { Breadcrumbs } from "@/components/seo/breadcrumbs";
 
 interface PdfToolLayoutProps {
   title: string;
@@ -115,6 +116,7 @@ export function PdfToolLayout({
 
   return (
     <div className="min-h-screen bg-[#F4F6FB]">
+      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "PDF Tools", href: "/pdf" }, { label: title }]} />
       {/* Header */}
       <div className="relative" style={{ backgroundColor: color }}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">

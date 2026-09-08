@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 export const metadata: Metadata = {
-  title: "Free Document Converter — Convert DOCX, CSV, TXT Online | Docmaker",
+  title: "Free Document Converter — DOCX, CSV, TXT | Docmaker",
   description: "Convert documents between DOCX, XLSX, CSV, TXT, HTML, Markdown, EPUB for free.",
   keywords: ["document converter", "docx converter", "csv to xlsx", "text converter"],
   openGraph: { title: "Free Document Converter — Docmaker", description: "Convert documents between formats for free." },

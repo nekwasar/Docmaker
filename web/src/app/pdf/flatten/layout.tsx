@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Free PDF Flattener — Flatten PDF Forms | Docmaker",
-  description: "Flatten PDF files to make form fields non-editable. Merge interactive elements into page content. Free, no limits.",
+  description: "Flatten PDF files to make form fields non-editable. Merge interactive elements into page content so forms can't be changed. Free and secure.",
   keywords: ["flatten pdf", "pdf flattener", "make pdf non-editable", "freeze pdf"],
   openGraph: { title: "Free PDF Flattener — Docmaker", description: "Flatten PDF form fields for free." },
   alternates: { canonical: "https://docmaker.io/pdf/flatten" },

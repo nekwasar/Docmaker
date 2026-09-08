@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 export const metadata: Metadata = {
-  title: "Free Cross-Format Converter — PDF, Images, Video, Audio | Docmaker",
+  title: "Free File Converter — PDF, Images, Video | Docmaker",
   description: "Convert between any format: PDF ↔ Images, Video → Audio, Image → PDF, and more. 38+ format pairs.",
   keywords: ["file converter", "pdf converter", "convert files online", "free converter"],
   openGraph: { title: "Free Cross-Format Converter — Docmaker", description: "Convert between any file format for free." },

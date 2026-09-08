@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 export const metadata: Metadata = {
-  title: "Free Document Summarizer — AI Summarize Any Document | Docmaker",
+  title: "Free AI Summarizer — Summarize Documents | Docmaker",
   description: "Summarize long documents instantly with AI. Free, no limits, no account required.",
   keywords: ["summarize document free", "ai summarizer", "document summary tool"],
   openGraph: { title: "Free Document Summarizer — Docmaker", description: "Summarize documents with AI for free.", images: [{ url: "https://docmaker.io/api/og?title=Summarize&subtitle=AI+summarize+documents+free&icon=docmaker", width: 1200, height: 630 }] },

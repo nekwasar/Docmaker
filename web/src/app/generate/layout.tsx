@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Free AI Document Generator — Create Professional Documents | Docmaker",
+  title: "Free AI Document Generator | Docmaker",
   description: "Generate professional documents from text prompts using AI. Create invoices, reports, contracts, resumes, and more in seconds. Free, no account required.",
   keywords: ["ai document generator free", "create document from text", "ai writing tool", "free document creator", "professional documents ai"],
   openGraph: {

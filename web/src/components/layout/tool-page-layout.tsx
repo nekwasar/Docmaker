@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Brand } from "@/config/site";
+import { Breadcrumbs } from "@/components/seo/breadcrumbs";
 
 type ToolColor = 'navy' | 'teal' | 'blue' | 'yellow';
 
@@ -23,6 +24,7 @@ export function ToolPageLayout({ title, color, children }: ToolPageLayoutProps) 
 
   return (
     <div className="min-h-screen bg-[#F4F6FB]">
+      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: title }]} />
       {/* Colored Header */}
       <div className="relative" style={{ backgroundColor: bgColor }}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">

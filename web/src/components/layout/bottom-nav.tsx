@@ -6,41 +6,67 @@ import { Home, Menu, X, Sparkles, FileText, Globe, ArrowUpDown, ChevronRight } f
 import { useState } from "react";
 import { Brand } from "@/config/site";
 
+const PAGE_COLORS: Record<string, { bg: string; text: string }> = {
+  "/": { bg: Brand.navy, text: "#FFFFFF" },
+  "/generate": { bg: Brand.yellow, text: "#0F172A" },
+  "/convert": { bg: Brand.teal, text: "#FFFFFF" },
+  "/pdf": { bg: Brand.blue, text: "#FFFFFF" },
+  "/transfer": { bg: Brand.blue, text: "#FFFFFF" },
+  "/pricing": { bg: Brand.navy, text: "#FFFFFF" },
+  "/help": { bg: Brand.navy, text: "#FFFFFF" },
+};
+
+function getPageColor(pathname: string) {
+  if (pathname === "/") return PAGE_COLORS["/"];
+  if (pathname.startsWith("/generate")) return PAGE_COLORS["/generate"];
+  if (pathname.startsWith("/convert")) return PAGE_COLORS["/convert"];
+  if (pathname.startsWith("/pdf")) return PAGE_COLORS["/pdf"];
+  if (pathname.startsWith("/transfer")) return PAGE_COLORS["/transfer"];
+  if (pathname.startsWith("/pricing")) return PAGE_COLORS["/pricing"];
+  if (pathname.startsWith("/help")) return PAGE_COLORS["/help"];
+  return PAGE_COLORS["/"];
+}
+
 export function BottomNav() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const colors = getPageColor(pathname);
   const isHome = pathname === "/";
 
   return (
     <>
-      {/* Bottom Nav Bar */}
+      {/* Bottom Nav Bar — Fixed */}
       <div
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-2 px-2 py-2 rounded-full border border-[#e5e5e5] shadow-[0_10px_25px_-5px_rgba(0,0,0,0.08)]"
-        style={{ backgroundColor: "rgba(255,255,255,0.85)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-2 px-2 py-2 rounded-full"
+        style={{
+          backgroundColor: colors.bg,
+          boxShadow: "0 10px 25px -5px rgba(0,0,0,0.15)",
+          border: `1px solid ${colors.bg}`,
+        }}
       >
         {/* Home */}
         <Link
           href="/"
           className={`flex items-center gap-2 px-4 py-2.5 rounded-full transition-all ${
-            isHome ? "bg-[#f4f4f5]" : "hover:bg-[#f4f4f5]"
+            isHome ? "bg-white/20" : "hover:bg-white/10"
           }`}
         >
-          <Home className="h-5 w-5" style={{ color: "#18181b" }} />
-          {isHome && <span className="text-sm font-medium text-[#18181b]">Home</span>}
+          <Home className="h-5 w-5" style={{ color: colors.text }} />
+          {isHome && <span className="text-sm font-medium" style={{ color: colors.text }}>Home</span>}
         </Link>
 
         {/* Menu */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-full transition-all ${
-            menuOpen ? "bg-[#f4f4f5]" : "hover:bg-[#f4f4f5]"
+            menuOpen ? "bg-white/20" : "hover:bg-white/10"
           }`}
         >
           {menuOpen ? (
-            <X className="h-5 w-5" style={{ color: "#18181b" }} />
+            <X className="h-5 w-5" style={{ color: colors.text }} />
           ) : (
-            <Menu className="h-5 w-5" style={{ color: "#18181b" }} />
+            <Menu className="h-5 w-5" style={{ color: colors.text }} />
           )}
         </button>
       </div>

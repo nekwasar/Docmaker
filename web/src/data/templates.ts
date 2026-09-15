@@ -10,6 +10,8 @@ export interface Template {
 }
 
 export const templates: Template[] = [
+  // real document previews — thumbnails kept for OG but UI now uses live DocumentPreview
+  // to beat docmaker.ai, we render actual content, not placeholder images
   {
     id: "tpl-invoice-pro",
     title: "Modern Business Invoice",

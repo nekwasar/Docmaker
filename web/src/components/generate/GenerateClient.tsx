@@ -5,6 +5,7 @@ import { Sparkles, Paperclip, Mic, Loader2, Copy, Download, X, User, Eye, Square
 import { Brand } from "@/config/site";
 import { DOCUMENT_TEMPLATES } from "@/lib/ai/prompts";
 import { templates, type Template } from "@/data/templates";
+import { DocumentPreview } from "./DocumentPreview";
 
 const TYPES = ["Auto", "Business", "Personal", "Academic", "Meeting"];
 const STARTER_TEMPLATES = templates.slice(0, 3);
@@ -16,6 +17,7 @@ export default function GeneratePage() {
   const [output, setOutput] = useState("");
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const [filePreview, setFilePreview] = useState<string>("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -43,6 +45,18 @@ export default function GeneratePage() {
     const tpl = DOCUMENT_TEMPLATES[t.toLowerCase().replace(" ", "_")];
     if (tpl?.prompt) setText(tpl.prompt);
   };
+
+  useEffect(() => {
+    if (attachedFiles.length === 0) { setFilePreview(""); return; }
+    const f = attachedFiles[0];
+    if (f.name.endsWith(".txt") || f.name.endsWith(".csv") || f.type.startsWith("text/")) {
+      const reader = new FileReader();
+      reader.onload = (e) => setFilePreview((e.target?.result as string)?.slice(0, 2000) || "");
+      reader.readAsText(f);
+    } else {
+      setFilePreview(`\u2022 ${f.name} (${(f.size/1024).toFixed(1)} KB) — will be used as generation context`);
+    }
+  }, [attachedFiles]);
 
   const handleFiles = (files: FileList | null) => {
     if (!files) return;
@@ -170,11 +184,24 @@ export default function GeneratePage() {
                     )}
                   </div>
                 </div>
-                <div className="p-5 max-h-[60vh] overflow-y-auto">
-                  <div className="prose prose-sm max-w-none">
-                    <pre className="text-sm text-slate-800 whitespace-pre-wrap font-sans leading-relaxed">{output}<span className="inline-block w-2 h-4 bg-slate-900 ml-0.5 animate-pulse align-middle" /></pre>
+                <div className="p-0 max-h-[60vh] overflow-y-auto bg-[#EEF1F5]">
+                  <div className="p-4">
+                    <DocumentPreview content={output} category={type} paginated />
+                    {generating && <span className="inline-block w-2 h-4 bg-slate-900 ml-0.5 animate-pulse align-middle" />}
                   </div>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {filePreview && !output && (
+            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+              <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
+                <span className="text-xs font-medium text-slate-500">Attached document preview</span>
+                <span className="text-[10px] text-slate-400 truncate max-w-[150px]">{attachedFiles[0]?.name}</span>
+              </div>
+              <div className="p-3 bg-[#EEF1F5]">
+                <DocumentPreview content={filePreview} category={type} scale={0.42} />
               </div>
             </div>
           )}
@@ -191,10 +218,10 @@ export default function GeneratePage() {
                   onClick={() => setPreviewTemplate(tpl)}
                   className="group flex-shrink-0 w-[220px] text-left bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-slate-300 hover:shadow-sm transition-all"
                 >
-                  <div className="h-[96px] bg-slate-100 overflow-hidden flex">
-                    {tpl.thumbnails.slice(0, 2).map((src, idx) => (
-                      <img key={src} src={src} alt={`${tpl.title} preview ${idx + 1}`} className="w-1/2 h-full object-cover" loading="lazy" />
-                    ))}
+                  <div className="h-[140px] bg-[#EEF1F5] overflow-hidden p-2">
+                    <div className="bg-white shadow-sm rounded-sm overflow-hidden h-full">
+                      <DocumentPreview content={tpl.content} category={tpl.category} scale={0.32} />
+                    </div>
                   </div>
                   <div className="p-3">
                     <p className="text-sm font-semibold text-slate-900 line-clamp-1">{tpl.title}</p>
@@ -304,15 +331,8 @@ export default function GeneratePage() {
               </button>
             </div>
             <div className="overflow-y-auto p-5 space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                {previewTemplate.thumbnails.map((src, i) => (
-                  <div key={i} className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
-                    <img src={src} alt={`Thumbnail ${i + 1} for ${previewTemplate.title}`} className="w-full h-40 object-cover" loading="lazy" />
-                    <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-1 text-[10px] font-medium text-slate-700 shadow">
-                      <Eye className="h-3 w-3" /> {i + 1} / {previewTemplate.thumbnails.length}
-                    </span>
-                  </div>
-                ))}
+              <div className="bg-[#EEF1F5] p-4 rounded-xl">
+                <DocumentPreview content={previewTemplate.content} category={previewTemplate.category} paginated />
               </div>
               <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 max-h-56 overflow-auto">
                 <pre className="text-xs text-slate-700 whitespace-pre-wrap font-mono leading-relaxed">{previewTemplate.content}</pre>

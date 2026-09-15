@@ -38,9 +38,9 @@ export function BottomNav() {
 
   return (
     <>
-      {/* Bottom Nav Bar — Fixed */}
+      {/* Bottom Nav Bar — Sticky */}
       <div
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-2 px-2 py-2 rounded-full"
+        className="sticky bottom-6 z-[9999] flex items-center gap-2 px-2 py-2 rounded-full w-fit mx-auto"
         style={{
           backgroundColor: colors.bg,
           boxShadow: "0 10px 25px -5px rgba(0,0,0,0.15)",

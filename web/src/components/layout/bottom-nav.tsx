@@ -32,39 +32,42 @@ function getPageColor(pathname: string) {
 export function BottomNav() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
   const hideTimeout = useRef<NodeJS.Timeout | null>(null);
+  const showTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const colors = getPageColor(pathname);
   const isHome = pathname === "/";
 
   useEffect(() => {
-    const showAndScheduleHide = () => {
-      setIsVisible(true);
+    const scheduleHide = () => {
       if (hideTimeout.current) clearTimeout(hideTimeout.current);
       if (!menuOpen) {
         hideTimeout.current = setTimeout(() => setIsVisible(false), 1400);
       }
     };
 
-    // hide shortly after mount if idle
-    hideTimeout.current = setTimeout(() => setIsVisible(false), 2500);
-
-    const onScroll = () => showAndScheduleHide();
-    const onMouseMove = () => showAndScheduleHide();
-    const onTouchStart = () => showAndScheduleHide();
+    const onScroll = () => {
+      if (hideTimeout.current) clearTimeout(hideTimeout.current);
+      if (!isVisible && !showTimeout.current && !menuOpen) {
+        showTimeout.current = setTimeout(() => {
+          setIsVisible(true);
+          scheduleHide();
+          showTimeout.current = null;
+        }, 1000);
+      } else if (isVisible) {
+        scheduleHide();
+      }
+    };
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("touchstart", onTouchStart, { passive: true });
 
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("touchstart", onTouchStart);
       if (hideTimeout.current) clearTimeout(hideTimeout.current);
+      if (showTimeout.current) clearTimeout(showTimeout.current);
     };
-  }, [menuOpen]);
+  }, [menuOpen, isVisible]);
 
   useEffect(() => {
     if (menuOpen) setIsVisible(true);

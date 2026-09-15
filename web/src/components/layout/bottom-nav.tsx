@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Menu, X, Sparkles, FileText, Globe, ArrowUpDown } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Brand } from "@/config/site";
 
 const PAGE_COLORS: Record<string, { bg: string; text: string }> = {
@@ -32,15 +32,51 @@ function getPageColor(pathname: string) {
 export function BottomNav() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const hideTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const colors = getPageColor(pathname);
   const isHome = pathname === "/";
 
+  useEffect(() => {
+    const showAndScheduleHide = () => {
+      setIsVisible(true);
+      if (hideTimeout.current) clearTimeout(hideTimeout.current);
+      if (!menuOpen) {
+        hideTimeout.current = setTimeout(() => setIsVisible(false), 1400);
+      }
+    };
+
+    // hide shortly after mount if idle
+    hideTimeout.current = setTimeout(() => setIsVisible(false), 2500);
+
+    const onScroll = () => showAndScheduleHide();
+    const onMouseMove = () => showAndScheduleHide();
+    const onTouchStart = () => showAndScheduleHide();
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("touchstart", onTouchStart);
+      if (hideTimeout.current) clearTimeout(hideTimeout.current);
+    };
+  }, [menuOpen]);
+
+  useEffect(() => {
+    if (menuOpen) setIsVisible(true);
+  }, [menuOpen]);
+
   return (
     <>
-      {/* Bottom Nav Bar — Sticky */}
+      {/* Bottom Nav Bar — Fixed, auto-hide when idle */}
       <div
-        className="sticky bottom-6 z-[9999] flex items-center gap-2 px-2 py-2 rounded-full w-fit mx-auto"
+        className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-2 px-2 py-2 rounded-full transition-all duration-300 ${
+          isVisible ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0 pointer-events-none"
+        }`}
         style={{
           backgroundColor: colors.bg,
           boxShadow: "0 10px 25px -5px rgba(0,0,0,0.15)",

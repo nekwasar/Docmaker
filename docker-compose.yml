@@ -1,0 +1,63 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: docmaker-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: namesranker
+      POSTGRES_PASSWORD: namesranker
+      POSTGRES_DB: docmaker
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U namesranker -d docmaker"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+
+  web:
+    build: ./web
+    container_name: docmaker-web
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+      - /app/.next
+    env_file: ./web/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    command: npm run dev -- -p 4000 -H 0.0.0.0
+
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    container_name: docmaker-gotenberg
+    restart: unless-stopped
+    ports:
+      - "3101:3000"
+    command: ["gotenberg", "--api-port=3000"]
+
+  ghostscript:
+    image: alpine:latest
+    container_name: docmaker-ghostscript
+    restart: unless-stopped
+    command: sh -c "apk add --no-cache ghostscript && while true; do sleep 3600; done"
+
+  pandoc:
+    image: pandoc/core:latest
+    container_name: docmaker-pandoc
+    restart: unless-stopped
+    entrypoint: ["tail", "-f", "/dev/null"]
+
+  ffmpeg:
+    image: jrottenberg/ffmpeg:alpine
+    container_name: docmaker-ffmpeg
+    restart: unless-stopped
+    entrypoint: ["sh", "-c", "while true; do sleep 3600; done"]
+
+volumes:
+  pgdata:

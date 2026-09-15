@@ -7,17 +7,19 @@ import { useState } from "react";
 import { Brand } from "@/config/site";
 
 const PAGE_COLORS: Record<string, { bg: string; text: string }> = {
-  "/": { bg: Brand.navy, text: "#FFFFFF" },
-  "/generate": { bg: Brand.yellow, text: "#0F172A" },
+  "/": { bg: Brand.blue, text: "#FFFFFF" },
+  "/generate": { bg: Brand.blue, text: "#FFFFFF" },
   "/convert": { bg: Brand.teal, text: "#FFFFFF" },
-  "/pdf": { bg: Brand.blue, text: "#FFFFFF" },
+  "/pdf": { bg: Brand.yellow, text: "#0F172A" },
   "/transfer": { bg: Brand.navy, text: "#FFFFFF" },
   "/pricing": { bg: Brand.navy, text: "#FFFFFF" },
   "/help": { bg: Brand.navy, text: "#FFFFFF" },
+  "/welcome": { bg: Brand.navy, text: "#FFFFFF" },
 };
 
 function getPageColor(pathname: string) {
   if (pathname === "/") return PAGE_COLORS["/"];
+  if (pathname.startsWith("/welcome")) return PAGE_COLORS["/welcome"];
   if (pathname.startsWith("/generate")) return PAGE_COLORS["/generate"];
   if (pathname.startsWith("/convert")) return PAGE_COLORS["/convert"];
   if (pathname.startsWith("/pdf")) return PAGE_COLORS["/pdf"];

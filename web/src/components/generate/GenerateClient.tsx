@@ -261,7 +261,6 @@ export default function GeneratePage() {
           </div>
         </div>
       )}
-      </div>
     </div>
   );
 }

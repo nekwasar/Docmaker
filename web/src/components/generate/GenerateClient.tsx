@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Sparkles, Paperclip, Mic, Loader2, Copy, Download, X, User, Eye } from "lucide-react";
-import { ToolPageLayout } from "@/components/layout/tool-page-layout";
 import { Brand } from "@/config/site";
 import { DOCUMENT_TEMPLATES } from "@/lib/ai/prompts";
 import { templates, type Template } from "@/data/templates";
@@ -91,8 +90,8 @@ export default function GeneratePage() {
   };
 
   return (
-    <ToolPageLayout title="AI Generate" color="blue">
-      <div className="space-y-6">
+    <div className="min-h-screen bg-[#F4F6FB]">
+      <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
         <div>
           <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">Document type</p>
           <div className="flex flex-wrap gap-2">
@@ -262,6 +261,7 @@ export default function GeneratePage() {
           </div>
         </div>
       )}
-    </ToolPageLayout>
+      </div>
+    </div>
   );
 }

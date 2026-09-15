@@ -7,8 +7,8 @@ import { useState } from "react";
 import { Brand } from "@/config/site";
 
 const PAGE_COLORS: Record<string, { bg: string; text: string }> = {
-  "/": { bg: Brand.blue, text: "#FFFFFF" },
-  "/generate": { bg: Brand.blue, text: "#FFFFFF" },
+  "/": { bg: Brand.navy, text: "#FFFFFF" },
+  "/generate": { bg: Brand.navy, text: "#FFFFFF" },
   "/convert": { bg: Brand.teal, text: "#FFFFFF" },
   "/pdf": { bg: Brand.yellow, text: "#0F172A" },
   "/transfer": { bg: Brand.navy, text: "#FFFFFF" },

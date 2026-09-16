@@ -166,14 +166,11 @@ export default function GeneratePage() {
           {isEmpty ? (
             /* ChatGPT-style centered empty state */
             <div className="flex flex-1 flex-col justify-center gap-6 py-6">
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <DocmakerMark />
-                <h1 className="text-[24px] font-semibold leading-tight tracking-[-0.02em] text-[#0F172A]">
-                  Start a document from anything
+                <h1 className="text-[40px] sm:text-[48px] font-semibold leading-[0.95] tracking-[-0.04em] text-[#0F172A]">
+                  Start a<br />document
                 </h1>
-                <p className="max-w-[560px] text-[13px] leading-5 text-[#475569]">
-                  Paste raw text, drop a file, or describe what you need. We turn it into a paginated, print-ready doc — no templates to hunt through.
-                </p>
               </div>
 
               {/* Quick starts — 2x2 crisp cards */}

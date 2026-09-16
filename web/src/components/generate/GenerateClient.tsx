@@ -219,9 +219,18 @@ export default function GeneratePage() {
                   className="group flex-shrink-0 w-[220px] text-left bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-slate-300 hover:shadow-sm transition-all"
                 >
                   <div className="h-[140px] bg-[#EEF1F5] overflow-hidden p-2">
-                    <div className="bg-white shadow-sm rounded-sm overflow-hidden h-full">
-                      <DocumentPreview content={tpl.content} category={tpl.category} scale={0.32} />
-                    </div>
+                    {tpl.id === "tpl-uploaded-business-plan" ? (
+                      <div className="flex gap-1 h-full">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={tpl.thumbnails[0]} alt="Page 1" className="h-full w-1/2 object-cover rounded-sm bg-white shadow-sm" />
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={tpl.thumbnails[1]} alt="Page 2" className="h-full w-1/2 object-cover rounded-sm bg-white shadow-sm" />
+                      </div>
+                    ) : (
+                      <div className="bg-white shadow-sm rounded-sm overflow-hidden h-full">
+                        <DocumentPreview content={tpl.content} category={tpl.category} scale={0.32} />
+                      </div>
+                    )}
                   </div>
                   <div className="p-3">
                     <p className="text-sm font-semibold text-slate-900 line-clamp-1">{tpl.title}</p>
@@ -331,12 +340,44 @@ export default function GeneratePage() {
               </button>
             </div>
             <div className="overflow-y-auto p-5 space-y-4">
-              <div className="bg-[#EEF1F5] p-4 rounded-xl">
-                <DocumentPreview content={previewTemplate.content} category={previewTemplate.category} paginated />
-              </div>
-              <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 max-h-56 overflow-auto">
-                <pre className="text-xs text-slate-700 whitespace-pre-wrap font-mono leading-relaxed">{previewTemplate.content}</pre>
-              </div>
+              {previewTemplate.id === "tpl-uploaded-business-plan" ? (
+                <>
+                  <div className="bg-[#EEF1F5] p-4 rounded-xl space-y-3">
+                    <p className="text-xs font-medium text-slate-500">
+                      Original PDF — 15 pages • rendered untempered from your upload
+                    </p>
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={previewTemplate.thumbnails[0]} alt="Page 1" className="w-full rounded-lg bg-white shadow" />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={previewTemplate.thumbnails[1]} alt="Page 2" className="w-full rounded-lg bg-white shadow" />
+                    </div>
+                    <a
+                      href="/templates/uploaded-business-plan.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#121660] hover:underline"
+                    >
+                      <Eye className="h-3.5 w-3.5" /> Open full 15-page PDF (2.6 MB) →
+                    </a>
+                  </div>
+                  <div className="rounded-xl overflow-hidden border border-slate-200 bg-white" style={{ height: 520 }}>
+                    <iframe src="/templates/uploaded-business-plan.pdf" title="Uploaded PDF" className="w-full h-full border-0" />
+                  </div>
+                  <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 max-h-56 overflow-auto">
+                    <pre className="text-xs text-slate-700 whitespace-pre-wrap font-mono leading-relaxed">{previewTemplate.content}</pre>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="bg-[#EEF1F5] p-4 rounded-xl">
+                    <DocumentPreview content={previewTemplate.content} category={previewTemplate.category} paginated />
+                  </div>
+                  <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 max-h-56 overflow-auto">
+                    <pre className="text-xs text-slate-700 whitespace-pre-wrap font-mono leading-relaxed">{previewTemplate.content}</pre>
+                  </div>
+                </>
+              )}
             </div>
             <div className="p-5 border-t border-slate-100 flex gap-3">
               <button onClick={() => setPreviewTemplate(null)} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">

@@ -10,36 +10,27 @@ export interface Template {
 }
 
 export const templates: Template[] = [
-  // Uploaded document — shown first on homepage Generate so you can see live preview
+  // Your uploaded document — rendered untempered as uploaded (real PDF pages)
   {
-    id: "tpl-uploaded-q3-report",
-    title: "Uploaded — Q3 Financial Report.pdf",
-    author: "You • just now",
+    id: "tpl-uploaded-business-plan",
+    title: "Blue Beige Minimal Professional Small Business Plan",
+    author: "Olivia Wilson • BORCELLE",
     category: "Business",
     thumbnails: [
-      "https://picsum.photos/seed/uploaded1/640/400",
-      "https://picsum.photos/seed/uploaded2/640/400",
+      "https://docmaker.io/templates/uploaded-1.png",
+      "https://docmaker.io/templates/uploaded-2.png",
     ],
-    content: `# Q3 2025 Financial Report — Extracted from your upload
+    content: `# Business Plan — BORCELLE
+**Prepared by:** Olivia Wilson • **Date:** May 2030
 
-**Source:** Q3_Financials_2025.pdf — 3 pages • Extracted Aug 15, 2025
+> Your uploaded document rendered **untempered** — exactly as uploaded. No AI rewrite.
 
-## Executive Summary
-Revenue grew 18% QoQ to $4.2M. Gross margin held at 64%. Operating expenses increased 9% due to headcount.
+**Original file:** Blue Beige Minimal Professional Small Business Plan.pdf — 15 pages • 2.6 MB
 
-| Metric | Q2 2025 | Q3 2025 | Change |
-|--------|---------|---------|--------|
-| Revenue | $3.56M | $4.20M | +18% |
-| Gross Profit | $2.28M | $2.69M | +18% |
-| OPEX | $1.41M | $1.54M | +9% |
-| Net Income | $0.87M | $1.15M | +32% |
+[Open original PDF](https://docmaker.io/templates/uploaded-business-plan.pdf)
 
-## Key Highlights
-- **Enterprise** now 42% of revenue (vs 31% in Q2)
-- Churn improved to 2.1% (from 2.8%)
-- Cash balance $8.4M
-
-> This is how your uploaded document renders — as a live paginated preview. Attach any PDF/DOCX/TXT/CSV/XLSX in the generator and you'll see it here before you generate.`,
+*Table of Contents: Executive Summary • Company Overview • Market Analysis (5-9) • Services • Marketing & Sales Strategy • Operations Plan • Management Team • Financial Plan (14-15)*`,
+  },
   },
   // real document previews — thumbnails kept for OG but UI now uses live DocumentPreview
   // to beat docmaker.ai, we render actual content, not placeholder images

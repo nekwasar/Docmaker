@@ -70,7 +70,7 @@ export default function TemplatesPage() {
             <p className="text-sm text-slate-600">No templates match.</p>
             <p className="text-xs text-slate-400 mt-1">
               {templates.length === 0 ? (
-                <>No templates uploaded yet — <a href="/admin/templates" className="text-[#121660] underline">upload in Admin → Templates</a>.</>
+                <>No templates uploaded yet — <a href="/upload/template" className="text-[#121660] underline">upload a template</a>.</>
               ) : (
                 <>Try a different search or category.</>
               )}

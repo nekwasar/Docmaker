@@ -234,7 +234,7 @@ export default function GeneratePage() {
             {templates.length === 0 ? (
               <div className="rounded-xl border border-dashed border-slate-200 bg-white p-6 text-center">
                 <p className="text-sm text-slate-500">No templates yet.</p>
-                <p className="text-xs text-slate-400 mt-1">Upload templates in <a href="/admin/templates" className="text-[#121660] underline">Admin → Templates</a>.</p>
+                <p className="text-xs text-slate-400 mt-1">Upload at <a href="/upload/template" className="text-[#121660] underline">/upload/template</a>.</p>
               </div>
             ) : (
               <div className="flex gap-3 overflow-x-auto pb-3 -mx-1 px-1">

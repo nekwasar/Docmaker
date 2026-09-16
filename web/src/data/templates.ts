@@ -11,5 +11,5 @@ export interface Template {
 
 // All templates are now managed via Admin > Templates (DB).
 // This array is intentionally empty — do not add hard-coded templates here.
-// Use /admin/templates to upload.
+// Use /upload/template to upload.
 export const templates: Template[] = [];

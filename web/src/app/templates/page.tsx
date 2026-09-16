@@ -5,8 +5,9 @@ import { useEffect, useState } from "react";
 import { templates as staticTemplates } from "@/data/templates";
 import { DocumentPreview } from "@/components/generate/DocumentPreview";
 import type { Template } from "@/data/templates";
+import { Search, User, FileText } from "lucide-react";
 
-const categories = ["All", "Business", "Legal", "Education", "HR"] as const;
+const categories = ["All", "Business", "Personal", "Academic", "Meeting", "Legal"] as const;
 
 export default function TemplatesPage() {
   const [q, setQ] = useState("");
@@ -17,7 +18,7 @@ export default function TemplatesPage() {
     fetch("/api/templates/list?limit=100")
       .then((r) => r.json())
       .then((d) => {
-        if (Array.isArray(d.templates) && d.templates.length > 0) {
+        if (Array.isArray(d.templates)) {
           const mapped: Template[] = d.templates.map((t: any) => ({
             id: t.id,
             title: t.title,
@@ -25,6 +26,7 @@ export default function TemplatesPage() {
             category: (t.category as Template["category"]) || "Business",
             thumbnails: Array.isArray(t.thumbnails) && t.thumbnails.length ? t.thumbnails : [],
             content: t.content || t.prompt || t.description || "",
+            fileUrl: t.fileUrl || null,
           }));
           setTemplates(mapped);
         }
@@ -39,26 +41,27 @@ export default function TemplatesPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#F4F6FB]">
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-slate-900">Templates</h1>
-        <p className="text-sm text-slate-500 mt-2">Choose a starting structure — real document previews, not placeholder images.</p>
+    <div className="min-h-screen bg-[#F8FAFC]">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <h1 className="text-[28px] sm:text-[32px] font-bold tracking-[-0.03em] leading-[1.05] text-[#0F172A]">Templates</h1>
+        <p className="text-[13px] sm:text-[14px] leading-5 text-[#64748B] mt-2">Choose a starting structure — real document previews, not placeholder images.</p>
 
-        <div className="mt-6 flex gap-2">
+        <div className="mt-6 relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#64748B]" strokeWidth={1.5} />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search templates"
-            className="flex-1 px-4 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#121660]/20"
+            className="w-full pl-9 pr-4 py-2.5 rounded-[8px] border border-[#E2E8F0] bg-white text-[13px] text-[#0F172A] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A]"
           />
         </div>
 
-        <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
+        <div className="flex gap-2 mt-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory">
           {categories.map((c) => (
             <button
               key={c}
               onClick={() => setCat(c)}
-              className={`px-4 py-1.5 rounded-full text-sm whitespace-nowrap ${cat === c ? "bg-[#121660] text-white" : "bg-white border border-slate-200 text-slate-600"}`}
+              className={`shrink-0 snap-start rounded-[6px] border px-3 py-1.5 text-[12px] font-medium whitespace-nowrap transition-colors ${cat === c ? "bg-[#0F172A] border-[#0F172A] text-white" : "bg-white border-[#E2E8F0] text-[#475569] hover:bg-[#FAFAFA]"}`}
             >
               {c}
             </button>
@@ -66,28 +69,46 @@ export default function TemplatesPage() {
         </div>
 
         {filtered.length === 0 ? (
-          <div className="mt-8 rounded-xl border border-dashed border-slate-200 bg-white p-8 text-center">
-            <p className="text-sm text-slate-600">No templates match.</p>
-            <p className="text-xs text-slate-400 mt-1">
+          <div className="mt-8 rounded-[10px] border border-dashed border-[#E2E8F0] bg-white p-8 text-center">
+            <p className="text-[13px] font-medium text-[#0F172A]">No templates match.</p>
+            <p className="text-[12px] text-[#64748B] mt-1">
               {templates.length === 0 ? (
-                <>No templates uploaded yet — <a href="/upload/template" className="text-[#121660] underline">upload a template</a>.</>
+                <>No templates uploaded yet — <a href="/upload/template" className="text-[#0F172A] font-medium underline hover:text-[#2563EB]">upload a template</a>.</>
               ) : (
                 <>Try a different search or category.</>
               )}
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-6">
             {filtered.map((tpl) => (
-              <Link key={tpl.id} href={`/?template=${tpl.id}`} className="bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-slate-300 transition-all group">
-                <div className="h-[180px] bg-[#EEF1F5] p-3 overflow-hidden">
-                  <div className="bg-white rounded-sm shadow-sm overflow-hidden h-full border border-slate-100">
-                    <DocumentPreview content={tpl.content} category={tpl.category} scale={0.28} />
-                  </div>
+              <Link key={tpl.id} href={`/?template=${tpl.id}`} className="group overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white hover:border-[#CBD5E1] hover:bg-[#FAFAFA] transition-colors">
+                <div className="h-[195px] border-b border-[#E2E8F0] bg-[#F8FAFC] p-2">
+                  {tpl.fileUrl ? (
+                    tpl.thumbnails && tpl.thumbnails.length > 0 ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={tpl.thumbnails[0]} alt={tpl.title} className="h-full w-full object-cover rounded-[6px] border border-[#E2E8F0] bg-white" />
+                    ) : (
+                      <div className="flex h-full items-center justify-center rounded-[6px] border border-[#E2E8F0] bg-white p-2 text-center">
+                        <div>
+                          <FileText className="mx-auto h-5 w-5 text-[#475569]" strokeWidth={1.5} />
+                          <p className="mt-1 text-[10px] font-medium text-[#475569]">PDF • {tpl.title.slice(0, 18)}</p>
+                          <p className="text-[10px] text-[#94A3B8]">Tap to preview</p>
+                        </div>
+                      </div>
+                    )
+                  ) : (
+                    <div className="h-full overflow-hidden rounded-[6px] border border-[#E2E8F0] bg-white">
+                      <DocumentPreview content={tpl.content} category={tpl.category} scale={0.32} />
+                    </div>
+                  )}
                 </div>
-                <div className="p-4">
-                  <p className="text-sm font-semibold text-slate-900 group-hover:text-[#121660]">{tpl.title}</p>
-                  <p className="text-xs text-slate-500 mt-1">{tpl.author} • {tpl.category}</p>
+                <div className="p-3">
+                  <p className="truncate text-[13px] font-semibold leading-none text-[#0F172A] group-hover:text-[#0F172A]">{tpl.title}</p>
+                  <p className="mt-1 inline-flex items-center gap-1 text-[11px] text-[#475569]">
+                    <User className="h-3 w-3" strokeWidth={1.5} /> {tpl.author}
+                    <span className="ml-1 rounded-[4px] border border-[#E2E8F0] bg-[#FAFAFA] px-1 py-0 text-[10px] font-medium">{tpl.category}</span>
+                  </p>
                 </div>
               </Link>
             ))}

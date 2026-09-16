@@ -194,7 +194,9 @@ export default function GeneratePage() {
 
           {/* One-Click Prompt Templates — clickable pill cards */}
           <div className="space-y-2">
-            <p className="text-[11px] font-bold tracking-wide text-[#2563EB] uppercase">TRY A QUICK PROMPT</p>
+            <p className="inline-flex items-center gap-1 text-[11px] font-bold tracking-wide text-[#2563EB] uppercase">
+              <span aria-hidden>⚡</span> TRY A QUICK PROMPT
+            </p>
             <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory scrollbar-none">
               {EXAMPLE_PROMPTS.map((ex) => (
                 <button
@@ -202,7 +204,7 @@ export default function GeneratePage() {
                   onClick={() => handlePromptClick(ex.text)}
                   className="shrink-0 snap-start inline-flex items-center gap-1.5 rounded-full border border-[#BFDBFE] border-blue-200 bg-[#EFF6FF] bg-blue-50 px-4 py-2 text-left hover:border-[#2563EB] hover:bg-[#DBEAFE] active:scale-95 transition-all"
                 >
-                  <span className="text-[12px] font-medium leading-4 text-[#0F172A] whitespace-nowrap">{ex.label}</span>
+                  <span className="text-[12px] font-medium leading-4 text-[#0F172A] whitespace-nowrap">✨ {ex.label} <span aria-hidden>→</span></span>
                 </button>
               ))}
             </div>

@@ -68,7 +68,7 @@ export function BottomNav() {
         {/* Search — replaces + New Doc */}
         <button
           onClick={() => setSearchOpen(true)}
-          className="ml-0.5 inline-flex items-center justify-center rounded-full bg-white p-2.5 text-[#0F172A] shadow-sm transition hover:bg-white/90 active:scale-[0.98]"
+          className="ml-0.5 inline-flex items-center justify-center rounded-full bg-transparent p-2.5 text-white/90 transition hover:bg-white/10 hover:text-white active:scale-[0.98]"
           aria-label="Search templates"
         >
           <Search className="h-4 w-4" strokeWidth={2} />

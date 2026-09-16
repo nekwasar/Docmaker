@@ -168,20 +168,27 @@ export default function GeneratePage() {
         : `<!-- ✎ Add your main content above — this template's text is below for reference -->\nYour content here: \n\n---\nTemplate reference — "${tpl.title}":\n${tpl.content}\n\n---\nUsing the template above as structure, generate a new document with my content. Keep the same headings and flow.\n`;
 
     setText(guided);
-    setTimeout(() => {
-      textareaRef.current?.focus();
-      if (textareaRef.current) {
-        // highlight whole starter block so user can just type to replace
+    // wait for React to flush controlled value, then highlight
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        const el = textareaRef.current;
+        if (!el) return;
+        el.focus();
+        // use live value, not closed-over guided, to avoid race with React state
+        const v = el.value;
         const endMarker = "---\n";
-        const end = guided.indexOf(endMarker);
+        const end = v.indexOf(endMarker);
         if (end !== -1) {
-          textareaRef.current.setSelectionRange(0, end + endMarker.length);
+          el.setSelectionRange(0, end + endMarker.length);
         } else {
-          textareaRef.current.select();
+          // fallback: highlight the "Your content here:" line like before (was working)
+          const pos = v.indexOf("Your content here:");
+          if (pos !== -1) el.setSelectionRange(pos, pos + "Your content here:".length);
+          else el.select();
         }
-        textareaRef.current.scrollTop = 0;
-      }
-    }, 0);
+        el.scrollTop = 0;
+      }, 50);
+    });
   };
 
   useEffect(() => { setPreviewPage(0); }, [previewTemplate]);

@@ -31,7 +31,6 @@ export const templates: Template[] = [
 
 *Table of Contents: Executive Summary • Company Overview • Market Analysis (5-9) • Services • Marketing & Sales Strategy • Operations Plan • Management Team • Financial Plan (14-15)*`,
   },
-  },
   // real document previews — thumbnails kept for OG but UI now uses live DocumentPreview
   // to beat docmaker.ai, we render actual content, not placeholder images
   {

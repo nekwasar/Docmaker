@@ -161,9 +161,9 @@ export default function GeneratePage() {
 
   return (
     <div className="flex h-[calc(100dvh-64px)] flex-col bg-white">
-      {/* Giant header — removed from container, pinned up top */}
+      {/* Giant header — desktop closer, good space */}
       <div className="shrink-0 border-b border-[#E2E8F0] bg-white">
-        <div className="mx-auto max-w-[680px] px-4 sm:px-6 py-5 sm:py-6">
+        <div className="mx-auto max-w-[680px] px-4 sm:px-6 py-3 sm:py-4">
           <h1 className="text-[44px] sm:text-[60px] font-bold leading-[0.85] tracking-[-0.04em] text-[#0F172A]">
             Create a document
           </h1>
@@ -176,8 +176,8 @@ export default function GeneratePage() {
             /* ChatGPT-style centered empty state — header no longer inside */
             <div className="flex flex-1 flex-col justify-center gap-6 py-6">
 
-              {/* Quick starts — 2x2 crisp cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {/* Quick starts — hidden on mobile, 2x2 on desktop */}
+              <div className="hidden sm:grid grid-cols-2 gap-2">
                 {QUICK_STARTS.map((q) => (
                   <button
                     key={q.label}

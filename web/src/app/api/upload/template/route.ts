@@ -62,16 +62,20 @@ export async function POST(req: NextRequest) {
             const id = Date.now().toString(36);
             const thumb1 = path.join(uploadsDir, `${id}-1.png`);
             const thumb2 = path.join(uploadsDir, `${id}-2.png`);
+            const thumb3 = path.join(uploadsDir, `${id}-3.png`);
             const container = "docmaker-ghostscript";
             execSync(`docker ps --format "{{.Names}}" | grep -q ${container}`, { stdio: "ignore" });
             const tmpInContainer = `/tmp/${tmpName}`;
             execSync(`docker cp "${filePath}" ${container}:${tmpInContainer}`, { stdio: "ignore" });
-            execSync(`docker exec ${container} sh -c "gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=png16m -r96 -dFirstPage=1 -dLastPage=2 -sOutputFile=/tmp/${id}-%d.png ${tmpInContainer} 2>/dev/null"`, { stdio: "ignore" });
+            execSync(`docker exec ${container} sh -c "gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=png16m -r96 -dFirstPage=1 -dLastPage=3 -sOutputFile=/tmp/${id}-%d.png ${tmpInContainer} 2>/dev/null"`, { stdio: "ignore" });
             execSync(`docker cp ${container}:/tmp/${id}-1.png "${thumb1}"`, { stdio: "ignore" });
             try { execSync(`docker cp ${container}:/tmp/${id}-2.png "${thumb2}"`, { stdio: "ignore" }); } catch {}
+            try { execSync(`docker cp ${container}:/tmp/${id}-3.png "${thumb3}"`, { stdio: "ignore" }); } catch {}
             const t1 = `/uploads/templates/${id}-1.png`;
-            const t2 = fs.existsSync(thumb2) ? `/uploads/templates/${id}-2.png` : t1;
-            if (fs.existsSync(thumb1)) thumbnails = [t1, t2];
+            const t2 = fs.existsSync(thumb2) ? `/uploads/templates/${id}-2.png` : null;
+            const t3 = fs.existsSync(thumb3) ? `/uploads/templates/${id}-3.png` : null;
+            const thumbs = [t1, t2, t3].filter(Boolean) as string[];
+            if (fs.existsSync(thumb1)) thumbnails = thumbs;
           } catch {}
         }
       } catch {}

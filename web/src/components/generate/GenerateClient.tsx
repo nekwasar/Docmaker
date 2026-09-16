@@ -171,13 +171,15 @@ export default function GeneratePage() {
     setTimeout(() => {
       textareaRef.current?.focus();
       if (textareaRef.current) {
-        const marker = "Your content here:";
-        const pos = guided.indexOf(marker);
-        if (pos !== -1) {
-          const tip = pos + marker.length + 1; // right after colon/space — tip where user types
-          textareaRef.current.setSelectionRange(tip, tip);
-          textareaRef.current.scrollTop = 0;
+        // highlight whole starter block so user can just type to replace
+        const endMarker = "---\n";
+        const end = guided.indexOf(endMarker);
+        if (end !== -1) {
+          textareaRef.current.setSelectionRange(0, end + endMarker.length);
+        } else {
+          textareaRef.current.select();
         }
+        textareaRef.current.scrollTop = 0;
       }
     }, 0);
   };

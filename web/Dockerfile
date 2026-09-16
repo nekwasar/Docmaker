@@ -2,8 +2,8 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install dependencies for sharp, canvas, prisma
-RUN apk add --no-cache libc6-compat openssl python3 make g++ cairo-dev jpeg-dev pango-dev giflib-dev
+# Install dependencies for sharp, canvas, prisma + ghostscript/poppler for PDF thumbnails/text
+RUN apk add --no-cache libc6-compat openssl python3 make g++ cairo-dev jpeg-dev pango-dev giflib-dev ghostscript poppler-utils
 
 COPY package.json package-lock.json ./
 RUN npm ci

@@ -47,38 +47,93 @@ export async function POST(req: NextRequest) {
         if (ext === ".txt" || ext === ".csv" || ext === ".md") {
           content = buf.toString("utf-8").slice(0, 20000);
         } else if (ext === ".pdf") {
-          const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-          const doc = await (pdfjs as any).getDocument({ data: new Uint8Array(buf), disableWorker: true }).promise;
-          let all = "";
-          const pages = Math.min(doc.numPages, 5);
-          for (let i = 1; i <= pages; i++) {
-            const page = await doc.getPage(i);
-            const tc = await page.getTextContent();
-            const t = tc.items.map((it: any) => it.str).join(" ");
-            all += t + "\n\n";
+          // Content extraction via pdftotext (poppler) — more reliable in Node than pdfjs worker
+          try {
+            const txt = execSync(`pdftotext -layout "${filePath}" -`, { maxBuffer: 10 * 1024 * 1024 }).toString("utf-8");
+            const trimmed = txt.trim().slice(0, 20000);
+            if (trimmed) content = trimmed;
+          } catch (e) {
+            console.error("pdftotext failed, falling back to pdfjs", e);
           }
-          content = all.slice(0, 20000) || `PDF: ${file.name} — ${doc.numPages} pages`;
+          // Fallback to pdfjs if pdftotext produced nothing
+          if (!content) {
+            try {
+              const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+              // Try to avoid worker issues by explicitly disabling worker
+              try { (pdfjs as any).GlobalWorkerOptions.workerSrc = ""; } catch {}
+              const doc = await (pdfjs as any).getDocument({ data: new Uint8Array(buf), disableWorker: true, useWorkerFetch: false, isEvalSupported: false }).promise;
+              let all = "";
+              const pages = Math.min(doc.numPages, 5);
+              for (let i = 1; i <= pages; i++) {
+                const page = await doc.getPage(i);
+                const tc = await page.getTextContent();
+                const t = tc.items.map((it: any) => it.str).join(" ");
+                all += t + "\n\n";
+              }
+              content = all.trim().slice(0, 20000) || `PDF: ${file.name} — ${doc.numPages} pages`;
+            } catch (pdfErr) {
+              console.error("pdfjs extraction failed", pdfErr);
+              content = `PDF: ${file.name} — ${buf.length} bytes`;
+            }
+          }
+          if (!content) content = `PDF: ${file.name} — ${file.size} bytes`;
+          // Thumbnails via ghostscript directly (no docker) — we installed gs in the web container
           try {
             const id = Date.now().toString(36);
-            const thumb1 = path.join(uploadsDir, `${id}-1.png`);
-            const thumb2 = path.join(uploadsDir, `${id}-2.png`);
-            const thumb3 = path.join(uploadsDir, `${id}-3.png`);
-            const container = "docmaker-ghostscript";
-            execSync(`docker ps --format "{{.Names}}" | grep -q ${container}`, { stdio: "ignore" });
-            const tmpInContainer = `/tmp/${tmpName}`;
-            execSync(`docker cp "${filePath}" ${container}:${tmpInContainer}`, { stdio: "ignore" });
-            execSync(`docker exec ${container} sh -c "gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=png16m -r96 -dFirstPage=1 -dLastPage=3 -sOutputFile=/tmp/${id}-%d.png ${tmpInContainer} 2>/dev/null"`, { stdio: "ignore" });
-            execSync(`docker cp ${container}:/tmp/${id}-1.png "${thumb1}"`, { stdio: "ignore" });
-            try { execSync(`docker cp ${container}:/tmp/${id}-2.png "${thumb2}"`, { stdio: "ignore" }); } catch {}
-            try { execSync(`docker cp ${container}:/tmp/${id}-3.png "${thumb3}"`, { stdio: "ignore" }); } catch {}
-            const t1 = `/uploads/templates/${id}-1.png`;
-            const t2 = fs.existsSync(thumb2) ? `/uploads/templates/${id}-2.png` : null;
-            const t3 = fs.existsSync(thumb3) ? `/uploads/templates/${id}-3.png` : null;
-            const thumbs = [t1, t2, t3].filter(Boolean) as string[];
-            if (fs.existsSync(thumb1)) thumbnails = thumbs;
+            // Use gs to render first 3 pages at 96 dpi
+            execSync(`gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=png16m -r96 -dFirstPage=1 -dLastPage=3 -sOutputFile="${uploadsDir}/${id}-%d.png" "${filePath}"`, { stdio: "ignore" });
+            const thumbs: string[] = [];
+            for (let i = 1; i <= 3; i++) {
+              const p = path.join(uploadsDir, `${id}-${i}.png`);
+              if (fs.existsSync(p)) thumbs.push(`/uploads/templates/${id}-${i}.png`);
+            }
+            if (thumbs.length > 0) thumbnails = thumbs;
+            else console.error("gs produced no thumbnails for", filePath);
+          } catch (thumbErr) {
+            console.error("ghostscript thumbnail failed", thumbErr);
+            // Fallback to pdfjs+canvas if gs fails
+            try {
+              const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+              try { (pdfjs as any).GlobalWorkerOptions.workerSrc = ""; } catch {}
+              const doc = await (pdfjs as any).getDocument({ data: new Uint8Array(buf), disableWorker: true }).promise;
+              const id = Date.now().toString(36) + "_c";
+              const { createCanvas } = await import("canvas");
+              const numThumbs = Math.min(doc.numPages, 3);
+              const thumbs: string[] = [];
+              for (let i = 1; i <= numThumbs; i++) {
+                const page = await doc.getPage(i);
+                const viewport = page.getViewport({ scale: 1 });
+                const targetWidth = 600;
+                const scale = targetWidth / viewport.width;
+                const scaled = page.getViewport({ scale });
+                const canvas = createCanvas(scaled.width, scaled.height);
+                const ctx = canvas.getContext("2d") as any;
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                await page.render({ canvasContext: ctx, viewport: scaled }).promise;
+                const outPath = path.join(uploadsDir, `${id}-${i}.png`);
+                fs.writeFileSync(outPath, canvas.toBuffer("image/png"));
+                thumbs.push(`/uploads/templates/${id}-${i}.png`);
+              }
+              if (thumbs.length > 0) thumbnails = thumbs;
+            } catch (e2) {
+              console.error("canvas fallback also failed", e2);
+            }
+          }
+        } else if ([".png", ".jpg", ".jpeg", ".webp", ".gif"].includes(ext)) {
+          try {
+            const id = Date.now().toString(36);
+            const { default: sharp } = await import("sharp");
+            const outPath = path.join(uploadsDir, `${id}-1.png`);
+            await sharp(buf).resize({ width: 600 }).png().toFile(outPath);
+            thumbnails = [`/uploads/templates/${id}-1.png`];
+            content = content || `Image: ${file.name}`;
           } catch {}
         }
-      } catch {}
+      } catch (e) {
+        console.error("content extraction failed", e);
+        if (!content) content = `File: ${file.name} — ${file.size} bytes`;
+      }
     } else {
       const prompt = (form.get("prompt") as string) || (form.get("content") as string) || "";
       if (prompt) content = prompt.slice(0, 20000);

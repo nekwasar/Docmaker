@@ -7,6 +7,7 @@ export interface Template {
   category: TemplateCategory;
   thumbnails: string[];
   content: string;
+  fileUrl?: string | null;
 }
 
 // All templates are now managed via Admin > Templates (DB).

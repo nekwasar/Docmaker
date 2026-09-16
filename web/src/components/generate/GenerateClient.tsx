@@ -49,7 +49,7 @@ export default function GeneratePage() {
     fetch("/api/templates/list?limit=20")
       .then((r) => r.json())
       .then((d) => {
-        if (Array.isArray(d.templates) && d.templates.length > 0) {
+        if (Array.isArray(d.templates)) {
           const mapped: Template[] = d.templates.map((t: any) => ({
             id: t.id,
             title: t.title,
@@ -57,6 +57,7 @@ export default function GeneratePage() {
             category: (t.category as Template["category"]) || "Business",
             thumbnails: Array.isArray(t.thumbnails) && t.thumbnails.length ? t.thumbnails : [],
             content: t.content || t.prompt || t.description || "",
+            fileUrl: t.fileUrl || null,
           }));
           setTemplates(mapped);
         }
@@ -201,6 +202,16 @@ export default function GeneratePage() {
                 </div>
               )}
 
+              {/* Persistent Help-us-grow CTA — always seeable */}
+              <div className="flex items-center justify-between rounded-[10px] border border-[#E2E8F0] bg-[#FAFAFA] px-4 py-3">
+                <div>
+                  <p className="text-[12px] font-semibold text-[#0F172A]">Help us grow</p>
+                  <p className="text-[11px] leading-4 text-[#475569]">Upload a template — it stays forever and helps everyone.</p>
+                </div>
+                <a href="/upload/template" className="shrink-0 inline-flex items-center gap-1.5 rounded-[6px] bg-[#0F172A] px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-black">
+                  Upload template <ArrowUp className="h-3 w-3 rotate-45" strokeWidth={1.5} />
+                </a>
+              </div>
               {/* Templates — compact dashed grid, enterprise */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -225,12 +236,6 @@ export default function GeneratePage() {
                         </div>
                       ))}
                     </div>
-                    <div className="flex items-center justify-between border-t border-dashed border-[#E2E8F0] bg-[#FAFAFA] px-4 py-3">
-                      <p className="text-[12px] text-[#475569]">Upload your first template to populate this grid.</p>
-                      <a href="/upload/template" className="inline-flex items-center gap-1.5 rounded-[6px] bg-[#0F172A] px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-black">
-                        Upload template <ArrowUp className="h-3 w-3 rotate-45" strokeWidth={1.5} />
-                      </a>
-                    </div>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
@@ -241,9 +246,24 @@ export default function GeneratePage() {
                         className="group overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white text-left hover:border-[#CBD5E1] hover:bg-[#FAFAFA] transition-colors"
                       >
                         <div className="h-[110px] border-b border-[#E2E8F0] bg-[#F8FAFC] p-2">
-                          <div className="h-full overflow-hidden rounded-[6px] border border-[#E2E8F0] bg-white">
-                            <DocumentPreview content={tpl.content} category={tpl.category} scale={0.32} />
-                          </div>
+                          {tpl.fileUrl ? (
+                            tpl.thumbnails && tpl.thumbnails.length > 0 ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={tpl.thumbnails[0]} alt={tpl.title} className="h-full w-full object-cover rounded-[6px] border border-[#E2E8F0] bg-white" />
+                            ) : (
+                              <div className="flex h-full items-center justify-center rounded-[6px] border border-[#E2E8F0] bg-white p-2 text-center">
+                                <div>
+                                  <FileText className="mx-auto h-5 w-5 text-[#475569]" strokeWidth={1.5} />
+                                  <p className="mt-1 text-[10px] font-medium text-[#475569]">PDF • {tpl.title.slice(0, 18)}</p>
+                                  <p className="text-[10px] text-[#94A3B8]">Tap to preview</p>
+                                </div>
+                              </div>
+                            )
+                          ) : (
+                            <div className="h-full overflow-hidden rounded-[6px] border border-[#E2E8F0] bg-white">
+                              <DocumentPreview content={tpl.content} category={tpl.category} scale={0.32} />
+                            </div>
+                          )}
                         </div>
                         <div className="p-3">
                           <p className="truncate text-[13px] font-semibold leading-none text-[#0F172A]">{tpl.title}</p>
@@ -415,12 +435,33 @@ export default function GeneratePage() {
               </button>
             </div>
             <div className="space-y-3 overflow-y-auto p-4">
-              <div className="rounded-[8px] border border-[#E2E8F0] bg-[#F8FAFC] p-3">
-                <DocumentPreview content={previewTemplate.content} category={previewTemplate.category} paginated />
-              </div>
-              <div className="max-h-56 overflow-auto rounded-[8px] border border-[#E2E8F0] bg-[#FAFAFA] p-3">
-                <pre className="whitespace-pre-wrap font-mono text-[11px] leading-5 text-[#0F172A]">{previewTemplate.content}</pre>
-              </div>
+              {previewTemplate.fileUrl ? (
+                <>
+                  {previewTemplate.fileUrl.endsWith(".pdf") ? (
+                    <div className="overflow-hidden rounded-[8px] border border-[#E2E8F0] bg-white" style={{ height: 420 }}>
+                      <iframe src={previewTemplate.fileUrl} title={previewTemplate.title} className="h-full w-full border-0" />
+                    </div>
+                  ) : previewTemplate.thumbnails?.[0] ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={previewTemplate.thumbnails[0]} alt={previewTemplate.title} className="w-full rounded-[8px] border border-[#E2E8F0] bg-white" />
+                  ) : null}
+                  <div className="rounded-[8px] border border-[#E2E8F0] bg-[#F8FAFC] p-3">
+                    <DocumentPreview content={previewTemplate.content || "No extracted text — open file above."} category={previewTemplate.category} paginated />
+                  </div>
+                  <a href={previewTemplate.fileUrl} target="_blank" rel="noopener noreferrer" className="inline-flex text-[11px] font-medium text-[#0F172A] underline">
+                    Open original file ({previewTemplate.fileUrl.split("/").pop()}) →
+                  </a>
+                </>
+              ) : (
+                <>
+                  <div className="rounded-[8px] border border-[#E2E8F0] bg-[#F8FAFC] p-3">
+                    <DocumentPreview content={previewTemplate.content} category={previewTemplate.category} paginated />
+                  </div>
+                  <div className="max-h-56 overflow-auto rounded-[8px] border border-[#E2E8F0] bg-[#FAFAFA] p-3">
+                    <pre className="whitespace-pre-wrap font-mono text-[11px] leading-5 text-[#0F172A]">{previewTemplate.content}</pre>
+                  </div>
+                </>
+              )}
             </div>
             <div className="flex gap-2 border-t border-[#E2E8F0] p-3">
               <button onClick={() => setPreviewTemplate(null)} className="flex-1 rounded-[6px] border border-[#E2E8F0] bg-white py-2 text-[13px] font-medium text-[#0F172A] hover:bg-slate-50">

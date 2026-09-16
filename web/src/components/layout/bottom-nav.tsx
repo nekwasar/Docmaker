@@ -2,12 +2,30 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Menu, X, Sparkles, FileText, Globe, ArrowUpDown, Plus, LayoutGrid } from "lucide-react";
-import { useState } from "react";
+import { Home, Menu, X, Sparkles, FileText, Globe, ArrowUpDown, Plus, LayoutGrid, Search } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export function BottomNav() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+
+  useEffect(() => {
+    if (!searchOpen) return;
+    setSearchLoading(true);
+    fetch("/api/templates/list?limit=50")
+      .then((r) => r.json())
+      .then((d) => setSearchResults(Array.isArray(d.templates) ? d.templates : []))
+      .catch(() => setSearchResults([]))
+      .finally(() => setSearchLoading(false));
+  }, [searchOpen]);
+
+  const filtered = query.trim()
+    ? searchResults.filter((t: any) => `${t.title} ${t.description ?? ""} ${t.category}`.toLowerCase().includes(query.toLowerCase()))
+    : searchResults;
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
   const isHome = pathname === "/";
@@ -47,14 +65,14 @@ export function BottomNav() {
           <span className="hidden sm:inline">Templates</span>
         </Link>
 
-        {/* Primary CTA — + New Doc */}
-        <Link
-          href="/generate"
-          className="ml-0.5 inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-[13px] font-semibold text-[#0F172A] shadow-sm transition hover:bg-white/90 active:scale-[0.98]"
+        {/* Search — replaces + New Doc */}
+        <button
+          onClick={() => setSearchOpen(true)}
+          className="ml-0.5 inline-flex items-center justify-center rounded-full bg-white p-2.5 text-[#0F172A] shadow-sm transition hover:bg-white/90 active:scale-[0.98]"
+          aria-label="Search templates"
         >
-          <Plus className="h-4 w-4" strokeWidth={2} />
-          <span>New Doc</span>
-        </Link>
+          <Search className="h-4 w-4" strokeWidth={2} />
+        </button>
 
         {/* Divider */}
         <span className="mx-1 h-6 w-px bg-white/15" aria-hidden />
@@ -112,6 +130,64 @@ export function BottomNav() {
                 className="flex items-center justify-center gap-1.5 rounded-[10px] bg-[#0F172A] px-3 py-2.5 text-[13px] font-semibold text-white hover:bg-black"
               >
                 <Plus className="h-4 w-4" /> Upload template
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Template Search Modal */}
+      {searchOpen && (
+        <div className="fixed inset-0 z-[9998] bg-[#0F172A]/40 backdrop-blur-sm" onClick={() => setSearchOpen(false)}>
+          <div
+            className="absolute left-1/2 top-[10vh] w-[92vw] max-w-lg -translate-x-1/2 rounded-[16px] border border-[#E2E8F0] bg-white shadow-2xl flex flex-col max-h-[70vh]"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-label="Search templates"
+          >
+            <div className="flex items-center gap-2 border-b border-[#E2E8F0] p-3">
+              <Search className="h-4 w-4 text-[#64748B] shrink-0" strokeWidth={1.75} />
+              <input
+                autoFocus
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search templates…"
+                className="flex-1 bg-transparent text-[13px] text-[#0F172A] placeholder:text-[#94A3B8] focus:outline-none"
+              />
+              <button onClick={() => setSearchOpen(false)} className="rounded-[8px] p-1.5 hover:bg-[#F8FAFC] text-[#475569]">
+                <X className="h-4 w-4" strokeWidth={1.75} />
+              </button>
+            </div>
+            <div className="overflow-y-auto p-2">
+              {searchLoading ? (
+                <p className="p-6 text-center text-[13px] text-[#64748B]">Loading…</p>
+              ) : filtered.length === 0 ? (
+                <p className="p-6 text-center text-[13px] text-[#64748B]">{query ? "No matches" : "Type to search"}</p>
+              ) : (
+                <div className="grid gap-1">
+                  {filtered.slice(0, 20).map((t: any) => (
+                    <Link
+                      key={t.id}
+                      href={`/?template=${t.id}`}
+                      onClick={() => setSearchOpen(false)}
+                      className="flex items-center gap-3 rounded-[10px] border border-transparent px-3 py-2.5 hover:border-[#E2E8F0] hover:bg-[#F8FAFC]"
+                    >
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-[#E2E8F0] bg-white text-[#475569]">
+                        <FileText className="h-4 w-4" strokeWidth={1.5} />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[13px] font-medium leading-4 text-[#0F172A]">{t.title}</span>
+                        <span className="block truncate text-[11px] leading-3 text-[#64748B]">{t.category} • {t.description?.slice(0, 60) ?? ""}</span>
+                      </span>
+                      <span className="text-[#94A3B8]">›</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="border-t border-[#E2E8F0] p-2 text-center">
+              <Link href="/templates" onClick={() => setSearchOpen(false)} className="text-[12px] font-medium text-[#0F172A] hover:underline">
+                Browse all templates →
               </Link>
             </div>
           </div>

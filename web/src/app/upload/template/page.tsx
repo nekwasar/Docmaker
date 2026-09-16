@@ -43,15 +43,18 @@ export default function UploadTemplatePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F6FB] flex items-center justify-center px-4 py-10">
-      <form onSubmit={handleUpload} className="w-full max-w-lg bg-white border border-slate-200 rounded-2xl p-6 space-y-4">
-        <h1 className="text-lg font-bold text-slate-900">Upload template</h1>
+    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-10">
+      <form onSubmit={handleUpload} className="w-full max-w-[560px] bg-white border border-[#E2E8F0] rounded-[10px] p-6 space-y-4">
+        <div className="space-y-1">
+          <h1 className="text-[16px] font-semibold tracking-[-0.01em] text-[#0F172A]">Upload template</h1>
+          <p className="text-[12px] leading-4 text-[#475569]">Public uploader — anyone can upload. Files appear on the homepage after upload.</p>
+        </div>
 
         <div
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
           onDragLeave={() => setDragOver(false)}
           onDrop={onDrop}
-          className={`rounded-xl border-2 border-dashed p-6 text-center transition-colors ${dragOver ? "border-[#121660] bg-[#121660]/5" : "border-slate-200 bg-slate-50"}`}
+          className={`rounded-[10px] border border-dashed p-6 text-center transition-colors ${dragOver ? "border-[#0F172A] bg-slate-50" : "border-[#E2E8F0] bg-[#FAFAFA]"}`}
         >
           <input
             id="file"
@@ -61,25 +64,25 @@ export default function UploadTemplatePage() {
             onChange={(e) => setFile(e.target.files?.[0] || null)}
           />
           <label htmlFor="file" className="cursor-pointer block">
-            <p className="text-sm font-medium text-slate-700">{file ? file.name : "Drop PDF/DOCX here or click to browse"}</p>
-            <p className="text-xs text-slate-400 mt-1">PDF, DOCX, TXT, images — 50 MB max</p>
+            <p className="text-[13px] font-medium text-[#0F172A]">{file ? file.name : "Drop PDF/DOCX here or click to browse"}</p>
+            <p className="text-[11px] text-[#475569] mt-1">PDF, DOCX, TXT, images — 50 MB max</p>
           </label>
-          {file && <p className="text-xs text-green-600 mt-2">{(file.size/1024/1024).toFixed(2)} MB</p>}
+          {file && <p className="text-[11px] text-emerald-600 mt-2">{(file.size/1024/1024).toFixed(2)} MB</p>}
         </div>
 
         <label className="block space-y-1">
-          <span className="text-xs font-medium text-slate-600">Title *</span>
-          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Modern Business Invoice" className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#121660]/20 focus:border-[#121660]" />
+          <span className="text-[11px] font-medium tracking-wide text-[#475569] uppercase">Title *</span>
+          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Modern Business Invoice" className="w-full rounded-[6px] border border-[#E2E8F0] bg-white px-3 py-2 text-[13px] text-[#0F172A] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A]" />
         </label>
 
         <div className="grid grid-cols-2 gap-3">
           <label className="block space-y-1">
-            <span className="text-xs font-medium text-slate-600">Author</span>
-            <input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="e.g. Sophia Chen" className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+            <span className="text-[11px] font-medium tracking-wide text-[#475569] uppercase">Author</span>
+            <input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="e.g. Sophia Chen" className="w-full rounded-[6px] border border-[#E2E8F0] bg-white px-3 py-2 text-[13px] text-[#0F172A] placeholder:text-[#94A3B8]" />
           </label>
           <label className="block space-y-1">
-            <span className="text-xs font-medium text-slate-600">Category</span>
-            <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm bg-white">
+            <span className="text-[11px] font-medium tracking-wide text-[#475569] uppercase">Category</span>
+            <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full rounded-[6px] border border-[#E2E8F0] bg-white px-3 py-2 text-[13px] text-[#0F172A]">
               {CATEGORIES.map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
@@ -88,14 +91,14 @@ export default function UploadTemplatePage() {
         </div>
 
         <label className="block space-y-1">
-          <span className="text-xs font-medium text-slate-600">Description</span>
-          <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Short description" className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+          <span className="text-[11px] font-medium tracking-wide text-[#475569] uppercase">Description</span>
+          <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Short description" className="w-full rounded-[6px] border border-[#E2E8F0] bg-white px-3 py-2 text-[13px] text-[#0F172A] placeholder:text-[#94A3B8]" />
         </label>
 
-        <button disabled={uploading} className="w-full rounded-xl bg-[#121660] text-white py-2.5 text-sm font-semibold disabled:opacity-50">
+        <button disabled={uploading} className="w-full rounded-[6px] bg-[#0F172A] py-2.5 text-[13px] font-semibold text-white hover:bg-black disabled:opacity-40">
           {uploading ? "Uploading…" : "Upload"}
         </button>
-        {done && <p className="text-sm text-green-600 text-center">{done}</p>}
+        {done && <p className="text-[13px] text-emerald-600 text-center">{done}</p>}
       </form>
     </div>
   );

@@ -170,10 +170,14 @@ export default function GeneratePage() {
     setText(guided);
     setTimeout(() => {
       textareaRef.current?.focus();
-      // place cursor at the very start (where "Your content here" is)
       if (textareaRef.current) {
-        const pos = guided.indexOf("Your content here:");
-        textareaRef.current.setSelectionRange(pos, pos + "Your content here:".length);
+        const marker = "Your content here:";
+        const pos = guided.indexOf(marker);
+        if (pos !== -1) {
+          const tip = pos + marker.length + 1; // right after colon/space — tip where user types
+          textareaRef.current.setSelectionRange(tip, tip);
+          textareaRef.current.scrollTop = 0;
+        }
       }
     }, 0);
   };

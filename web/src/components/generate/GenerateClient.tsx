@@ -161,19 +161,11 @@ export default function GeneratePage() {
 
   return (
     <div className="flex h-[calc(100dvh-64px)] flex-col bg-white">
-      {/* Giant header — desktop closer, good space */}
-      <div className="shrink-0 border-b border-[#E2E8F0] bg-white">
-        <div className="mx-auto max-w-[680px] px-4 sm:px-6 py-3 sm:py-4">
-          <h1 className="whitespace-nowrap text-[30px] sm:text-[60px] font-bold leading-[0.85] tracking-[-0.04em] text-[#0F172A]">
-            Create a document
-          </h1>
-        </div>
-      </div>
       {/* Scrollable conversation / empty state */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
         <div className="mx-auto flex min-h-full max-w-[680px] flex-col px-4 sm:px-6 py-6">
           {isEmpty ? (
-            /* ChatGPT-style centered empty state — header no longer inside */
+            /* ChatGPT-style centered empty state */
             <div className="flex flex-1 flex-col justify-center gap-6 py-6">
 
               {/* Quick starts — hidden on mobile, 2x2 on desktop */}
@@ -243,12 +235,12 @@ export default function GeneratePage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:gap-2.5 sm:overflow-visible sm:pb-0">
                     {templates.map((tpl) => (
                       <button
                         key={tpl.id}
                         onClick={() => setPreviewTemplate(tpl)}
-                        className="group overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white text-left hover:border-[#CBD5E1] hover:bg-[#FAFAFA] transition-colors"
+                        className="group shrink-0 w-[48%] snap-start overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white text-left hover:border-[#CBD5E1] hover:bg-[#FAFAFA] transition-colors sm:w-auto"
                       >
                         <div className="h-[140px] border-b border-[#E2E8F0] bg-[#F8FAFC] p-2">
                           {tpl.fileUrl ? (

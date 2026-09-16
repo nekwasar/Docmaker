@@ -142,12 +142,37 @@ export default function GeneratePage() {
 
   const stop = () => abortRef.current?.abort();
 
-  const useTemplate = (tpl: Template) => {
-    setText(tpl.content);
+  const useTemplate = async (tpl: Template) => {
     const mapped = tpl.category.charAt(0).toUpperCase() + tpl.category.slice(1);
     if ((TYPES as readonly string[]).map((x) => x.toLowerCase()).includes(mapped.toLowerCase())) setType(mapped as any);
     setPreviewTemplate(null);
-    textareaRef.current?.focus();
+
+    // If template has a file, attach it so AI can use it as reference
+    if (tpl.fileUrl) {
+      try {
+        const res = await fetch(tpl.fileUrl);
+        const blob = await res.blob();
+        const name = tpl.fileUrl.split("/").pop() || `${tpl.title}.pdf`;
+        const file = new File([blob], name, { type: blob.type || "application/pdf" });
+        setAttachedFiles((prev) => [file, ...prev].slice(0, 3));
+      } catch {}
+    }
+
+    // Guided prompt — user content on top, template reference below
+    const guided =
+      tpl.fileUrl
+        ? `<!-- ✎ Add your main content above — replace this line -->\nYour content here: \n\n---\nUse the attached template "${tpl.title}" as the exact structure and styling reference. Keep its sections, headings, and layout (see attached file), but replace the body with new content based on what I wrote above. Generate a complete, paginated document.\n`
+        : `<!-- ✎ Add your main content above — this template's text is below for reference -->\nYour content here: \n\n---\nTemplate reference — "${tpl.title}":\n${tpl.content}\n\n---\nUsing the template above as structure, generate a new document with my content. Keep the same headings and flow.\n`;
+
+    setText(guided);
+    setTimeout(() => {
+      textareaRef.current?.focus();
+      // place cursor at the very start (where "Your content here" is)
+      if (textareaRef.current) {
+        const pos = guided.indexOf("Your content here:");
+        textareaRef.current.setSelectionRange(pos, pos + "Your content here:".length);
+      }
+    }, 0);
   };
 
   useEffect(() => { setPreviewPage(0); }, [previewTemplate]);

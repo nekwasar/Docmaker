@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Paperclip, Mic, Copy, Download, X, User, Square, RotateCcw, FileText, FileUp, LayoutGrid, ArrowUp } from "lucide-react";
+import { Paperclip, Mic, Copy, Download, X, User, Square, RotateCcw, FileText, FileUp, LayoutGrid, ArrowUp, Sparkles } from "lucide-react";
 import { DOCUMENT_TEMPLATES } from "@/lib/ai/prompts";
 import { templates as staticTemplates, type Template } from "@/data/templates";
 import { DocumentPreview } from "./DocumentPreview";
 
 const TYPES = ["Auto", "Business", "Personal", "Academic", "Meeting"] as const;
 
-// Inline enterprise wordmark — replaces rounded purple badge
 function DocmakerMark() {
   return (
     <div className="inline-flex items-center gap-2">
@@ -23,6 +22,13 @@ function DocmakerMark() {
     </div>
   );
 }
+
+const QUICK_STARTS = [
+  { label: "Draft an invoice", hint: "Bill + line items", text: "Create a modern business invoice for Nova Studio charging Acme Corp $6,998.25 with 3 line items, due in 14 days." , cat: "Business" as const },
+  { label: "Weekly sync notes", hint: "Decisions + actions", text: "Turn these bullets into weekly sync meeting notes: sprint review, roadmap Q3, blockers, decisions, action items.", cat: "Meeting" as const },
+  { label: "NDA draft", hint: "Mutual, 2 years", text: "Draft a mutual NDA between Nova Studio and Acme Corp, 2-year term, confidential info definition, return of materials.", cat: "Legal" as const },
+  { label: "Research brief", hint: "Abstract + analysis", text: "Write a 4-section research brief on remote work impact on urban design with abstract, intro, analysis, conclusion.", cat: "Academic" as const },
+];
 
 export default function GeneratePage() {
   const [text, setText] = useState("");
@@ -153,27 +159,117 @@ export default function GeneratePage() {
   const isEmpty = !output && !generating;
 
   return (
-    <div className="min-h-[calc(100dvh-64px)] bg-white">
+    <div className="flex h-[calc(100dvh-64px)] flex-col bg-white">
+      {/* Scrollable conversation / empty state */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
-        {/* Tight single-column container 640-768 */}
-        <div className="mx-auto max-w-[680px] px-4 sm:px-6 py-8 space-y-6">
-          {/* Header — left-aligned, high-contrast, semibold */}
-          <div className="space-y-3">
-            <DocmakerMark />
-            <h1 className="text-[22px] sm:text-[26px] font-semibold leading-tight tracking-[-0.02em] text-[#0F172A]">
-              What will you create today?
-            </h1>
-            <p className="text-[13px] leading-5 text-[#475569] max-w-[560px]">
-              Describe your idea, paste text, or attach a source file. Start typing below — pick a category and generate.
-            </p>
-          </div>
+        <div className="mx-auto flex min-h-full max-w-[680px] flex-col px-4 sm:px-6 py-6">
+          {isEmpty ? (
+            /* ChatGPT-style centered empty state */
+            <div className="flex flex-1 flex-col justify-center gap-6 py-6">
+              <div className="space-y-3">
+                <DocmakerMark />
+                <h1 className="text-[24px] font-semibold leading-tight tracking-[-0.02em] text-[#0F172A]">
+                  Start a document from anything
+                </h1>
+                <p className="max-w-[560px] text-[13px] leading-5 text-[#475569]">
+                  Paste raw text, drop a file, or describe what you need. We turn it into a paginated, print-ready doc — no templates to hunt through.
+                </p>
+              </div>
 
-          {isEmpty ? null : (
-            <div className="space-y-4">
+              {/* Quick starts — 2x2 crisp cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {QUICK_STARTS.map((q) => (
+                  <button
+                    key={q.label}
+                    onClick={() => { setText(q.text); setType(q.cat); textareaRef.current?.focus(); }}
+                    className="group rounded-[10px] border border-[#E2E8F0] bg-white p-3 text-left hover:border-[#CBD5E1] hover:bg-[#FAFAFA] transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[13px] font-medium text-[#0F172A]">{q.label}</span>
+                      <Sparkles className="h-3.5 w-3.5 text-[#94A3B8] group-hover:text-[#0F172A]" strokeWidth={1.5} />
+                    </div>
+                    <span className="mt-1 block text-[11px] text-[#475569]">{q.hint} • {q.cat}</span>
+                  </button>
+                ))}
+              </div>
+
+              {filePreview && (
+                <div className="overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white">
+                  <div className="flex items-center justify-between border-b border-[#E2E8F0] bg-[#FAFAFA] px-3 py-2">
+                    <span className="text-[11px] font-medium tracking-wide text-[#475569] uppercase">Attached preview</span>
+                    <span className="max-w-[180px] truncate text-[11px] text-[#475569]">{attachedFiles[0]?.name}</span>
+                  </div>
+                  <div className="bg-[#F8FAFC] p-3">
+                    <div className="rounded-[8px] border border-[#E2E8F0] bg-white p-3">
+                      <DocumentPreview content={filePreview} category={type} scale={0.42} />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Templates — compact dashed grid, enterprise */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="inline-flex items-center gap-2">
+                    <LayoutGrid className="h-3.5 w-3.5 text-[#475569]" strokeWidth={1.5} />
+                    <p className="text-[11px] font-semibold tracking-wide text-[#0F172A] uppercase">Templates</p>
+                    <span className="rounded-[6px] border border-[#E2E8F0] bg-[#FAFAFA] px-1.5 py-0.5 text-[10px] font-medium text-[#475569]">{templates.length}</span>
+                  </div>
+                  <a href="/templates" className="inline-flex items-center gap-1 rounded-[6px] border border-[#E2E8F0] bg-white px-2 py-1 text-[11px] font-medium text-[#0F172A] hover:bg-slate-50">
+                    See all <ArrowUp className="h-3 w-3 rotate-45" strokeWidth={1.5} />
+                  </a>
+                </div>
+                {templates.length === 0 ? (
+                  <div className="overflow-hidden rounded-[10px] border border-dashed border-[#E2E8F0] bg-white">
+                    <div className="grid grid-cols-3 divide-x divide-dashed divide-[#E2E8F0]">
+                      {[0, 1, 2].map((i) => (
+                        <div key={i} className="flex flex-col items-center justify-center gap-2 p-5 text-center">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-[6px] border border-[#E2E8F0] bg-[#FAFAFA]">
+                            <FileUp className="h-4 w-4 text-[#475569]" strokeWidth={1.5} />
+                          </div>
+                          <span className="text-[11px] font-medium text-[#475569]">{i === 0 ? "No templates" : "Empty slot"}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between border-t border-dashed border-[#E2E8F0] bg-[#FAFAFA] px-4 py-3">
+                      <p className="text-[12px] text-[#475569]">Upload your first template to populate this grid.</p>
+                      <a href="/upload/template" className="inline-flex items-center gap-1.5 rounded-[6px] bg-[#0F172A] px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-black">
+                        Upload template <ArrowUp className="h-3 w-3 rotate-45" strokeWidth={1.5} />
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    {templates.map((tpl) => (
+                      <button
+                        key={tpl.id}
+                        onClick={() => setPreviewTemplate(tpl)}
+                        className="group overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white text-left hover:border-[#CBD5E1] hover:bg-[#FAFAFA] transition-colors"
+                      >
+                        <div className="h-[110px] border-b border-[#E2E8F0] bg-[#F8FAFC] p-2">
+                          <div className="h-full overflow-hidden rounded-[6px] border border-[#E2E8F0] bg-white">
+                            <DocumentPreview content={tpl.content} category={tpl.category} scale={0.32} />
+                          </div>
+                        </div>
+                        <div className="p-3">
+                          <p className="truncate text-[13px] font-semibold leading-none text-[#0F172A]">{tpl.title}</p>
+                          <p className="mt-1 inline-flex items-center gap-1 text-[11px] text-[#475569]">
+                            <User className="h-3 w-3" strokeWidth={1.5} /> {tpl.author}
+                            <span className="ml-1 rounded-[4px] border border-[#E2E8F0] bg-[#FAFAFA] px-1 py-0 text-[10px] font-medium">{tpl.category}</span>
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4 py-4">
               {text && (
                 <div className="rounded-[10px] border border-[#E2E8F0] bg-white p-4">
                   <p className="text-[11px] font-medium tracking-wide text-[#475569] uppercase">Your prompt • {type}</p>
-                  <p className="mt-2 text-[13px] leading-5 text-[#0F172A] whitespace-pre-wrap">{text}</p>
+                  <p className="mt-2 whitespace-pre-wrap text-[13px] leading-5 text-[#0F172A]">{text}</p>
                   {attachedFiles.length > 0 && (
                     <div className="mt-3 flex flex-wrap gap-2">
                       {attachedFiles.map((f) => (
@@ -207,58 +303,54 @@ export default function GeneratePage() {
                 <div className="max-h-[56vh] overflow-y-auto bg-[#F8FAFC] p-4">
                   <div className="rounded-[8px] border border-[#E2E8F0] bg-white p-4">
                     <DocumentPreview content={output} category={type} paginated />
-                    {generating && <span className="inline-block h-4 w-1.5 bg-[#0F172A] ml-0.5 animate-pulse align-middle" />}
+                    {generating && <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse bg-[#0F172A] align-middle" />}
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-
-          {filePreview && !output && (
-            <div className="overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white">
-              <div className="flex items-center justify-between border-b border-[#E2E8F0] bg-[#FAFAFA] px-3 py-2">
-                <span className="text-[11px] font-medium tracking-wide text-[#475569] uppercase">Attached preview</span>
-                <span className="max-w-[180px] truncate text-[11px] text-[#475569]">{attachedFiles[0]?.name}</span>
-              </div>
-              <div className="bg-[#F8FAFC] p-3">
-                <div className="rounded-[8px] border border-[#E2E8F0] bg-white p-3">
-                  <DocumentPreview content={filePreview} category={type} scale={0.42} />
+              {filePreview && (
+                <div className="overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white">
+                  <div className="flex items-center justify-between border-b border-[#E2E8F0] bg-[#FAFAFA] px-3 py-2">
+                    <span className="text-[11px] font-medium tracking-wide text-[#475569] uppercase">Attached preview</span>
+                    <span className="max-w-[180px] truncate text-[11px] text-[#475569]">{attachedFiles[0]?.name}</span>
+                  </div>
+                  <div className="bg-[#F8FAFC] p-3">
+                    <div className="rounded-[8px] border border-[#E2E8F0] bg-white p-3">
+                      <DocumentPreview content={filePreview} category={type} scale={0.42} />
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
+        </div>
+      </div>
 
-          {/* Input Card — structured, crisp borders, no pill */}
-          <div className="rounded-[10px] border border-[#E2E8F0] bg-white">
-            {/* Category badges — rectangle, subtle */}
+      {/* Bottom-docked composer — ChatGPT style */}
+      <div className="border-t border-[#E2E8F0] bg-white">
+        <div className="mx-auto max-w-[680px] px-4 sm:px-6 py-3">
+          <div className="rounded-[10px] border border-[#E2E8F0] bg-white shadow-sm focus-within:border-[#0F172A] focus-within:ring-1 focus-within:ring-[#0F172A]">
             <div className="flex flex-wrap gap-1.5 border-b border-[#E2E8F0] bg-[#FAFAFA] px-3 py-2">
               {TYPES.map((t) => (
                 <button
                   key={t}
                   onClick={() => selectType(t as any)}
-                  className={`rounded-[6px] border px-2.5 py-1 text-[12px] font-medium leading-none transition-colors ${
-                    type === t ? "border-[#0F172A] bg-[#0F172A] text-white" : "border-[#E2E8F0] bg-white text-[#475569] hover:bg-slate-50"
-                  }`}
+                  className={`rounded-[6px] border px-2.5 py-1 text-[12px] font-medium leading-none transition-colors ${type === t ? "border-[#0F172A] bg-[#0F172A] text-white" : "border-[#E2E8F0] bg-white text-[#475569] hover:bg-white"}`}
                 >
                   {t}
                 </button>
               ))}
             </div>
-
-            {/* Textarea */}
             <textarea
               ref={textareaRef}
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Describe or paste what you want to turn into a document — paste any copied text and we will format it…"
+              placeholder="Ask, paste, or drop a file — we will format it…"
               rows={1}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) generate();
               }}
-              className="w-full resize-none bg-white px-3 py-3 text-[13px] leading-5 text-[#0F172A] placeholder:text-[#94A3B8] focus:outline-none min-h-[64px] max-h-[160px]"
+              className="max-h-[160px] min-h-[52px] w-full resize-none bg-white px-3 py-2.5 text-[13px] leading-5 text-[#0F172A] placeholder:text-[#94A3B8] focus:outline-none"
             />
-
-            {/* Attached chips */}
             {attachedFiles.length > 0 && (
               <div className="flex flex-wrap gap-1.5 px-3 pb-2">
                 {attachedFiles.map((f) => (
@@ -271,19 +363,17 @@ export default function GeneratePage() {
                 ))}
               </div>
             )}
-
-            {/* Bottom action bar — left utility, right primary */}
             <div className="flex items-center justify-between gap-2 border-t border-[#E2E8F0] bg-[#FAFAFA] px-3 py-2">
               <div className="flex items-center gap-2">
                 <input ref={fileInputRef as any} type="file" multiple accept=".pdf,.docx,.txt,.csv,.xlsx,.png,.jpg,.jpeg,.webp" className="hidden" onChange={(e) => handleFiles(e.target.files)} />
                 <button
                   type="button"
                   onClick={() => (fileInputRef as any).current?.click()}
-                  className="inline-flex items-center gap-1.5 rounded-[6px] border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-[12px] font-medium text-[#0F172A] hover:bg-slate-50"
+                  className="inline-flex items-center gap-1.5 rounded-[6px] border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-[12px] font-medium text-[#0F172A] hover:bg-white"
                 >
                   <Paperclip className="h-3.5 w-3.5" strokeWidth={1.5} /> Attach
                 </button>
-                <button type="button" className="inline-flex items-center gap-1.5 rounded-[6px] border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-[12px] font-medium text-[#0F172A] hover:bg-slate-50">
+                <button type="button" className="inline-flex items-center gap-1.5 rounded-[6px] border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-[12px] font-medium text-[#0F172A] hover:bg-white">
                   <Mic className="h-3.5 w-3.5" strokeWidth={1.5} /> Voice
                 </button>
                 <span className="hidden sm:inline text-[11px] text-[#64748B]">~{pages} {pages === 1 ? "page" : "pages"}</span>
@@ -305,70 +395,12 @@ export default function GeneratePage() {
               </div>
             </div>
           </div>
-          <p className="flex items-center justify-center gap-1.5 text-center text-[11px] text-[#475569]">
+          <p className="mt-2 flex items-center justify-center gap-1.5 text-center text-[11px] text-[#475569]">
             <kbd className="rounded-[4px] border border-[#E2E8F0] bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] leading-none text-[#0F172A]">⌘</kbd>
             <span>+</span>
             <kbd className="rounded-[4px] border border-[#E2E8F0] bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] leading-none text-[#0F172A]">Enter</kbd>
-            <span>to generate • AI can make mistakes. Review before sharing.</span>
+            <span>to generate</span>
           </p>
-
-          {/* Templates — crisp dashed grid, enterprise */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="inline-flex items-center gap-2">
-                <LayoutGrid className="h-3.5 w-3.5 text-[#475569]" strokeWidth={1.5} />
-                <p className="text-[11px] font-semibold tracking-wide text-[#0F172A] uppercase">Templates</p>
-                <span className="rounded-[6px] border border-[#E2E8F0] bg-[#FAFAFA] px-1.5 py-0.5 text-[10px] font-medium text-[#475569]">{templates.length}</span>
-              </div>
-              <a href="/templates" className="inline-flex items-center gap-1 rounded-[6px] border border-[#E2E8F0] bg-white px-2 py-1 text-[11px] font-medium text-[#0F172A] hover:bg-slate-50">
-                See all <ArrowUp className="h-3 w-3 rotate-45" strokeWidth={1.5} />
-              </a>
-            </div>
-
-            {templates.length === 0 ? (
-              <div className="rounded-[10px] border border-dashed border-[#E2E8F0] bg-white p-0 overflow-hidden">
-                <div className="grid grid-cols-3 divide-x divide-dashed divide-[#E2E8F0]">
-                  {[0, 1, 2].map((i) => (
-                    <div key={i} className="flex flex-col items-center justify-center gap-2 p-6 text-center">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-[6px] border border-[#E2E8F0] bg-[#FAFAFA]">
-                        <FileUp className="h-4 w-4 text-[#475569]" strokeWidth={1.5} />
-                      </div>
-                      <span className="text-[11px] font-medium text-[#475569]">{i === 0 ? "No templates" : "Empty slot"}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex items-center justify-between border-t border-dashed border-[#E2E8F0] bg-[#FAFAFA] px-4 py-3">
-                  <p className="text-[12px] text-[#475569]">Upload your first template to populate this grid.</p>
-                  <a href="/upload/template" className="inline-flex items-center gap-1.5 rounded-[6px] bg-[#0F172A] px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-black">
-                    Upload template <ArrowUp className="h-3 w-3 rotate-45" strokeWidth={1.5} />
-                  </a>
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {templates.map((tpl) => (
-                  <button
-                    key={tpl.id}
-                    onClick={() => setPreviewTemplate(tpl)}
-                    className="group text-left overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white hover:border-[#CBD5E1] hover:bg-[#FAFAFA] transition-colors"
-                  >
-                    <div className="h-[128px] border-b border-[#E2E8F0] bg-[#F8FAFC] p-2">
-                      <div className="h-full overflow-hidden rounded-[6px] border border-[#E2E8F0] bg-white">
-                        <DocumentPreview content={tpl.content} category={tpl.category} scale={0.32} />
-                      </div>
-                    </div>
-                    <div className="p-3">
-                      <p className="truncate text-[13px] font-semibold leading-none text-[#0F172A]">{tpl.title}</p>
-                      <p className="mt-1 inline-flex items-center gap-1 text-[11px] text-[#475569]">
-                        <User className="h-3 w-3" strokeWidth={1.5} /> {tpl.author}
-                        <span className="ml-1 rounded-[4px] border border-[#E2E8F0] bg-[#FAFAFA] px-1 py-0 text-[10px] font-medium">{tpl.category}</span>
-                      </p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
       </div>
 

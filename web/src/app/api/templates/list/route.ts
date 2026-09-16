@@ -24,6 +24,10 @@ export async function GET(request: NextRequest) {
         description: true,
         category: true,
         prompt: true,
+        content: true,
+        author: true,
+        thumbnails: true,
+        fileUrl: true,
         downloads: true,
         createdAt: true,
         user: {

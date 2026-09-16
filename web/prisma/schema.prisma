@@ -127,10 +127,16 @@ model Template {
   id              String   @id @default(cuid())
   userId          String
   title           String
-  description     String
-  category        String   // invoice, report, contract, etc.
-  prompt          String   // the template prompt text
-  isPublic        Boolean  @default(false)
+  description     String   @default("")
+  category        String   // invoice, report, contract, business, personal, academic, etc.
+  prompt          String   @default("") // template prompt / extracted content
+  content         String?  @db.Text // full markdown / extracted text for file templates
+  author          String?  // display author, e.g. "Olivia Wilson"
+  thumbnails      Json?    // string[] of image urls
+  fileUrl         String?  // /uploads/templates/<id>.pdf etc
+  fileName        String?  // original filename
+  fileSize        Int?
+  isPublic        Boolean  @default(true)
   downloads       Int      @default(0)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

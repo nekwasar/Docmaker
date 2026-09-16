@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Sparkles, Paperclip, Mic, Loader2, Copy, Download, X, User, Eye, Square, RotateCcw, FileText } from "lucide-react";
+import { Sparkles, Paperclip, Mic, Loader2, Copy, Download, X, User, Square, RotateCcw, FileText } from "lucide-react";
 import { Brand } from "@/config/site";
 import { DOCUMENT_TEMPLATES } from "@/lib/ai/prompts";
-import { templates, type Template } from "@/data/templates";
+import { templates as staticTemplates, type Template } from "@/data/templates";
 import { DocumentPreview } from "./DocumentPreview";
 
 const TYPES = ["Auto", "Business", "Personal", "Academic", "Meeting"];
-const STARTER_TEMPLATES = templates.slice(0, 3);
 
 export default function GeneratePage() {
   const [text, setText] = useState("");
@@ -18,6 +17,27 @@ export default function GeneratePage() {
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [filePreview, setFilePreview] = useState<string>("");
+  const [templates, setTemplates] = useState<Template[]>(staticTemplates);
+  const STARTER_TEMPLATES = templates.slice(0, 3);
+
+  useEffect(() => {
+    fetch("/api/templates/list?limit=20")
+      .then((r) => r.json())
+      .then((d) => {
+        if (Array.isArray(d.templates) && d.templates.length > 0) {
+          const mapped: Template[] = d.templates.map((t: any) => ({
+            id: t.id,
+            title: t.title,
+            author: t.author || t.user?.name || "Docmaker",
+            category: (t.category as Template["category"]) || "Business",
+            thumbnails: Array.isArray(t.thumbnails) && t.thumbnails.length ? t.thumbnails : ["/api/og?title=" + encodeURIComponent(t.title)],
+            content: t.content || t.prompt || t.description || "",
+          }));
+          setTemplates(mapped);
+        }
+      })
+      .catch(() => {});
+  }, []);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -211,36 +231,34 @@ export default function GeneratePage() {
               <p className="text-xs font-medium text-slate-400 uppercase tracking-wide">Templates</p>
               <a href="/templates" className="text-xs text-slate-500 hover:text-slate-700">See all →</a>
             </div>
-            <div className="flex gap-3 overflow-x-auto pb-3 -mx-1 px-1">
-              {templates.map((tpl) => (
-                <button
-                  key={tpl.id}
-                  onClick={() => setPreviewTemplate(tpl)}
-                  className="group flex-shrink-0 w-[220px] text-left bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-slate-300 hover:shadow-sm transition-all"
-                >
-                  <div className="h-[140px] bg-[#EEF1F5] overflow-hidden p-2">
-                    {tpl.id === "tpl-uploaded-business-plan" ? (
-                      <div className="flex gap-1 h-full">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={tpl.thumbnails[0]} alt="Page 1" className="h-full w-1/2 object-cover rounded-sm bg-white shadow-sm" />
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={tpl.thumbnails[1]} alt="Page 2" className="h-full w-1/2 object-cover rounded-sm bg-white shadow-sm" />
-                      </div>
-                    ) : (
+            {templates.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-slate-200 bg-white p-6 text-center">
+                <p className="text-sm text-slate-500">No templates yet.</p>
+                <p className="text-xs text-slate-400 mt-1">Upload templates in <a href="/admin/templates" className="text-[#121660] underline">Admin → Templates</a>.</p>
+              </div>
+            ) : (
+              <div className="flex gap-3 overflow-x-auto pb-3 -mx-1 px-1">
+                {templates.map((tpl) => (
+                  <button
+                    key={tpl.id}
+                    onClick={() => setPreviewTemplate(tpl)}
+                    className="group flex-shrink-0 w-[220px] text-left bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-slate-300 hover:shadow-sm transition-all"
+                  >
+                    <div className="h-[140px] bg-[#EEF1F5] overflow-hidden p-2">
                       <div className="bg-white shadow-sm rounded-sm overflow-hidden h-full">
                         <DocumentPreview content={tpl.content} category={tpl.category} scale={0.32} />
                       </div>
-                    )}
-                  </div>
-                  <div className="p-3">
-                    <p className="text-sm font-semibold text-slate-900 line-clamp-1">{tpl.title}</p>
-                    <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-                      <User className="h-3 w-3" /> {tpl.author}
-                    </p>
-                  </div>
-                </button>
-              ))}
-            </div>
+                    </div>
+                    <div className="p-3">
+                      <p className="text-sm font-semibold text-slate-900 line-clamp-1">{tpl.title}</p>
+                      <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                        <User className="h-3 w-3" /> {tpl.author}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -340,44 +358,12 @@ export default function GeneratePage() {
               </button>
             </div>
             <div className="overflow-y-auto p-5 space-y-4">
-              {previewTemplate.id === "tpl-uploaded-business-plan" ? (
-                <>
-                  <div className="bg-[#EEF1F5] p-4 rounded-xl space-y-3">
-                    <p className="text-xs font-medium text-slate-500">
-                      Original PDF — 15 pages • rendered untempered from your upload
-                    </p>
-                    <div className="grid grid-cols-2 gap-3">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={previewTemplate.thumbnails[0]} alt="Page 1" className="w-full rounded-lg bg-white shadow" />
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={previewTemplate.thumbnails[1]} alt="Page 2" className="w-full rounded-lg bg-white shadow" />
-                    </div>
-                    <a
-                      href="/templates/uploaded-business-plan.pdf"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#121660] hover:underline"
-                    >
-                      <Eye className="h-3.5 w-3.5" /> Open full 15-page PDF (2.6 MB) →
-                    </a>
-                  </div>
-                  <div className="rounded-xl overflow-hidden border border-slate-200 bg-white" style={{ height: 520 }}>
-                    <iframe src="/templates/uploaded-business-plan.pdf" title="Uploaded PDF" className="w-full h-full border-0" />
-                  </div>
-                  <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 max-h-56 overflow-auto">
-                    <pre className="text-xs text-slate-700 whitespace-pre-wrap font-mono leading-relaxed">{previewTemplate.content}</pre>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="bg-[#EEF1F5] p-4 rounded-xl">
-                    <DocumentPreview content={previewTemplate.content} category={previewTemplate.category} paginated />
-                  </div>
-                  <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 max-h-56 overflow-auto">
-                    <pre className="text-xs text-slate-700 whitespace-pre-wrap font-mono leading-relaxed">{previewTemplate.content}</pre>
-                  </div>
-                </>
-              )}
+              <div className="bg-[#EEF1F5] p-4 rounded-xl">
+                <DocumentPreview content={previewTemplate.content} category={previewTemplate.category} paginated />
+              </div>
+              <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 max-h-56 overflow-auto">
+                <pre className="text-xs text-slate-700 whitespace-pre-wrap font-mono leading-relaxed">{previewTemplate.content}</pre>
+              </div>
             </div>
             <div className="p-5 border-t border-slate-100 flex gap-3">
               <button onClick={() => setPreviewTemplate(null)} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">

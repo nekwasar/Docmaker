@@ -161,15 +161,20 @@ export default function GeneratePage() {
 
   return (
     <div className="flex h-[calc(100dvh-64px)] flex-col bg-white">
+      {/* Giant header — removed from container, pinned up top */}
+      <div className="shrink-0 border-b border-[#E2E8F0] bg-white">
+        <div className="mx-auto max-w-[680px] px-4 sm:px-6 py-5 sm:py-6">
+          <h1 className="text-[44px] sm:text-[60px] font-bold leading-[0.85] tracking-[-0.04em] text-[#0F172A]">
+            Create a document
+          </h1>
+        </div>
+      </div>
       {/* Scrollable conversation / empty state */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
         <div className="mx-auto flex min-h-full max-w-[680px] flex-col px-4 sm:px-6 py-6">
           {isEmpty ? (
-            /* ChatGPT-style centered empty state */
+            /* ChatGPT-style centered empty state — header no longer inside */
             <div className="flex flex-1 flex-col justify-center gap-6 py-6">
-              <h1 className="translate-y-[-8px] text-[44px] sm:text-[60px] font-bold leading-[0.85] tracking-[-0.04em] text-[#0F172A]">
-                Create a document
-              </h1>
 
               {/* Quick starts — 2x2 crisp cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">

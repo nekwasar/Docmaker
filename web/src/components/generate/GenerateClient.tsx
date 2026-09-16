@@ -181,15 +181,16 @@ export default function GeneratePage() {
   const isEmpty = !output && !generating;
 
   return (
-    <div className="min-h-[calc(100dvh-64px)] bg-white">
+    <div className="min-h-[calc(100dvh-64px)] bg-[#F8FAFC]">
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-[720px] px-4 sm:px-6 py-6 sm:py-8 space-y-6">
-          {/* Intent-Focused Hero Section — replaces Sponsored + Help us grow */}
-          <div className="text-center sm:text-left space-y-3 py-2">
-            <h1 className="text-[30px] sm:text-[38px] font-bold tracking-[-0.03em] leading-[1.05] text-[#0F172A]">
-              Generate Formatted Documents in Seconds with AI.
+          {/* Intent-Focused Hero Section — clean, no badges */}
+          <div className="text-center sm:text-left space-y-3">
+            <h1 className="text-[32px] sm:text-[42px] font-bold tracking-[-0.03em] leading-[1.0] text-[#0F172A]">
+              Generate Formatted Documents
+              <span className="block text-[#2563EB]">In seconds, zero manual formatting.</span>
             </h1>
-            <p className="mx-auto sm:mx-0 max-w-[560px] text-[13px] leading-5 text-[#475569]">
+            <p className="mx-auto sm:mx-0 max-w-[560px] text-[15px] sm:text-[16px] leading-6 text-[#64748B]">
               Turn raw text or files into paginated, print-ready PDFs and DOCXs — no manual formatting.
             </p>
           </div>
@@ -212,7 +213,7 @@ export default function GeneratePage() {
           </div>
 
           {/* Input Area — un-stuck, directly under hero, with exposed controls */}
-          <div className="rounded-[12px] border border-[#E2E8F0] bg-white shadow-sm focus-within:border-[#0F172A] focus-within:ring-1 focus-within:ring-[#0F172A] overflow-hidden">
+          <div className="rounded-[12px] border border-[#E2E8F0] bg-white shadow-xl shadow-[0_20px_25px_-5px_rgba(0,0,0,0.06)] focus-within:border-[#0F172A] focus-within:ring-1 focus-within:ring-[#0F172A] overflow-hidden">
             {/* Exposed Interactive Controls */}
             <div className="flex flex-wrap items-center gap-2 border-b border-[#E2E8F0] bg-[#FAFAFA] px-3 py-2">
               <div className="flex items-center gap-1.5">

@@ -166,12 +166,9 @@ export default function GeneratePage() {
           {isEmpty ? (
             /* ChatGPT-style centered empty state */
             <div className="flex flex-1 flex-col justify-center gap-6 py-6">
-              <div className="space-y-4">
-                <DocmakerMark />
-                <h1 className="text-[40px] sm:text-[48px] font-semibold leading-[0.95] tracking-[-0.04em] text-[#0F172A]">
-                  Start a<br />document
-                </h1>
-              </div>
+              <h1 className="text-[42px] sm:text-[56px] font-bold leading-[0.9] tracking-[-0.03em] text-[#0F172A]">
+                Start a document
+              </h1>
 
               {/* Quick starts — 2x2 crisp cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">

@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Ubuntu, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { SessionProvider } from "@/components/providers/session-provider";
 
-const inter = Inter({ subsets: ["latin"] });
+const ubuntu = Ubuntu({ subsets: ["latin"], weight: ["300", "400", "500", "700"], variable: "--font-ubuntu" });
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
 
 export const metadata: Metadata = {
@@ -118,7 +118,7 @@ export default function RootLayout({
       <head>
         <link rel="search" type="application/opensearchdescription+xml" title="Docmaker" href="/opensearch.xml" />
       </head>
-      <body className={`${inter.className} ${playfair.variable}`}>
+      <body className={`${ubuntu.className} ${ubuntu.variable} ${playfair.variable}`}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteLd) }} />
         <SessionProvider>

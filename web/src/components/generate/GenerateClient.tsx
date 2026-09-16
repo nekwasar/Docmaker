@@ -164,7 +164,7 @@ export default function GeneratePage() {
       {/* Giant header — desktop closer, good space */}
       <div className="shrink-0 border-b border-[#E2E8F0] bg-white">
         <div className="mx-auto max-w-[680px] px-4 sm:px-6 py-3 sm:py-4">
-          <h1 className="text-[44px] sm:text-[60px] font-bold leading-[0.85] tracking-[-0.04em] text-[#0F172A]">
+          <h1 className="whitespace-nowrap text-[30px] sm:text-[60px] font-bold leading-[0.85] tracking-[-0.04em] text-[#0F172A]">
             Create a document
           </h1>
         </div>

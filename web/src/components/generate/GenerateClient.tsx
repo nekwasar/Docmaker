@@ -192,18 +192,17 @@ export default function GeneratePage() {
             </h1>
           </div>
 
-          {/* One-Click Prompt Templates — replaces generic category pills */}
+          {/* One-Click Prompt Templates — clickable pill cards */}
           <div className="space-y-2">
-            <p className="text-[11px] font-semibold tracking-wide text-[#0F172A] uppercase">Try one</p>
+            <p className="text-[11px] font-bold tracking-wide text-[#2563EB] uppercase">TRY A QUICK PROMPT</p>
             <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory scrollbar-none">
               {EXAMPLE_PROMPTS.map((ex) => (
                 <button
                   key={ex.label}
                   onClick={() => handlePromptClick(ex.text)}
-                  className="shrink-0 snap-start rounded-[8px] border border-[#E2E8F0] bg-white px-3 py-2 text-left hover:border-[#0F172A] hover:bg-[#FAFAFA] transition-colors"
+                  className="shrink-0 snap-start inline-flex items-center gap-1.5 rounded-full border border-[#BFDBFE] border-blue-200 bg-[#EFF6FF] bg-blue-50 px-4 py-2 text-left hover:border-[#2563EB] hover:bg-[#DBEAFE] active:scale-95 transition-all"
                 >
-                  <span className="block text-[12px] font-medium leading-4 text-[#0F172A] whitespace-nowrap">{ex.label}</span>
-                  <span className="block text-[11px] text-[#475569]">{ex.cat}</span>
+                  <span className="text-[12px] font-medium leading-4 text-[#0F172A] whitespace-nowrap">{ex.label}</span>
                 </button>
               ))}
             </div>
@@ -293,7 +292,7 @@ export default function GeneratePage() {
               ) : (
                 <button
                   onClick={generate}
-                  className="inline-flex items-center gap-1.5 rounded-[6px] bg-[#2563EB] bg-blue-600 px-5 py-2.5 text-[13px] font-bold text-white hover:bg-[#1D4ED8] hover:brightness-110 active:bg-[#1E40AF] shadow-sm hover:shadow-md transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-1.5 rounded-[6px] bg-[#0F172A] px-5 py-2.5 text-[13px] font-bold text-white hover:bg-black shadow-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Generate Document <span aria-hidden>→</span>
                 </button>

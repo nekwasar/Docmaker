@@ -154,7 +154,10 @@ export default function GeneratePage() {
         const blob = await res.blob();
         const name = tpl.fileUrl.split("/").pop() || `${tpl.title}.pdf`;
         const file = new File([blob], name, { type: blob.type || "application/pdf" });
-        setAttachedFiles((prev) => [file, ...prev].slice(0, 3));
+        setAttachedFiles((prev) => {
+          if (prev.some((p) => p.name === file.name && p.size === file.size)) return prev;
+          return [file, ...prev].slice(0, 3);
+        });
       } catch {}
     }
 
@@ -310,10 +313,10 @@ export default function GeneratePage() {
                   <p className="text-[11px] font-medium tracking-wide text-[#475569] uppercase">Your prompt • {type}</p>
                   <p className="mt-2 whitespace-pre-wrap text-[13px] leading-5 text-[#0F172A]">{text}</p>
                   {attachedFiles.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {attachedFiles.map((f) => (
-                        <span key={f.name} className="inline-flex items-center gap-1.5 rounded-[6px] border border-[#E2E8F0] bg-[#FAFAFA] px-2 py-1 text-[12px] text-[#0F172A]">
-                          <FileText className="h-3 w-3" strokeWidth={1.5} /> {f.name}
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {attachedFiles.map((f, i) => (
+                        <span key={`${f.name}-${f.size}-${i}`} className="inline-flex items-center gap-1 rounded-[6px] border border-[#E2E8F0] bg-[#FAFAFA] px-1.5 py-0.5 text-[11px] text-[#0F172A]">
+                          <FileText className="h-2.5 w-2.5" strokeWidth={1.5} /> {f.name}
                         </span>
                       ))}
                     </div>
@@ -392,11 +395,11 @@ export default function GeneratePage() {
             />
             {attachedFiles.length > 0 && (
               <div className="flex flex-wrap gap-1.5 px-3 pb-2">
-                {attachedFiles.map((f) => (
-                  <span key={f.name} className="inline-flex items-center gap-1 rounded-[6px] border border-[#E2E8F0] bg-[#FAFAFA] px-2 py-1 text-[12px] text-[#0F172A]">
+                {attachedFiles.map((f, i) => (
+                  <span key={`${f.name}-${f.size}-${i}`} className="inline-flex items-center gap-1 rounded-[6px] border border-[#E2E8F0] bg-[#FAFAFA] px-1.5 py-0.5 text-[11px] text-[#0F172A]">
                     {f.name}
                     <button onClick={() => setAttachedFiles((prev) => prev.filter((x) => x !== f))} className="ml-1 rounded-[4px] p-0.5 hover:bg-white">
-                      <X className="h-3 w-3" strokeWidth={1.5} />
+                      <X className="h-2.5 w-2.5" strokeWidth={1.5} />
                     </button>
                   </span>
                 ))}

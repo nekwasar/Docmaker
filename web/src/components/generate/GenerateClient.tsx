@@ -5,6 +5,7 @@ import { Paperclip, Mic, Copy, Download, X, User, Square, RotateCcw, FileText, F
 import { DOCUMENT_TEMPLATES } from "@/lib/ai/prompts";
 import { templates as staticTemplates, type Template } from "@/data/templates";
 import { DocumentPreview } from "./DocumentPreview";
+import { TopStatusSlot } from "./TopStatusSlot";
 
 const TYPES = ["Auto", "Business", "Personal", "Academic", "Meeting"] as const;
 
@@ -40,6 +41,8 @@ export default function GeneratePage() {
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [filePreview, setFilePreview] = useState<string>("");
   const [templates, setTemplates] = useState<Template[]>(staticTemplates);
+  const [adAvailable, setAdAvailable] = useState(true);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -100,6 +103,17 @@ export default function GeneratePage() {
       setFilePreview(`• ${f.name} (${(f.size / 1024).toFixed(1)} KB) — will be used as generation context`);
     }
   }, [attachedFiles]);
+
+  // Transient analyzing pulse after a file is attached (State 1 demo)
+  useEffect(() => {
+    if (filePreview && !generating && attachedFiles.length > 0) {
+      setIsAnalyzing(true);
+      const t = setTimeout(() => setIsAnalyzing(false), 2200);
+      return () => clearTimeout(t);
+    } else {
+      setIsAnalyzing(false);
+    }
+  }, [filePreview, generating, attachedFiles.length]);
 
   const handleFiles = (files: FileList | null) => {
     if (!files) return;
@@ -229,19 +243,20 @@ export default function GeneratePage() {
                 ))}
               </div>
 
-              {filePreview && (
-                <div className="overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white">
-                  <div className="flex items-center justify-between border-b border-[#E2E8F0] bg-[#FAFAFA] px-3 py-2">
-                    <span className="text-[11px] font-medium tracking-wide text-[#475569] uppercase">Attached preview</span>
-                    <span className="max-w-[180px] truncate text-[11px] text-[#475569]">{attachedFiles[0]?.name}</span>
-                  </div>
-                  <div className="bg-[#F8FAFC] p-3">
-                    <div className="rounded-[8px] border border-[#E2E8F0] bg-white p-3">
-                      <DocumentPreview content={filePreview} category={type} scale={0.42} />
-                    </div>
-                  </div>
-                </div>
-              )}
+              {/* Dynamic status banner slot — replaces hardcoded ATTACHED PREVIEW */}
+              {(() => {
+                const agentStatus = generating ? "generating" : isAnalyzing ? "analyzing" : "idle";
+                const activeFile = attachedFiles[0] ?? null;
+                return (
+                  <TopStatusSlot
+                    agentStatus={agentStatus as any}
+                    adAvailable={adAvailable}
+                    onCloseAd={() => setAdAvailable(false)}
+                    activeFile={activeFile}
+                    onRemoveFile={() => setAttachedFiles((prev) => prev.slice(1))}
+                  />
+                );
+              })()}
 
               {/* Persistent Help-us-grow CTA — always seeable */}
               <div className="flex items-center justify-between rounded-[10px] border border-[#E2E8F0] bg-[#FAFAFA] px-4 py-3">

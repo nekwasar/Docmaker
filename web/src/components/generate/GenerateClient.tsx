@@ -183,16 +183,13 @@ export default function GeneratePage() {
   return (
     <div className="min-h-[calc(100dvh-64px)] bg-[#F8FAFC]">
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-[720px] px-4 sm:px-6 py-6 sm:py-8 space-y-6">
-          {/* Intent-Focused Hero Section — clean, no badges */}
-          <div className="text-center sm:text-left space-y-3">
-            <h1 className="text-[32px] sm:text-[42px] font-bold tracking-[-0.03em] leading-[1.0] text-[#0F172A]">
+        <div className="mx-auto max-w-[720px] px-4 sm:px-6 py-6 sm:py-8 space-y-4">
+          {/* Intent-Focused Hero Section — clean, no badges, tight 16px gap */}
+          <div className="text-center sm:text-left">
+            <h1 className="text-[30px] sm:text-[38px] font-bold tracking-[-0.03em] leading-[1.05] text-[#0F172A]">
               Generate Formatted Documents
-              <span className="block text-[#2563EB]">In seconds, zero manual formatting.</span>
+              <span className="block text-[#2563EB]">In Seconds with AI</span>
             </h1>
-            <p className="mx-auto sm:mx-0 max-w-[560px] text-[15px] sm:text-[16px] leading-6 text-[#64748B]">
-              Turn raw text or files into paginated, print-ready PDFs and DOCXs — no manual formatting.
-            </p>
           </div>
 
           {/* One-Click Prompt Templates — replaces generic category pills */}
@@ -296,7 +293,7 @@ export default function GeneratePage() {
               ) : (
                 <button
                   onClick={generate}
-                  className="inline-flex items-center gap-1.5 rounded-[6px] bg-[#0F172A] px-5 py-2.5 text-[13px] font-semibold text-white hover:bg-black shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-1.5 rounded-[6px] bg-[#2563EB] bg-blue-600 px-5 py-2.5 text-[13px] font-bold text-white hover:bg-[#1D4ED8] hover:brightness-110 active:bg-[#1E40AF] shadow-sm hover:shadow-md transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Generate Document <span aria-hidden>→</span>
                 </button>

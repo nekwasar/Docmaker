@@ -28,6 +28,11 @@ services:
       - /app/node_modules
       - /app/.next
     env_file: ./web/.env
+    environment:
+      DATABASE_URL: postgresql://namesranker:namesranker@docmaker-postgres:5432/docmaker
+      NEXTAUTH_URL: https://docmaker.io
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       db:
         condition: service_healthy

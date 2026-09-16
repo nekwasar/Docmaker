@@ -14,12 +14,15 @@ const EXAMPLE_PROMPTS = [
   { label: "Create Research Brief", text: "Create a research brief on remote work's impact on urban design — abstract, introduction, literature review, analysis, and conclusion.", cat: "Academic" },
 ] as const;
 
-const MODEL_OPTIONS = ["GPT-4o", "Claude 3.5 Sonnet", "Gemini 1.5 Pro"] as const;
+const STYLE_OPTIONS = [
+  { value: "professional", label: "Professional" },
+  { value: "simple", label: "Simple English" },
+] as const;
 const FORMAT_OPTIONS = ["PDF", "DOCX", "Markdown"] as const;
 
 export default function GeneratePage() {
   const [text, setText] = useState("");
-  const [selectedModel, setSelectedModel] = useState<(typeof MODEL_OPTIONS)[number]>("GPT-4o");
+  const [selectedStyle, setSelectedStyle] = useState<(typeof STYLE_OPTIONS)[number]["value"]>("professional");
   const [selectedFormat, setSelectedFormat] = useState<(typeof FORMAT_OPTIONS)[number]>("PDF");
   const [generating, setGenerating] = useState(false);
   const [output, setOutput] = useState("");
@@ -104,7 +107,7 @@ export default function GeneratePage() {
       const form = new FormData();
       form.append("text", text);
       form.append("structure", "business");
-      form.append("model", selectedModel);
+      form.append("style", selectedStyle);
       form.append("format", selectedFormat.toLowerCase());
       attachedFiles.forEach((f) => form.append("files", f));
 
@@ -213,15 +216,15 @@ export default function GeneratePage() {
             {/* Exposed Interactive Controls */}
             <div className="flex flex-wrap items-center gap-2 border-b border-[#E2E8F0] bg-[#FAFAFA] px-3 py-2">
               <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-medium text-[#475569]">Model</span>
+                <span className="text-[11px] font-medium text-[#475569]">Style</span>
                 <div className="relative">
                   <select
-                    value={selectedModel}
-                    onChange={(e) => setSelectedModel(e.target.value as any)}
+                    value={selectedStyle}
+                    onChange={(e) => setSelectedStyle(e.target.value as any)}
                     className="appearance-none rounded-[6px] border border-[#E2E8F0] bg-white pl-2 pr-6 py-1 text-[12px] font-medium text-[#0F172A] focus:outline-none focus:border-[#0F172A]"
                   >
-                    {MODEL_OPTIONS.map((m) => (
-                      <option key={m} value={m}>{m}</option>
+                    {STYLE_OPTIONS.map((s) => (
+                      <option key={s.value} value={s.value}>{s.label}</option>
                     ))}
                   </select>
                   <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 h-3 w-3 text-[#475569]" strokeWidth={1.5} />

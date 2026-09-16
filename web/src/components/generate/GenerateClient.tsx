@@ -166,9 +166,9 @@ export default function GeneratePage() {
         <div className="mx-auto flex min-h-full max-w-[680px] flex-col px-4 sm:px-6 py-6">
           {isEmpty ? (
             /* ChatGPT-style centered empty state */
-            <div className="flex flex-1 flex-col justify-center gap-6 py-6">
-              <h1 className="text-[42px] sm:text-[56px] font-bold leading-[0.9] tracking-[-0.03em] text-[#0F172A]">
-                Start a document
+            <div className="flex flex-1 flex-col justify-start gap-8 pt-8 sm:pt-12 pb-6">
+              <h1 className="text-[44px] sm:text-[60px] font-bold leading-[0.85] tracking-[-0.04em] text-[#0F172A]">
+                Create a document
               </h1>
 
               {/* Quick starts — 2x2 crisp cards */}

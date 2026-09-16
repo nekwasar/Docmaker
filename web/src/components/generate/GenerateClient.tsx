@@ -396,8 +396,8 @@ export default function GeneratePage() {
       </div>
 
       {/* Bottom-docked composer — ChatGPT style */}
-      <div className="border-t border-[#E2E8F0] bg-white">
-        <div className="mx-auto max-w-[680px] px-4 sm:px-6 py-3">
+      <div className="border-t border-[#E2E8F0] bg-white pb-[env(safe-area-inset-bottom)]">
+        <div className="mx-auto max-w-[680px] px-4 sm:px-6 pt-3 pb-6 sm:py-3">
           <div className="rounded-[10px] border border-[#E2E8F0] bg-white shadow-sm focus-within:border-[#0F172A] focus-within:ring-1 focus-within:ring-[#0F172A]">
             <div className="flex flex-wrap gap-1.5 border-b border-[#E2E8F0] bg-[#FAFAFA] px-3 py-2">
               {TYPES.map((t) => (

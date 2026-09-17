@@ -12,6 +12,24 @@ export function BottomNav() {
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    const check = () => {
+      const hasModal = !!document.querySelector("[data-full-modal]") || document.body.dataset.modalOpen === "true";
+      setIsModalOpen(hasModal);
+    };
+    check();
+    const observer = new MutationObserver(check);
+    observer.observe(document.body, { attributes: true, childList: true, subtree: true, attributeFilter: ["data-modal-open"] });
+    window.addEventListener("preview-modal-change", check as any);
+    const interval = setInterval(check, 300);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("preview-modal-change", check as any);
+      clearInterval(interval);
+    };
+  }, []);
 
   useEffect(() => {
     if (!searchOpen) return;
@@ -29,6 +47,8 @@ export function BottomNav() {
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
   const isHome = pathname === "/";
+
+  if (isModalOpen || searchOpen) return null;
 
   return (
     <>

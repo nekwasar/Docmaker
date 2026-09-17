@@ -38,6 +38,18 @@ export default function TemplatesPage() {
 
   useEffect(() => { setPreviewPage(0); }, [previewTemplate]);
 
+  useEffect(() => {
+    const isOpen = !!previewTemplate;
+    document.body.dataset.modalOpen = isOpen ? "true" : "false";
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    window.dispatchEvent(new CustomEvent("preview-modal-change", { detail: { open: isOpen } }));
+    return () => {
+      document.body.dataset.modalOpen = "false";
+      document.body.style.overflow = "";
+      window.dispatchEvent(new CustomEvent("preview-modal-change", { detail: { open: false } }));
+    };
+  }, [previewTemplate]);
+
   const filtered = templates.filter((t) => {
     const matchCat = cat === "All" || t.category === cat;
     const matchQ = !q || t.title.toLowerCase().includes(q.toLowerCase()) || t.author.toLowerCase().includes(q.toLowerCase());
@@ -125,58 +137,55 @@ export default function TemplatesPage() {
       </div>
 
       {previewTemplate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <button aria-label="Close preview" onClick={() => setPreviewTemplate(null)} className="absolute inset-0 bg-[#0F172A]/50 backdrop-blur-[2px]" />
-          <div className="relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white shadow-xl">
-            <div className="flex items-center justify-between border-b border-[#E2E8F0] px-4 py-3">
-              <div>
-                <h2 className="text-[14px] font-semibold text-[#0F172A]">{previewTemplate.title}</h2>
-                <p className="mt-1 inline-flex items-center gap-1.5 text-[11px] text-[#475569]">
-                  <User className="h-3 w-3" strokeWidth={1.5} /> {previewTemplate.author}
-                  <span className="rounded-[6px] border border-[#E2E8F0] bg-[#FAFAFA] px-1.5 py-0.5 text-[10px] font-medium text-[#0F172A]">{previewTemplate.category}</span>
-                </p>
-              </div>
-              <button onClick={() => setPreviewTemplate(null)} className="rounded-[6px] border border-[#E2E8F0] bg-white p-1.5 hover:bg-slate-50" aria-label="Close">
-                <X className="h-4 w-4 text-[#475569]" strokeWidth={1.5} />
-              </button>
+        <div data-full-modal className="fixed inset-0 z-50 flex flex-col bg-white">
+          <div className="flex shrink-0 items-center justify-between border-b border-[#E2E8F0] bg-white px-4 py-3">
+            <div className="min-w-0">
+              <h2 className="truncate text-[15px] font-semibold text-[#0F172A]">{previewTemplate.title}</h2>
+              <p className="mt-1 inline-flex items-center gap-1.5 text-[11px] text-[#475569]">
+                <User className="h-3 w-3 shrink-0" strokeWidth={1.5} /> <span className="truncate">{previewTemplate.author}</span>
+                <span className="rounded-[6px] border border-[#E2E8F0] bg-[#FAFAFA] px-1.5 py-0.5 text-[10px] font-medium text-[#0F172A]">{previewTemplate.category}</span>
+              </p>
             </div>
-            <div className="space-y-3 overflow-y-auto p-4">
-              {previewTemplate.fileUrl ? (
-                previewTemplate.thumbnails && previewTemplate.thumbnails.length > 0 ? (
-                  <div className="space-y-3">
-                    <div className="overflow-hidden rounded-[8px] border border-[#E2E8F0] bg-white">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={previewTemplate.thumbnails[previewPage]} alt={`Page ${previewPage + 1}`} className="w-full object-contain" />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-medium text-[#475569]">Page {previewPage + 1} of {previewTemplate.thumbnails.length}</span>
-                      <div className="flex gap-1">
-                        <button disabled={previewPage === 0} onClick={() => setPreviewPage((p) => Math.max(0, p - 1))} className="rounded-[6px] border border-[#E2E8F0] bg-white px-2 py-1 text-[11px] disabled:opacity-40">Prev</button>
-                        <button disabled={previewPage === previewTemplate.thumbnails.length - 1} onClick={() => setPreviewPage((p) => Math.min(previewTemplate.thumbnails.length - 1, p + 1))} className="rounded-[6px] border border-[#E2E8F0] bg-white px-2 py-1 text-[11px] disabled:opacity-40">Next</button>
-                      </div>
-                    </div>
-                    <div className="flex justify-center gap-1.5">
-                      {previewTemplate.thumbnails.map((_, i) => (
-                        <button key={i} onClick={() => setPreviewPage(i)} aria-label={`Go to page ${i + 1}`} className={`h-1.5 w-6 rounded-full ${i === previewPage ? "bg-[#0F172A]" : "bg-[#E2E8F0]"}`} />
-                      ))}
+            <button onClick={() => setPreviewTemplate(null)} className="ml-3 shrink-0 rounded-[6px] border border-[#E2E8F0] bg-white p-2 hover:bg-slate-50" aria-label="Close">
+              <X className="h-4 w-4 text-[#475569]" strokeWidth={1.5} />
+            </button>
+          </div>
+          <div className="flex-1 space-y-3 overflow-y-auto bg-[#F8FAFC] p-4">
+            {previewTemplate.fileUrl ? (
+              previewTemplate.thumbnails && previewTemplate.thumbnails.length > 0 ? (
+                <div className="space-y-3">
+                  <div className="overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={previewTemplate.thumbnails[previewPage]} alt={`Page ${previewPage + 1}`} className="w-full object-contain" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[12px] font-medium text-[#0F172A]">Page {previewPage + 1} of {previewTemplate.thumbnails.length}</span>
+                    <div className="flex gap-1.5">
+                      <button disabled={previewPage === 0} onClick={() => setPreviewPage((p) => Math.max(0, p - 1))} className="rounded-[6px] border border-[#E2E8F0] bg-white px-3 py-1.5 text-[12px] font-medium disabled:opacity-40">Prev</button>
+                      <button disabled={previewPage === previewTemplate.thumbnails.length - 1} onClick={() => setPreviewPage((p) => Math.min(previewTemplate.thumbnails.length - 1, p + 1))} className="rounded-[6px] border border-[#E2E8F0] bg-white px-3 py-1.5 text-[12px] font-medium disabled:opacity-40">Next</button>
                     </div>
                   </div>
-                ) : (
-                  <div className="overflow-hidden rounded-[8px] border border-[#E2E8F0] bg-white" style={{ height: 420 }}>
-                    <iframe src={previewTemplate.fileUrl} title={previewTemplate.title} className="h-full w-full border-0" />
+                  <div className="flex justify-center gap-1.5 pt-1">
+                    {previewTemplate.thumbnails.map((_, i) => (
+                      <button key={i} onClick={() => setPreviewPage(i)} aria-label={`Go to page ${i + 1}`} className={`h-2 w-8 rounded-full transition-colors ${i === previewPage ? "bg-[#0F172A]" : "bg-[#E2E8F0]"}`} />
+                    ))}
                   </div>
-                )
-              ) : (
-                <div className="rounded-[8px] border border-[#E2E8F0] bg-[#F8FAFC] p-3">
-                  <DocumentPreview content={previewTemplate.content} category={previewTemplate.category} paginated />
                 </div>
-              )}
-            </div>
-            <div className="border-t border-[#E2E8F0] p-3">
-              <Link href={`/?template=${previewTemplate.id}`} className="flex w-full items-center justify-center rounded-[6px] bg-[#0F172A] py-2.5 text-[13px] font-semibold text-white hover:bg-black">
-                Use this template
-              </Link>
-            </div>
+              ) : (
+                <div className="overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white" style={{ height: "60vh" }}>
+                  <iframe src={previewTemplate.fileUrl} title={previewTemplate.title} className="h-full w-full border-0" />
+                </div>
+              )
+            ) : (
+              <div className="rounded-[10px] border border-[#E2E8F0] bg-white p-4 shadow-sm">
+                <DocumentPreview content={previewTemplate.content} category={previewTemplate.category} paginated />
+              </div>
+            )}
+          </div>
+          <div className="shrink-0 border-t border-[#E2E8F0] bg-white p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+            <Link href={`/?template=${previewTemplate.id}`} className="flex w-full items-center justify-center rounded-[10px] bg-[#0F172A] py-3 text-[14px] font-semibold text-white hover:bg-black active:scale-[0.99]">
+              Use this template
+            </Link>
           </div>
         </div>
       )}

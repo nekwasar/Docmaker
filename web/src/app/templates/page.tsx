@@ -1,20 +1,35 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { templates as staticTemplates } from "@/data/templates";
 import { DocumentPreview } from "@/components/generate/DocumentPreview";
 import type { Template } from "@/data/templates";
-import { Search, User, FileText, X } from "lucide-react";
+import { Search, User, FileText, X, SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
 
 const categories = ["All", "Business", "Personal", "Academic", "Meeting", "Legal"] as const;
 
 export default function TemplatesPage() {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("All");
+  const [filterOpen, setFilterOpen] = useState(false);
   const [templates, setTemplates] = useState<Template[]>(staticTemplates);
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
   const [previewPage, setPreviewPage] = useState(0);
+  const touchStartX = useRef<number | null>(null);
+
+  const handleSwipeStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const handleSwipeEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || !previewTemplate?.thumbnails) return;
+    const diff = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(diff) > 50) {
+      if (diff < 0 && previewPage < previewTemplate.thumbnails.length - 1) setPreviewPage((p) => p + 1);
+      else if (diff > 0 && previewPage > 0) setPreviewPage((p) => p - 1);
+    }
+    touchStartX.current = null;
+  };
 
   useEffect(() => {
     fetch("/api/templates/list?limit=100")
@@ -56,47 +71,99 @@ export default function TemplatesPage() {
     return matchCat && matchQ;
   });
 
+  const handleCreateTemplate = async () => {
+    try {
+      const res = await fetch("/api/auth/session");
+      const data = await res.json().catch(() => null);
+      if (!data?.user) {
+        const go = window.confirm("Please sign in to create a template. Go to sign in?");
+        if (go) window.location.href = "/signup";
+        return;
+      }
+    } catch {}
+    window.location.href = "/upload/template";
+  };
+
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        <h1 className="text-[28px] sm:text-[32px] font-bold tracking-[-0.03em] leading-[1.05] text-[#0F172A]">Templates</h1>
-        <p className="text-[13px] sm:text-[14px] leading-5 text-[#64748B] mt-2">Choose a starting structure — real document previews, not placeholder images.</p>
-
-        <div className="mt-6 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#64748B]" strokeWidth={1.5} />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search templates"
-            className="w-full pl-9 pr-4 py-2.5 rounded-[8px] border border-[#E2E8F0] bg-white text-[13px] text-[#0F172A] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A]"
-          />
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-[28px] sm:text-[32px] font-bold tracking-[-0.03em] leading-[1.05] text-[#0F172A]">Templates</h1>
+            <p className="text-[13px] sm:text-[14px] leading-5 text-[#64748B] mt-2">Choose a starting structure — real document previews, not placeholder images.</p>
+          </div>
+          <button
+            onClick={handleCreateTemplate}
+            className="shrink-0 inline-flex items-center gap-1.5 rounded-[8px] bg-[#0F172A] px-3 py-2 sm:px-4 sm:py-2.5 text-[13px] font-semibold text-white hover:bg-black active:scale-[0.98] shadow-sm"
+          >
+            <span className="text-[16px] leading-none">+</span>
+            <span className="hidden sm:inline">Create Template</span>
+            <span className="sm:hidden" aria-hidden>+</span>
+          </button>
         </div>
 
-        <div className="flex gap-2 mt-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory">
-          {categories.map((c) => (
-            <button
-              key={c}
-              onClick={() => setCat(c)}
-              className={`shrink-0 snap-start rounded-[6px] border px-3 py-1.5 text-[12px] font-medium whitespace-nowrap transition-colors ${cat === c ? "bg-[#0F172A] border-[#0F172A] text-white" : "bg-white border-[#E2E8F0] text-[#475569] hover:bg-[#FAFAFA]"}`}
-            >
-              {c}
-            </button>
-          ))}
+        <div className="mt-6 flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#64748B]" strokeWidth={1.5} />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search templates"
+              className="w-full pl-9 pr-4 py-2.5 rounded-[8px] border border-[#E2E8F0] bg-white text-[13px] text-[#0F172A] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A]"
+            />
+          </div>
+          <button
+            onClick={() => setFilterOpen(!filterOpen)}
+            aria-label="Filter templates"
+            aria-expanded={filterOpen}
+            className={`flex shrink-0 items-center justify-center gap-1.5 rounded-[8px] border px-3 py-2.5 text-[12px] font-medium transition-colors ${filterOpen || cat !== "All" ? "border-[#0F172A] bg-[#0F172A] text-white" : "border-[#E2E8F0] bg-white text-[#475569] hover:bg-[#FAFAFA] hover:border-[#CBD5E1]"}`}
+          >
+            <SlidersHorizontal className="h-4 w-4" strokeWidth={1.75} />
+            <span className="hidden sm:inline">Filter</span>
+            {cat !== "All" && <span className="hidden sm:inline rounded-full bg-white/20 px-1.5 py-0.5 text-[10px]">{cat}</span>}
+          </button>
         </div>
+        {filterOpen && (
+          <div className="mt-3 flex flex-wrap gap-2 rounded-[10px] border border-[#E2E8F0] bg-white p-2">
+            {categories.map((c) => (
+              <button
+                key={c}
+                onClick={() => {
+                  setCat(c);
+                  setFilterOpen(false);
+                }}
+                className={`rounded-[6px] border px-3 py-1.5 text-[12px] font-medium whitespace-nowrap transition-colors ${cat === c ? "bg-[#0F172A] border-[#0F172A] text-white" : "bg-[#FAFAFA] border-[#E2E8F0] text-[#475569] hover:bg-white hover:border-[#CBD5E1]"}`}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        )}
 
-        {filtered.length === 0 ? (
+        {filtered.length === 0 && templates.length !== 0 ? (
           <div className="mt-8 rounded-[10px] border border-dashed border-[#E2E8F0] bg-white p-8 text-center">
             <p className="text-[13px] font-medium text-[#0F172A]">No templates match.</p>
-            <p className="text-[12px] text-[#64748B] mt-1">
-              {templates.length === 0 ? (
-                <>No templates uploaded yet — <a href="/upload/template" className="text-[#0F172A] font-medium underline hover:text-[#2563EB]">upload a template</a>.</>
-              ) : (
-                <>Try a different search or category.</>
-              )}
-            </p>
+            <p className="text-[12px] text-[#64748B] mt-1">Try a different search or category.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-6">
+            <button
+              onClick={handleCreateTemplate}
+              className="group flex flex-col items-center justify-center gap-2 rounded-[10px] border-2 border-dashed border-[#CBD5E1] bg-[#F8FAFC] hover:bg-white hover:border-[#0F172A] p-6 text-center transition-colors h-[320px] sm:h-[360px]"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white border-2 border-dashed border-[#CBD5E1] group-hover:border-[#0F172A] transition-colors">
+                <span className="text-[22px] font-light leading-none text-[#475569] group-hover:text-[#0F172A]">+</span>
+              </div>
+              <p className="text-[13px] font-semibold text-[#0F172A]">Create Template</p>
+              <p className="text-[11px] text-[#64748B]">Create or Upload Template</p>
+            </button>
+            {filtered.length === 0 ? (
+              <div className="col-span-1 sm:col-span-2 rounded-[10px] border border-dashed border-[#E2E8F0] bg-white p-8 text-center flex flex-col items-center justify-center h-[320px] sm:h-[360px]">
+                <p className="text-[13px] font-medium text-[#0F172A]">No templates uploaded yet</p>
+                <p className="text-[12px] text-[#64748B] mt-1">Be the first — your template stays forever.</p>
+              </div>
+            ) : (
+              <>
             {filtered.map((tpl) => (
               <button
                 key={tpl.id}
@@ -132,6 +199,8 @@ export default function TemplatesPage() {
                 </div>
               </button>
             ))}
+              </>
+            )}
           </div>
         )}
       </div>
@@ -154,21 +223,40 @@ export default function TemplatesPage() {
             {previewTemplate.fileUrl ? (
               previewTemplate.thumbnails && previewTemplate.thumbnails.length > 0 ? (
                 <div className="space-y-3">
-                  <div className="overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white">
+                  <div
+                    className="relative overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white group"
+                    onTouchStart={handleSwipeStart}
+                    onTouchEnd={handleSwipeEnd}
+                  >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={previewTemplate.thumbnails[previewPage]} alt={`Page ${previewPage + 1}`} className="w-full object-contain" />
+                    <img src={previewTemplate.thumbnails[previewPage]} alt={`Page ${previewPage + 1}`} className="w-full object-contain select-none" draggable={false} />
+                    {previewPage > 0 && (
+                      <button
+                        onClick={() => setPreviewPage((p) => Math.max(0, p - 1))}
+                        aria-label="Previous page"
+                        className="absolute left-2 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 backdrop-blur border border-[#E2E8F0] shadow-md hover:bg-white transition-colors"
+                      >
+                        <ChevronLeft className="h-5 w-5 text-[#0F172A]" strokeWidth={1.75} />
+                      </button>
+                    )}
+                    {previewPage < previewTemplate.thumbnails.length - 1 && (
+                      <button
+                        onClick={() => setPreviewPage((p) => Math.min(previewTemplate.thumbnails.length - 1, p + 1))}
+                        aria-label="Next page"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 backdrop-blur border border-[#E2E8F0] shadow-md hover:bg-white transition-colors"
+                      >
+                        <ChevronRight className="h-5 w-5 text-[#0F172A]" strokeWidth={1.75} />
+                      </button>
+                    )}
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[12px] font-medium text-[#0F172A]">Page {previewPage + 1} of {previewTemplate.thumbnails.length}</span>
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-[11px] font-medium text-[#475569]">Page {previewPage + 1} of {previewTemplate.thumbnails.length}</span>
+                    <span className="h-3 w-px bg-[#E2E8F0]" aria-hidden />
                     <div className="flex gap-1.5">
-                      <button disabled={previewPage === 0} onClick={() => setPreviewPage((p) => Math.max(0, p - 1))} className="rounded-[6px] border border-[#E2E8F0] bg-white px-3 py-1.5 text-[12px] font-medium disabled:opacity-40">Prev</button>
-                      <button disabled={previewPage === previewTemplate.thumbnails.length - 1} onClick={() => setPreviewPage((p) => Math.min(previewTemplate.thumbnails.length - 1, p + 1))} className="rounded-[6px] border border-[#E2E8F0] bg-white px-3 py-1.5 text-[12px] font-medium disabled:opacity-40">Next</button>
+                      {previewTemplate.thumbnails.map((_, i) => (
+                        <button key={i} onClick={() => setPreviewPage(i)} aria-label={`Go to page ${i + 1}`} className={`h-1.5 w-6 rounded-full transition-colors ${i === previewPage ? "bg-[#0F172A]" : "bg-[#E2E8F0]"}`} />
+                      ))}
                     </div>
-                  </div>
-                  <div className="flex justify-center gap-1.5 pt-1">
-                    {previewTemplate.thumbnails.map((_, i) => (
-                      <button key={i} onClick={() => setPreviewPage(i)} aria-label={`Go to page ${i + 1}`} className={`h-2 w-8 rounded-full transition-colors ${i === previewPage ? "bg-[#0F172A]" : "bg-[#E2E8F0]"}`} />
-                    ))}
                   </div>
                 </div>
               ) : (

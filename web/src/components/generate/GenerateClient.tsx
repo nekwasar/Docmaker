@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Paperclip, Mic, Copy, Download, X, User, Square, RotateCcw, FileText, FileUp, LayoutGrid, ArrowUp, Sparkles, ChevronDown } from "lucide-react";
+import { Paperclip, Mic, Copy, Download, X, User, Square, RotateCcw, FileText, FileUp, LayoutGrid, ArrowUp, Sparkles, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { templates as staticTemplates, type Template } from "@/data/templates";
 import { DocumentPreview } from "./DocumentPreview";
 
@@ -36,6 +36,7 @@ export default function GeneratePage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
     fetch("/api/templates/list?limit=20")
@@ -170,6 +171,19 @@ export default function GeneratePage() {
 
   useEffect(() => { setPreviewPage(0); }, [previewTemplate]);
 
+  const handleCreateTemplate = async () => {
+    try {
+      const res = await fetch("/api/auth/session");
+      const data = await res.json().catch(() => null);
+      if (!data?.user) {
+        const go = window.confirm("Please sign in to create a template. Go to sign in?");
+        if (go) window.location.href = "/signup";
+        return;
+      }
+    } catch {}
+    window.location.href = "/upload/template";
+  };
+
   useEffect(() => {
     const isOpen = !!previewTemplate;
     document.body.dataset.modalOpen = isOpen ? "true" : "false";
@@ -181,6 +195,19 @@ export default function GeneratePage() {
       window.dispatchEvent(new CustomEvent("preview-modal-change", { detail: { open: false } }));
     };
   }, [previewTemplate]);
+
+  const handleSwipeStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const handleSwipeEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || !previewTemplate?.thumbnails) return;
+    const diff = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(diff) > 50) {
+      if (diff < 0 && previewPage < previewTemplate.thumbnails.length - 1) setPreviewPage((p) => p + 1);
+      else if (diff > 0 && previewPage > 0) setPreviewPage((p) => p - 1);
+    }
+    touchStartX.current = null;
+  };
 
   const copy = () => navigator.clipboard.writeText(output);
   const download = () => {
@@ -372,36 +399,57 @@ export default function GeneratePage() {
 
           {/* Templates — kept below input for discovery */}
           <div className="space-y-2 pt-2">
-            <div className="flex items-center justify-between">
-              <div className="inline-flex items-center gap-2">
-                <LayoutGrid className="h-3.5 w-3.5 text-[#475569]" strokeWidth={1.5} />
+            <div className="flex items-center justify-between gap-2">
+              <div className="inline-flex items-center gap-2 min-w-0">
+                <LayoutGrid className="h-3.5 w-3.5 text-[#475569] shrink-0" strokeWidth={1.5} />
                 <p className="text-[11px] font-semibold tracking-wide text-[#0F172A] uppercase">Templates</p>
                 <span className="rounded-[6px] border border-[#E2E8F0] bg-[#FAFAFA] px-1.5 py-0.5 text-[10px] font-medium text-[#475569]">{templates.length}</span>
               </div>
-              <a href="/templates" className="inline-flex items-center gap-1 rounded-[6px] border border-[#E2E8F0] bg-white px-2 py-1 text-[11px] font-medium text-[#0F172A] hover:bg-slate-50">
-                See all <ArrowUp className="h-3 w-3 rotate-45" strokeWidth={1.5} />
-              </a>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  onClick={handleCreateTemplate}
+                  className="inline-flex items-center gap-1 rounded-[6px] bg-[#0F172A] px-2 py-1 text-[11px] font-semibold text-white hover:bg-black active:scale-[0.98]"
+                >
+                  + Add Template
+                </button>
+                <a href="/templates" className="inline-flex items-center gap-1 rounded-[6px] border border-[#E2E8F0] bg-white px-2 py-1 text-[11px] font-medium text-[#0F172A] hover:bg-slate-50">
+                  See all <ArrowUp className="h-3 w-3 rotate-45" strokeWidth={1.5} />
+                </a>
+              </div>
             </div>
             {templates.length === 0 ? (
-              <div className="overflow-hidden rounded-[10px] border border-dashed border-[#E2E8F0] bg-white">
-                <div className="grid grid-cols-3 divide-x divide-dashed divide-[#E2E8F0]">
-                  {[0, 1, 2].map((i) => (
-                    <div key={i} className="flex flex-col items-center justify-center gap-2 p-5 text-center">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-[6px] border border-[#E2E8F0] bg-[#FAFAFA]">
-                        <FileUp className="h-4 w-4 text-[#475569]" strokeWidth={1.5} />
-                      </div>
-                      <span className="text-[11px] font-medium text-[#475569]">{i === 0 ? "No templates" : "Empty slot"}</span>
+              <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:gap-2.5 sm:overflow-visible sm:pb-0">
+                <button
+                  onClick={handleCreateTemplate}
+                  className="group shrink-0 w-[48%] snap-start flex flex-col items-center justify-center gap-2 rounded-[10px] border-2 border-dashed border-[#CBD5E1] bg-[#F8FAFC] hover:bg-white hover:border-[#0F172A] p-6 text-center transition-colors sm:w-auto min-h-[260px]"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white border-2 border-dashed border-[#CBD5E1] group-hover:border-[#0F172A] transition-colors">
+                    <span className="text-[22px] font-light leading-none text-[#475569] group-hover:text-[#0F172A]">+</span>
+                  </div>
+                  <p className="text-[13px] font-semibold text-[#0F172A]">Create Template</p>
+                  <p className="text-[11px] text-[#64748B]">Create or Upload Template</p>
+                </button>
+                {[0, 1].map((i) => (
+                  <div key={i} className="hidden sm:flex flex-col items-center justify-center gap-2 p-5 text-center rounded-[10px] border border-dashed border-[#E2E8F0] bg-white min-h-[260px]">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-[6px] border border-[#E2E8F0] bg-[#FAFAFA]">
+                      <FileUp className="h-4 w-4 text-[#475569]" strokeWidth={1.5} />
                     </div>
-                  ))}
-                </div>
-                <div className="flex items-center justify-center border-t border-dashed border-[#E2E8F0] bg-[#FAFAFA] px-4 py-3">
-                  <a href="/upload/template" className="inline-flex items-center gap-1.5 rounded-[6px] bg-[#0F172A] px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-black">
-                    Upload template <ArrowUp className="h-3 w-3 rotate-45" strokeWidth={1.5} />
-                  </a>
-                </div>
+                    <span className="text-[11px] font-medium text-[#475569]">Empty slot</span>
+                  </div>
+                ))}
               </div>
             ) : (
               <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:gap-2.5 sm:overflow-visible sm:pb-0">
+                <button
+                  onClick={handleCreateTemplate}
+                  className="group shrink-0 w-[48%] snap-start flex flex-col items-center justify-center gap-2 rounded-[10px] border-2 border-dashed border-[#CBD5E1] bg-[#F8FAFC] hover:bg-white hover:border-[#0F172A] p-6 text-center transition-colors sm:w-auto min-h-[260px]"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white border-2 border-dashed border-[#CBD5E1] group-hover:border-[#0F172A] transition-colors">
+                    <span className="text-[22px] font-light leading-none text-[#475569] group-hover:text-[#0F172A]">+</span>
+                  </div>
+                  <p className="text-[13px] font-semibold text-[#0F172A]">Create Template</p>
+                  <p className="text-[11px] text-[#64748B]">Create or Upload Template</p>
+                </button>
                 {templates.map((tpl) => (
                   <button
                     key={tpl.id}
@@ -461,21 +509,40 @@ export default function GeneratePage() {
             {previewTemplate.fileUrl ? (
               previewTemplate.thumbnails && previewTemplate.thumbnails.length > 0 ? (
                 <div className="space-y-3">
-                  <div className="overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white">
+                  <div
+                    className="relative overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white group"
+                    onTouchStart={handleSwipeStart}
+                    onTouchEnd={handleSwipeEnd}
+                  >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={previewTemplate.thumbnails[previewPage]} alt={`Page ${previewPage + 1}`} className="w-full object-contain" />
+                    <img src={previewTemplate.thumbnails[previewPage]} alt={`Page ${previewPage + 1}`} className="w-full object-contain select-none" draggable={false} />
+                    {previewPage > 0 && (
+                      <button
+                        onClick={() => setPreviewPage((p) => Math.max(0, p - 1))}
+                        aria-label="Previous page"
+                        className="absolute left-2 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 backdrop-blur border border-[#E2E8F0] shadow-md hover:bg-white transition-colors"
+                      >
+                        <ChevronLeft className="h-5 w-5 text-[#0F172A]" strokeWidth={1.75} />
+                      </button>
+                    )}
+                    {previewPage < previewTemplate.thumbnails.length - 1 && (
+                      <button
+                        onClick={() => setPreviewPage((p) => Math.min(previewTemplate.thumbnails.length - 1, p + 1))}
+                        aria-label="Next page"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 backdrop-blur border border-[#E2E8F0] shadow-md hover:bg-white transition-colors"
+                      >
+                        <ChevronRight className="h-5 w-5 text-[#0F172A]" strokeWidth={1.75} />
+                      </button>
+                    )}
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[12px] font-medium text-[#0F172A]">Page {previewPage + 1} of {previewTemplate.thumbnails.length}</span>
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-[11px] font-medium text-[#475569]">Page {previewPage + 1} of {previewTemplate.thumbnails.length}</span>
+                    <span className="h-3 w-px bg-[#E2E8F0]" aria-hidden />
                     <div className="flex gap-1.5">
-                      <button disabled={previewPage === 0} onClick={() => setPreviewPage((p) => Math.max(0, p - 1))} className="rounded-[6px] border border-[#E2E8F0] bg-white px-3 py-1.5 text-[12px] font-medium disabled:opacity-40">Prev</button>
-                      <button disabled={previewPage === previewTemplate.thumbnails.length - 1} onClick={() => setPreviewPage((p) => Math.min(previewTemplate.thumbnails.length - 1, p + 1))} className="rounded-[6px] border border-[#E2E8F0] bg-white px-3 py-1.5 text-[12px] font-medium disabled:opacity-40">Next</button>
+                      {previewTemplate.thumbnails.map((_, i) => (
+                        <button key={i} onClick={() => setPreviewPage(i)} aria-label={`Go to page ${i + 1}`} className={`h-1.5 w-6 rounded-full transition-colors ${i === previewPage ? "bg-[#0F172A]" : "bg-[#E2E8F0]"}`} />
+                      ))}
                     </div>
-                  </div>
-                  <div className="flex justify-center gap-1.5 pt-1">
-                    {previewTemplate.thumbnails.map((_, i) => (
-                      <button key={i} onClick={() => setPreviewPage(i)} aria-label={`Go to page ${i + 1}`} className={`h-2 w-8 rounded-full transition-colors ${i === previewPage ? "bg-[#0F172A]" : "bg-[#E2E8F0]"}`} />
-                    ))}
                   </div>
                 </div>
               ) : (

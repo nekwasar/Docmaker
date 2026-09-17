@@ -447,7 +447,7 @@ export default function GeneratePage() {
                     onClick={() => setPreviewTemplate(tpl)}
                     className="group shrink-0 w-[48%] snap-start overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white text-left hover:border-[#CBD5E1] hover:bg-[#FAFAFA] transition-colors sm:w-auto"
                   >
-                    <div className="h-[195px] border-b border-[#E2E8F0] bg-[#F8FAFC] p-2">
+                    <div className="h-[195px] sm:h-[300px] border-b border-[#E2E8F0] bg-[#F8FAFC] p-2">
                       {tpl.fileUrl ? (
                         tpl.thumbnails && tpl.thumbnails.length > 0 ? (
                           // eslint-disable-next-line @next/next/no-img-element

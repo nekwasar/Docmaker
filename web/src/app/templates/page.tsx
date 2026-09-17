@@ -160,7 +160,7 @@ export default function TemplatesPage() {
                 onClick={() => setPreviewTemplate(tpl)}
                 className="group w-full max-w-[220px] text-left overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white hover:border-[#CBD5E1] hover:bg-[#FAFAFA] transition-colors"
               >
-                <div className="h-[260px] sm:h-[300px] border-b border-[#E2E8F0] bg-[#F8FAFC] p-2">
+                <div className="h-[225px] sm:h-[300px] border-b border-[#E2E8F0] bg-[#F8FAFC] p-2">
                   {tpl.fileUrl ? (
                     tpl.thumbnails && tpl.thumbnails.length > 0 ? (
                       // eslint-disable-next-line @next/next/no-img-element

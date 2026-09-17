@@ -148,7 +148,7 @@ export default function TemplatesPage() {
             </button>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 mt-6 justify-items-center">
             {filtered.length === 0 ? (
-              <div className="col-span-2 sm:col-span-3 lg:col-span-4 rounded-[10px] border border-dashed border-[#E2E8F0] bg-white p-8 text-center flex flex-col items-center justify-center min-h-[420px] w-full">
+              <div className="col-span-2 sm:col-span-3 lg:col-span-4 rounded-[10px] border border-dashed border-[#E2E8F0] bg-white p-8 text-center flex flex-col items-center justify-center min-h-[360px] w-full">
                 <p className="text-[13px] font-medium text-[#0F172A]">No templates uploaded yet</p>
                 <p className="text-[12px] text-[#64748B] mt-1">Be the first — your template stays forever.</p>
               </div>
@@ -160,7 +160,7 @@ export default function TemplatesPage() {
                 onClick={() => setPreviewTemplate(tpl)}
                 className="group w-full max-w-[220px] text-left overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white hover:border-[#CBD5E1] hover:bg-[#FAFAFA] transition-colors"
               >
-                <div className="h-[300px] sm:h-[340px] border-b border-[#E2E8F0] bg-[#F8FAFC] p-2">
+                <div className="h-[260px] sm:h-[300px] border-b border-[#E2E8F0] bg-[#F8FAFC] p-2">
                   {tpl.fileUrl ? (
                     tpl.thumbnails && tpl.thumbnails.length > 0 ? (
                       // eslint-disable-next-line @next/next/no-img-element

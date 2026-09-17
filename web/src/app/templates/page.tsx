@@ -71,22 +71,13 @@ export default function TemplatesPage() {
     return matchCat && matchQ;
   });
 
-  const handleCreateTemplate = async () => {
-    try {
-      const res = await fetch("/api/auth/session");
-      const data = await res.json().catch(() => null);
-      if (!data?.user) {
-        const go = window.confirm("Please sign in to create a template. Go to sign in?");
-        if (go) window.location.href = "/signup";
-        return;
-      }
-    } catch {}
+  const handleCreateTemplate = () => {
     window.location.href = "/upload/template";
   };
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <div className="max-w-4xl mx-auto px-5 sm:px-8 py-6 sm:py-8">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-[28px] sm:text-[32px] font-bold tracking-[-0.03em] leading-[1.05] text-[#0F172A]">Templates</h1>
@@ -146,19 +137,18 @@ export default function TemplatesPage() {
             <p className="text-[12px] text-[#64748B] mt-1">Try a different search or category.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-6">
+          <>
             <button
               onClick={handleCreateTemplate}
-              className="group flex flex-col items-center justify-center gap-2 rounded-[10px] border-2 border-dashed border-[#CBD5E1] bg-[#F8FAFC] hover:bg-white hover:border-[#0F172A] p-6 text-center transition-colors h-[320px] sm:h-[360px]"
+              className="group flex w-full items-center justify-center gap-2 rounded-[10px] border-2 border-dashed border-[#CBD5E1] bg-[#F8FAFC] hover:bg-white hover:border-[#0F172A] px-4 py-4 text-center transition-colors mt-6"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white border-2 border-dashed border-[#CBD5E1] group-hover:border-[#0F172A] transition-colors">
-                <span className="text-[22px] font-light leading-none text-[#475569] group-hover:text-[#0F172A]">+</span>
-              </div>
-              <p className="text-[13px] font-semibold text-[#0F172A]">Create Template</p>
-              <p className="text-[11px] text-[#64748B]">Create or Upload Template</p>
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white border-2 border-dashed border-[#CBD5E1] group-hover:border-[#0F172A] transition-colors text-[18px] font-light leading-none text-[#475569] group-hover:text-[#0F172A]">+</span>
+              <span className="text-[13px] font-semibold text-[#0F172A]">Add Template</span>
+              <span className="text-[11px] text-[#64748B]">Create or Upload — anyone can upload</span>
             </button>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 mt-6 justify-items-center">
             {filtered.length === 0 ? (
-              <div className="col-span-1 sm:col-span-2 rounded-[10px] border border-dashed border-[#E2E8F0] bg-white p-8 text-center flex flex-col items-center justify-center h-[320px] sm:h-[360px]">
+              <div className="col-span-2 sm:col-span-3 lg:col-span-4 rounded-[10px] border border-dashed border-[#E2E8F0] bg-white p-8 text-center flex flex-col items-center justify-center min-h-[420px] w-full">
                 <p className="text-[13px] font-medium text-[#0F172A]">No templates uploaded yet</p>
                 <p className="text-[12px] text-[#64748B] mt-1">Be the first — your template stays forever.</p>
               </div>
@@ -168,9 +158,9 @@ export default function TemplatesPage() {
               <button
                 key={tpl.id}
                 onClick={() => setPreviewTemplate(tpl)}
-                className="group text-left overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white hover:border-[#CBD5E1] hover:bg-[#FAFAFA] transition-colors"
+                className="group w-full max-w-[220px] text-left overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white hover:border-[#CBD5E1] hover:bg-[#FAFAFA] transition-colors"
               >
-                <div className="h-[320px] sm:h-[360px] border-b border-[#E2E8F0] bg-[#F8FAFC] p-2">
+                <div className="h-[300px] sm:h-[340px] border-b border-[#E2E8F0] bg-[#F8FAFC] p-2">
                   {tpl.fileUrl ? (
                     tpl.thumbnails && tpl.thumbnails.length > 0 ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -202,6 +192,7 @@ export default function TemplatesPage() {
               </>
             )}
           </div>
+          </>
         )}
       </div>
 

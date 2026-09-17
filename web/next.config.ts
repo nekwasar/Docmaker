@@ -3,6 +3,15 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   typescript: { ignoreBuildErrors: true },
   poweredByHeader: false,
+  turbopack: {
+    root: "/app",
+  },
+  webpack: (config) => {
+    config.watchOptions = {
+      ignored: ["**/.next/**", "**/public/uploads/**", "**/node_modules/**"],
+    };
+    return config;
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [{ protocol: "https", hostname: "**.docmaker.io" }, { protocol: "https", hostname: "picsum.photos" }],

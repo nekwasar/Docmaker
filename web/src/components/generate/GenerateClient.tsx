@@ -408,18 +408,20 @@ export default function GeneratePage() {
                 </a>
               </div>
             </div>
-            <button
-              onClick={handleCreateTemplate}
-              className="group flex w-full items-center justify-center gap-2 rounded-[10px] border-2 border-dashed border-[#CBD5E1] bg-[#F8FAFC] hover:bg-white hover:border-[#0F172A] px-4 py-3.5 text-center transition-colors"
-            >
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white border-2 border-dashed border-[#CBD5E1] group-hover:border-[#0F172A] transition-colors text-[16px] font-light leading-none text-[#475569] group-hover:text-[#0F172A]">+</span>
-              <span className="text-[13px] font-semibold text-[#0F172A]">Add Template</span>
-              <span className="text-[11px] text-[#64748B]">Anyone can upload</span>
-            </button>
             {templates.length === 0 ? (
-              <div className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory px-1 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:gap-3 sm:overflow-visible sm:pb-0">
+              <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:gap-2.5 sm:overflow-visible sm:pb-0">
+                <button
+                  onClick={handleCreateTemplate}
+                  className="group shrink-0 w-[48%] snap-start flex flex-col items-center justify-center gap-2 rounded-[10px] border-2 border-dashed border-[#CBD5E1] bg-[#F8FAFC] hover:bg-white hover:border-[#0F172A] p-6 text-center transition-colors sm:w-auto min-h-[260px]"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white border-2 border-dashed border-[#CBD5E1] group-hover:border-[#0F172A] transition-colors">
+                    <span className="text-[22px] font-light leading-none text-[#475569] group-hover:text-[#0F172A]">+</span>
+                  </div>
+                  <p className="text-[13px] font-semibold text-[#0F172A]">Create Template</p>
+                  <p className="text-[11px] text-[#64748B]">Create or Upload Template</p>
+                </button>
                 {[0, 1].map((i) => (
-                  <div key={i} className="hidden sm:flex flex-col items-center justify-center gap-2 p-5 text-center rounded-[10px] border border-dashed border-[#E2E8F0] bg-white min-h-[300px]">
+                  <div key={i} className="hidden sm:flex flex-col items-center justify-center gap-2 p-5 text-center rounded-[10px] border border-dashed border-[#E2E8F0] bg-white min-h-[260px]">
                     <div className="flex h-8 w-8 items-center justify-center rounded-[6px] border border-[#E2E8F0] bg-[#FAFAFA]">
                       <FileUp className="h-4 w-4 text-[#475569]" strokeWidth={1.5} />
                     </div>
@@ -428,14 +430,24 @@ export default function GeneratePage() {
                 ))}
               </div>
             ) : (
-              <div className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory px-1 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:gap-3 sm:overflow-visible sm:pb-0">
+              <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:gap-2.5 sm:overflow-visible sm:pb-0">
+                <button
+                  onClick={handleCreateTemplate}
+                  className="group shrink-0 w-[48%] snap-start flex flex-col items-center justify-center gap-2 rounded-[10px] border-2 border-dashed border-[#CBD5E1] bg-[#F8FAFC] hover:bg-white hover:border-[#0F172A] p-6 text-center transition-colors sm:w-auto min-h-[260px]"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white border-2 border-dashed border-[#CBD5E1] group-hover:border-[#0F172A] transition-colors">
+                    <span className="text-[22px] font-light leading-none text-[#475569] group-hover:text-[#0F172A]">+</span>
+                  </div>
+                  <p className="text-[13px] font-semibold text-[#0F172A]">Create Template</p>
+                  <p className="text-[11px] text-[#64748B]">Create or Upload Template</p>
+                </button>
                 {templates.map((tpl) => (
                   <button
                     key={tpl.id}
                     onClick={() => setPreviewTemplate(tpl)}
-                    className="group shrink-0 w-[42%] max-w-[200px] snap-start overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white text-left hover:border-[#CBD5E1] hover:bg-[#FAFAFA] transition-colors sm:w-auto sm:max-w-none"
+                    className="group shrink-0 w-[48%] snap-start overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white text-left hover:border-[#CBD5E1] hover:bg-[#FAFAFA] transition-colors sm:w-auto"
                   >
-                    <div className="h-[260px] sm:h-[300px] border-b border-[#E2E8F0] bg-[#F8FAFC] p-2">
+                    <div className="h-[195px] border-b border-[#E2E8F0] bg-[#F8FAFC] p-2">
                       {tpl.fileUrl ? (
                         tpl.thumbnails && tpl.thumbnails.length > 0 ? (
                           // eslint-disable-next-line @next/next/no-img-element

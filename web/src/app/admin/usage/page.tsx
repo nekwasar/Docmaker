@@ -1,5 +1,6 @@
 "use client";
 
+import { adminHead } from "../fonts";
 import { useEffect, useState } from "react";
 
 interface Row {
@@ -53,7 +54,7 @@ export default function AdminUsage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-[22px] font-bold tracking-tight text-[#0F172A]">Usage & Spend</h1>
+        <h1 className={`text-[22px] font-bold tracking-tight text-[#3D4D4E] ${adminHead.className}`}>Usage & Spend</h1>
         <p className="mt-1 text-[13px] text-[#64748B]">{total} generations logged. Costs are estimates, admin-only.</p>
       </div>
       <div className="flex gap-2">
@@ -62,9 +63,9 @@ export default function AdminUsage() {
           onChange={(e) => setModel(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && load(1, model)}
           placeholder="Filter by model…"
-          className="flex-1 rounded-[8px] border border-[#E2E8F0] bg-white px-3 py-2 text-[13px] text-[#0F172A] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#0F172A]"
+          className="flex-1 rounded-[8px] border border-[#E2E8F0] bg-white px-3 py-2 text-[13px] text-[#3D4D4E] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#3D4D4E]"
         />
-        <button onClick={() => load(1, model)} className="rounded-[8px] bg-[#0F172A] px-4 py-2 text-[13px] font-semibold text-white hover:bg-black">
+        <button onClick={() => load(1, model)} className="rounded-[8px] bg-[#3D4D4E] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#2E3B3C]">
           Filter
         </button>
       </div>
@@ -83,7 +84,7 @@ export default function AdminUsage() {
           </thead>
           <tbody className="divide-y divide-[#F1F5F9]">
             {items.map((r) => (
-              <tr key={r.id} className="text-[#0F172A]">
+              <tr key={r.id} className="text-[#3D4D4E]">
                 <td className="px-3 py-2 whitespace-nowrap text-[#475569]">{new Date(r.createdAt).toLocaleString()}</td>
                 <td className="px-3 py-2 font-medium">{r.model}</td>
                 <td className="px-3 py-2 text-right">{r.promptTokens.toLocaleString()}</td>

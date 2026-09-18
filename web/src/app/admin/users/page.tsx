@@ -1,5 +1,6 @@
 "use client";
 
+import { adminHead } from "../fonts";
 import { useEffect, useState } from "react";
 
 interface U {
@@ -62,7 +63,7 @@ export default function AdminUsers() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-[22px] font-bold tracking-tight text-[#0F172A]">Users</h1>
+        <h1 className={`text-[22px] font-bold tracking-tight text-[#3D4D4E] ${adminHead.className}`}>Users</h1>
         <p className="mt-1 text-[13px] text-[#64748B]">{total} users. Roles: free, pro, admin. You cannot demote yourself.</p>
       </div>
       {msg && <p className="rounded-[8px] border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12px] text-emerald-700">{msg}</p>}
@@ -73,9 +74,9 @@ export default function AdminUsers() {
           onChange={(e) => setQ(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && load(1, q)}
           placeholder="Search email or name…"
-          className="flex-1 rounded-[8px] border border-[#E2E8F0] bg-white px-3 py-2 text-[13px] text-[#0F172A] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#0F172A]"
+          className="flex-1 rounded-[8px] border border-[#E2E8F0] bg-white px-3 py-2 text-[13px] text-[#3D4D4E] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#3D4D4E]"
         />
-        <button onClick={() => load(1, q)} className="rounded-[8px] bg-[#0F172A] px-4 py-2 text-[13px] font-semibold text-white hover:bg-black">
+        <button onClick={() => load(1, q)} className="rounded-[8px] bg-[#3D4D4E] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#2E3B3C]">
           Search
         </button>
       </div>
@@ -91,7 +92,7 @@ export default function AdminUsers() {
           </thead>
           <tbody className="divide-y divide-[#F1F5F9]">
             {items.map((u) => (
-              <tr key={u.id} className="text-[#0F172A]">
+              <tr key={u.id} className="text-[#3D4D4E]">
                 <td className="px-3 py-2">
                   <span className="block font-medium">{u.email}</span>
                   <span className="block text-[11px] text-[#64748B]">{u.name || "—"}</span>
@@ -100,7 +101,7 @@ export default function AdminUsers() {
                   <select
                     value={u.role}
                     onChange={(e) => setRole(u, e.target.value)}
-                    className="rounded-[6px] border border-[#E2E8F0] bg-white px-2 py-1 text-[12px] font-medium text-[#0F172A]"
+                    className="rounded-[6px] border border-[#E2E8F0] bg-white px-2 py-1 text-[12px] font-medium text-[#3D4D4E]"
                   >
                     <option value="free">free</option>
                     <option value="pro">pro</option>
@@ -131,7 +132,7 @@ export default function AdminUsers() {
                       }
                     }}
                     onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
-                    className="w-20 rounded-[6px] border border-[#E2E8F0] bg-white px-2 py-1 text-right text-[12px] text-[#0F172A]"
+                    className="w-20 rounded-[6px] border border-[#E2E8F0] bg-white px-2 py-1 text-right text-[12px] text-[#3D4D4E]"
                   />{" "}
                   <span className="text-[#94A3B8]">({u.usedCredits} used)</span>
                 </td>

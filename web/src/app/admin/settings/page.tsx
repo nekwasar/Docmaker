@@ -1,5 +1,6 @@
 "use client";
 
+import { adminHead } from "../fonts";
 import { useEffect, useState } from "react";
 
 const FIELDS = [
@@ -86,7 +87,7 @@ export default function AdminSettings() {
   return (
     <div className="space-y-4 max-w-2xl">
       <div>
-        <h1 className="text-[22px] font-bold tracking-tight text-[#0F172A]">AI Settings</h1>
+        <h1 className={`text-[22px] font-bold tracking-tight text-[#3D4D4E] ${adminHead.className}`}>AI Settings</h1>
         <p className="mt-1 text-[13px] text-[#64748B]">DB values override env. Keys are encrypted at rest, masked on read.</p>
       </div>
       {err && <p className="rounded-[8px] border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-700">{err}</p>}
@@ -99,7 +100,7 @@ export default function AdminSettings() {
               <select
                 value={values[f.key] ?? ""}
                 onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
-                className="w-full rounded-[6px] border border-[#E2E8F0] bg-white px-3 py-2 text-[13px] text-[#0F172A]"
+                className="w-full rounded-[6px] border border-[#E2E8F0] bg-white px-3 py-2 text-[13px] text-[#3D4D4E]"
               >
                 {(f as any).options.map((o: string) => (
                   <option key={o} value={o}>{o}</option>
@@ -115,7 +116,7 @@ export default function AdminSettings() {
                   if (f.key === "AI_API_KEY") setKeyTouched(true);
                 }}
                 placeholder={f.key === "AI_API_KEY" ? "•••••••• (unchanged)" : ""}
-                className="w-full rounded-[6px] border border-[#E2E8F0] bg-white px-3 py-2 text-[13px] text-[#0F172A] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#0F172A]"
+                className="w-full rounded-[6px] border border-[#E2E8F0] bg-white px-3 py-2 text-[13px] text-[#3D4D4E] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#3D4D4E]"
               />
             )}
             {(f as any).hint && <span className="block text-[11px] text-[#94A3B8]">{(f as any).hint}</span>}
@@ -128,14 +129,14 @@ export default function AdminSettings() {
           <button
             onClick={save}
             disabled={saving}
-            className="rounded-[6px] bg-[#0F172A] px-4 py-2 text-[13px] font-semibold text-white hover:bg-black disabled:opacity-50"
+            className="rounded-[6px] bg-[#3D4D4E] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#2E3B3C] disabled:opacity-50"
           >
             {saving ? "Saving…" : "Save settings"}
           </button>
           <button
             onClick={test}
             disabled={testing}
-            className="rounded-[6px] border border-[#E2E8F0] bg-white px-4 py-2 text-[13px] font-medium text-[#0F172A] hover:bg-[#F8FAFC] disabled:opacity-50"
+            className="rounded-[6px] border border-[#E2E8F0] bg-white px-4 py-2 text-[13px] font-medium text-[#3D4D4E] hover:bg-[#F8FAFC] disabled:opacity-50"
           >
             {testing ? "Testing…" : "Test provider"}
           </button>

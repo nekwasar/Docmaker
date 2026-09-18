@@ -1,5 +1,6 @@
 "use client";
 
+import { adminHead } from "../fonts";
 import { useEffect, useState } from "react";
 
 interface Sub {
@@ -75,12 +76,12 @@ export default function AdminNewsletter() {
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-[22px] font-bold tracking-tight text-[#0F172A]">Newsletter</h1>
+          <h1 className={`text-[22px] font-bold tracking-tight text-[#3D4D4E] ${adminHead.className}`}>Newsletter</h1>
           <p className="mt-1 text-[13px] text-[#64748B]">{total} subscribers. Own database, CSV export.</p>
         </div>
         <a
           href="/api/admin/subscribers/export"
-          className="shrink-0 rounded-[8px] border border-[#E2E8F0] bg-white px-3 py-2 text-[13px] font-medium text-[#0F172A] hover:bg-[#F8FAFC]"
+          className="shrink-0 rounded-[8px] border border-[#E2E8F0] bg-white px-3 py-2 text-[13px] font-medium text-[#3D4D4E] hover:bg-[#F8FAFC]"
         >
           Export CSV
         </a>
@@ -93,9 +94,9 @@ export default function AdminNewsletter() {
           onChange={(e) => setQ(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && load(1, q)}
           placeholder="Search email…"
-          className="flex-1 rounded-[8px] border border-[#E2E8F0] bg-white px-3 py-2 text-[13px] text-[#0F172A] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#0F172A]"
+          className="flex-1 rounded-[8px] border border-[#E2E8F0] bg-white px-3 py-2 text-[13px] text-[#3D4D4E] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#3D4D4E]"
         />
-        <button onClick={() => load(1, q)} className="rounded-[8px] bg-[#0F172A] px-4 py-2 text-[13px] font-semibold text-white hover:bg-black">
+        <button onClick={() => load(1, q)} className="rounded-[8px] bg-[#3D4D4E] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#2E3B3C]">
           Search
         </button>
       </div>
@@ -112,7 +113,7 @@ export default function AdminNewsletter() {
           </thead>
           <tbody className="divide-y divide-[#F1F5F9]">
             {items.map((s) => (
-              <tr key={s.id} className="text-[#0F172A]">
+              <tr key={s.id} className="text-[#3D4D4E]">
                 <td className="px-3 py-2 font-medium">{s.email}</td>
                 <td className="px-3 py-2">
                   <span className={`rounded-[6px] px-1.5 py-0.5 text-[11px] font-medium ${s.status === "subscribed" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-[#475569]"}`}>
@@ -122,7 +123,7 @@ export default function AdminNewsletter() {
                 <td className="px-3 py-2 text-[#64748B]">{s.source || "—"}</td>
                 <td className="px-3 py-2 whitespace-nowrap text-[#475569]">{new Date(s.createdAt).toLocaleDateString()}</td>
                 <td className="px-3 py-2 text-right whitespace-nowrap">
-                  <button onClick={() => toggle(s)} className="mr-2 text-[12px] font-medium text-[#0F172A] underline hover:text-[#2563EB]">
+                  <button onClick={() => toggle(s)} className="mr-2 text-[12px] font-medium text-[#3D4D4E] underline hover:text-[#2563EB]">
                     {s.status === "subscribed" ? "Unsubscribe" : "Resubscribe"}
                   </button>
                   <button onClick={() => remove(s)} className="text-[12px] font-medium text-red-600 underline hover:text-red-700">

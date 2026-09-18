@@ -1,5 +1,6 @@
 "use client";
 
+import { adminHead } from "../fonts";
 import { useEffect, useState } from "react";
 
 interface Row {
@@ -52,7 +53,7 @@ export default function AdminVisitors() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-[22px] font-bold tracking-tight text-[#0F172A]">Visitors</h1>
+        <h1 className={`text-[22px] font-bold tracking-tight text-[#3D4D4E] ${adminHead.className}`}>Visitors</h1>
         <p className="mt-1 text-[13px] text-[#64748B]">{total} page views. Raw IPs retained 90 days (see Privacy).</p>
       </div>
       {topPaths.length > 0 && (
@@ -61,7 +62,7 @@ export default function AdminVisitors() {
             <button
               key={t.path}
               onClick={() => { setPath(t.path); load(1, t.path); }}
-              className="rounded-[6px] border border-[#E2E8F0] bg-white px-2.5 py-1 text-[12px] text-[#0F172A] hover:bg-[#F8FAFC]"
+              className="rounded-[6px] border border-[#E2E8F0] bg-white px-2.5 py-1 text-[12px] text-[#3D4D4E] hover:bg-[#F8FAFC]"
             >
               {t.path} <span className="text-[#64748B]">({t.count})</span>
             </button>
@@ -74,9 +75,9 @@ export default function AdminVisitors() {
           onChange={(e) => setPath(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && load(1, path)}
           placeholder="Filter by path…"
-          className="flex-1 rounded-[8px] border border-[#E2E8F0] bg-white px-3 py-2 text-[13px] text-[#0F172A] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#0F172A]"
+          className="flex-1 rounded-[8px] border border-[#E2E8F0] bg-white px-3 py-2 text-[13px] text-[#3D4D4E] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#3D4D4E]"
         />
-        <button onClick={() => load(1, path)} className="rounded-[8px] bg-[#0F172A] px-4 py-2 text-[13px] font-semibold text-white hover:bg-black">
+        <button onClick={() => load(1, path)} className="rounded-[8px] bg-[#3D4D4E] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#2E3B3C]">
           Filter
         </button>
       </div>
@@ -94,7 +95,7 @@ export default function AdminVisitors() {
           </thead>
           <tbody className="divide-y divide-[#F1F5F9]">
             {items.map((r) => (
-              <tr key={r.id} className="text-[#0F172A]">
+              <tr key={r.id} className="text-[#3D4D4E]">
                 <td className="px-3 py-2 whitespace-nowrap text-[#475569]">{new Date(r.createdAt).toLocaleString()}</td>
                 <td className="px-3 py-2 font-medium font-mono text-[11px]">{r.path}</td>
                 <td className="px-3 py-2 font-mono text-[11px] text-[#475569]">{r.ip || "—"}</td>

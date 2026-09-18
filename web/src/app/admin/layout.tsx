@@ -45,6 +45,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <a href="/admin/visitors" className="rounded-[6px] px-2 py-1.5 text-[#475569] hover:bg-[#F8FAFC] whitespace-nowrap">Visitors</a>
             <a href="/admin/newsletter" className="rounded-[6px] px-2 py-1.5 text-[#475569] hover:bg-[#F8FAFC] whitespace-nowrap">Newsletter</a>
             <a href="/admin/users" className="rounded-[6px] px-2 py-1.5 text-[#475569] hover:bg-[#F8FAFC] whitespace-nowrap">Users</a>
+            <a href="/admin/audit" className="rounded-[6px] px-2 py-1.5 text-[#475569] hover:bg-[#F8FAFC] whitespace-nowrap">Audit</a>
             <a href="/" className="rounded-[6px] px-2 py-1.5 text-[#475569] hover:bg-[#F8FAFC] whitespace-nowrap">← Site</a>
           </nav>
         </div>

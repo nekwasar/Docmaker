@@ -11,6 +11,9 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
     const rawPath = typeof body.path === "string" ? body.path : "/";
+    if (!rawPath.startsWith("/")) {
+      return NextResponse.json({ error: "Invalid path" }, { status: 400 });
+    }
     const path = rawPath.slice(0, 200) || "/";
     const sessionId = (typeof body.sessionId === "string" ? body.sessionId : null)?.slice(0, 64) || null;
 

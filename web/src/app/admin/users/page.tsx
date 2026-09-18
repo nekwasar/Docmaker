@@ -107,7 +107,34 @@ export default function AdminUsers() {
                     <option value="admin">admin</option>
                   </select>
                 </td>
-                <td className="px-3 py-2 text-right">{u.credits} <span className="text-[#94A3B8]">({u.usedCredits} used)</span></td>
+                <td className="px-3 py-2 text-right">
+                  <input
+                    type="number"
+                    min={0}
+                    defaultValue={u.credits}
+                    key={`${u.id}-${u.credits}`}
+                    onBlur={(e) => {
+                      const n = parseInt(e.target.value, 10);
+                      if (!isNaN(n) && n !== u.credits) {
+                        fetch(`/api/admin/users/${u.id}`, {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ credits: n }),
+                        })
+                          .then(async (r) => {
+                            const d = await r.json().catch(() => ({}));
+                            if (!r.ok) throw new Error(d.error || "Update failed");
+                            setMsg(`${u.email} credits → ${n}`);
+                            load(page, q);
+                          })
+                          .catch((err: any) => setErr(err.message));
+                      }
+                    }}
+                    onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
+                    className="w-20 rounded-[6px] border border-[#E2E8F0] bg-white px-2 py-1 text-right text-[12px] text-[#0F172A]"
+                  />{" "}
+                  <span className="text-[#94A3B8]">({u.usedCredits} used)</span>
+                </td>
                 <td className="px-3 py-2 whitespace-nowrap text-[#475569]">{new Date(u.createdAt).toLocaleDateString()}</td>
               </tr>
             ))}

@@ -72,7 +72,11 @@ function getClientSessionId(): string {
     try {
       const sessionId = sid || getClientSessionId();
       if (!sessionId) return;
-      const res = await fetch(`/api/newsletter/status?sessionId=${encodeURIComponent(sessionId)}`);
+      let email = "";
+      try { email = localStorage.getItem("dm_email") || ""; } catch {}
+      const qs = new URLSearchParams({ sessionId });
+      if (email) qs.set("email", email);
+      const res = await fetch(`/api/newsletter/status?${qs}`);
       const data = await res.json().catch(() => null);
       if (!data || data.enabled === false) {
         setGateMustSubscribe(false);
@@ -84,15 +88,9 @@ function getClientSessionId(): string {
   };
 
   useEffect(() => {
-    // Page-view beacon (detailed analytics) + initial gate check.
+    // Sitewide beacon now lives in <Tracker/> (root layout); here just check the gate.
     try {
-      const sid = getClientSessionId();
-      fetch("/api/track/view", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: window.location.pathname, sessionId: sid, referrer: document.referrer || null }),
-      }).catch(() => {});
-      checkGate(sid);
+      checkGate(getClientSessionId());
     } catch {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -235,6 +233,7 @@ function getClientSessionId(): string {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Subscribe failed");
+      try { localStorage.setItem("dm_email", email); } catch {}
       setGateMustSubscribe(false);
       setGateEmail("");
       textareaRef.current?.focus();

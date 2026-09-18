@@ -5,6 +5,7 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { SessionProvider } from "@/components/providers/session-provider";
+import Tracker from "@/components/analytics/Tracker";
 
 const ubuntu = Ubuntu({ subsets: ["latin"], weight: ["300", "400", "500", "700"], variable: "--font-ubuntu" });
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
@@ -122,6 +123,7 @@ export default function RootLayout({
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteLd) }} />
         <SessionProvider>
+          <Tracker />
           <div className="hidden lg:block">
             <Header />
           </div>

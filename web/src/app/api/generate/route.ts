@@ -80,11 +80,30 @@ export async function POST(request: NextRequest) {
       fullPrompt += "\n\nAdditional context from attached files:\n" + fileContexts.join("\n\n---\n\n");
     }
 
+    // Attribution for usage logging (server-side only — never sent to client).
+    // If the client sent no session id, mint one so the gate/throttle can't be
+    // bypassed by simply dropping cookies/localStorage.
+    const session = await getSession().catch(() => null);
+    let sessionId =
+      request.headers.get("x-session-id") ||
+      request.cookies.get("dm_sid")?.value ||
+      null;
+    let mintedSid: string | null = null;
+    if (!sessionId) {
+      mintedSid = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+      sessionId = mintedSid;
+    }
+    const sidCookie = mintedSid
+      ? `dm_sid=${mintedSid}; Path=/; Max-Age=${365 * 24 * 3600}; SameSite=Lax`
+      : null;
+
     const config = await getAIConfigAsync();
     if (!config.apiKey) {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (sidCookie) headers["Set-Cookie"] = sidCookie;
       return new Response(JSON.stringify({ error: "AI is not configured yet. Please try again later." }), {
         status: 503,
-        headers: { "Content-Type": "application/json" },
+        headers,
       });
     }
 
@@ -93,12 +112,6 @@ export async function POST(request: NextRequest) {
       { role: "user" as const, content: fullPrompt },
     ];
 
-    // Attribution for usage logging (server-side only — never sent to client).
-    const session = await getSession().catch(() => null);
-    const sessionId =
-      request.headers.get("x-session-id") ||
-      request.cookies.get("dm_sid")?.value ||
-      null;
     const promptTokensEst = estimateTokens(SYSTEM_PROMPT + fullPrompt);
 
     let providerUsage: UsageReport | null = null;
@@ -152,13 +165,13 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return new Response(stream, {
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Cache-Control": "no-cache",
-        "X-Accel-Buffering": "no",
-      },
-    });
+    const headers: Record<string, string> = {
+      "Content-Type": "text/plain; charset=utf-8",
+      "Cache-Control": "no-cache",
+      "X-Accel-Buffering": "no",
+    };
+    if (sidCookie) headers["Set-Cookie"] = sidCookie;
+    return new Response(stream, { headers });
   } catch (error: any) {
     return new Response(JSON.stringify({ error: error.message || "Generation failed" }), {
       status: 500,

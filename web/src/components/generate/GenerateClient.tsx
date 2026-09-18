@@ -31,12 +31,85 @@ export default function GeneratePage() {
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [filePreview, setFilePreview] = useState<string>("");
   const [templates, setTemplates] = useState<Template[]>(staticTemplates);
+  const [gateMustSubscribe, setGateMustSubscribe] = useState(false);
+  const [gateInfo, setGateInfo] = useState<{ generations: number; threshold: number }>({ generations: 0, threshold: 2 });
+  const [gateEmail, setGateEmail] = useState("");
+  const [gateError, setGateError] = useState<string | null>(null);
+  const [gateSubmitting, setGateSubmitting] = useState(false);
+
+function getClientSessionId(): string {
+  try {
+    const m = document.cookie.match(/(?:^|;\s*)dm_sid=([^;]+)/);
+    if (m?.[1]) {
+      try { localStorage.setItem("dm_sid", m[1]); } catch {}
+      return m[1];
+    }
+    try {
+      const ls = localStorage.getItem("dm_sid");
+      if (ls) {
+        document.cookie = `dm_sid=${ls}; path=/; max-age=${365 * 24 * 3600}; samesite=lax`;
+        return ls;
+      }
+    } catch {}
+    const id = (crypto as any)?.randomUUID
+      ? (crypto as any).randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    try { localStorage.setItem("dm_sid", id); } catch {}
+    document.cookie = `dm_sid=${id}; path=/; max-age=${365 * 24 * 3600}; samesite=lax`;
+    return id;
+  } catch {
+    return "";
+  }
+}
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const touchStartX = useRef<number | null>(null);
+
+  const checkGate = async (sid?: string) => {
+    try {
+      const sessionId = sid || getClientSessionId();
+      if (!sessionId) return;
+      const res = await fetch(`/api/newsletter/status?sessionId=${encodeURIComponent(sessionId)}`);
+      const data = await res.json().catch(() => null);
+      if (!data || data.enabled === false) {
+        setGateMustSubscribe(false);
+        return;
+      }
+      setGateInfo({ generations: data.generations ?? 0, threshold: data.threshold ?? 2 });
+      setGateMustSubscribe(!!data.mustSubscribe);
+    } catch {}
+  };
+
+  useEffect(() => {
+    // Page-view beacon (detailed analytics) + initial gate check.
+    try {
+      const sid = getClientSessionId();
+      fetch("/api/track/view", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: window.location.pathname, sessionId: sid, referrer: document.referrer || null }),
+      }).catch(() => {});
+      checkGate(sid);
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Keep bottom nav hidden while the gate modal is open (same signal as preview modal).
+  useEffect(() => {
+    if (!gateMustSubscribe) return;
+    document.body.dataset.modalOpen = "true";
+    window.dispatchEvent(new CustomEvent("preview-modal-change", { detail: { open: true } }));
+    return () => {
+      if (!previewTemplate) {
+        document.body.dataset.modalOpen = "false";
+        window.dispatchEvent(new CustomEvent("preview-modal-change", { detail: { open: false } }));
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gateMustSubscribe]);
 
   useEffect(() => {
     fetch("/api/templates/list?limit=20")
@@ -100,10 +173,13 @@ export default function GeneratePage() {
 
   const generate = async () => {
     if ((!text.trim() && attachedFiles.length === 0) || generating) return;
+    if (gateMustSubscribe) return;
     setGenerating(true);
     setOutput("");
     const controller = new AbortController();
     abortRef.current = controller;
+    const sid = getClientSessionId();
+    let failed = false;
     try {
       const form = new FormData();
       form.append("text", text);
@@ -112,7 +188,12 @@ export default function GeneratePage() {
       form.append("format", selectedFormat.toLowerCase());
       attachedFiles.forEach((f) => form.append("files", f));
 
-      const res = await fetch("/api/generate", { method: "POST", body: form, signal: controller.signal });
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        body: form,
+        signal: controller.signal,
+        headers: sid ? { "x-session-id": sid } : undefined,
+      });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.error || "Failed");
@@ -127,10 +208,40 @@ export default function GeneratePage() {
         }
       }
     } catch (e: any) {
+      failed = true;
       if (e.name !== "AbortError") setOutput(`Error: ${e.message}`);
     } finally {
       setGenerating(false);
       abortRef.current = null;
+      // Re-check the newsletter gate after each generation (server counts it).
+      if (!failed) checkGate(sid);
+    }
+  };
+
+  const subscribeGate = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    setGateError(null);
+    const email = gateEmail.trim();
+    if (!email) {
+      setGateError("Please enter your email address");
+      return;
+    }
+    setGateSubmitting(true);
+    try {
+      const res = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, source: "gate" }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Subscribe failed");
+      setGateMustSubscribe(false);
+      setGateEmail("");
+      textareaRef.current?.focus();
+    } catch (err: any) {
+      setGateError(err.message || "Subscribe failed");
+    } finally {
+      setGateSubmitting(false);
     }
   };
 
@@ -551,6 +662,37 @@ export default function GeneratePage() {
             <button onClick={() => useTemplate(previewTemplate)} className="w-full rounded-[10px] bg-[#0F172A] py-3 text-[14px] font-semibold text-white hover:bg-black active:scale-[0.99]">
               Use this template
             </button>
+          </div>
+        </div>
+      )}
+
+      {gateMustSubscribe && (
+        <div data-full-modal className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 p-4 backdrop-blur-[2px]">
+          <div className="w-full max-w-sm rounded-[12px] border border-[#E2E8F0] bg-white p-6 shadow-xl">
+            <h2 className="text-[18px] font-bold tracking-tight text-[#0F172A]">Keep creating for free</h2>
+            <p className="mt-1 text-[13px] leading-5 text-[#475569]">
+              You&apos;ve used {gateInfo.generations} free generation{gateInfo.generations === 1 ? "" : "s"}. Subscribe to
+              the newsletter to continue — no spam, unsubscribe anytime.
+            </p>
+            <form onSubmit={subscribeGate} className="mt-4 space-y-2">
+              <input
+                type="email"
+                required
+                value={gateEmail}
+                onChange={(e) => setGateEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="w-full rounded-[8px] border border-[#E2E8F0] bg-white px-3 py-2.5 text-[13px] text-[#0F172A] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A]"
+              />
+              {gateError && <p className="text-[12px] text-red-600">{gateError}</p>}
+              <button
+                type="submit"
+                disabled={gateSubmitting}
+                className="w-full rounded-[8px] bg-[#0F172A] py-2.5 text-[13px] font-semibold text-white hover:bg-black disabled:opacity-50"
+              >
+                {gateSubmitting ? "Subscribing…" : "Subscribe & continue"}
+              </button>
+            </form>
+            <p className="mt-3 text-center text-[11px] text-[#94A3B8]">We&apos;ll only email you product updates.</p>
           </div>
         </div>
       )}

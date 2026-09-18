@@ -1,11 +1,18 @@
 import { NextRequest } from "next/server";
-import { streamAIResponse, getAIConfig } from "@/lib/ai/config";
+import { PrismaClient } from "@prisma/client";
+import { streamAIResponse, getAIConfigAsync, type UsageReport } from "@/lib/ai/config";
+import { estimateCostUsd, estimateTokens } from "@/lib/pricing";
 import { buildPrompt, SYSTEM_PROMPT } from "@/lib/ai/prompts";
+import { getSession } from "@/lib/session";
+
+const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
     let text = "";
     let structure = "auto";
+    let style = "professional";
+    let format = "pdf";
     let fileContexts: string[] = [];
 
     const contentType = request.headers.get("content-type") || "";
@@ -14,6 +21,8 @@ export async function POST(request: NextRequest) {
       const form = await request.formData();
       text = (form.get("text") as string) || "";
       structure = (form.get("structure") as string) || "auto";
+      style = (form.get("style") as string) || "professional";
+      format = (form.get("format") as string) || "pdf";
       const files = form.getAll("files") as File[];
       for (const file of files) {
         if (!file || !file.name) continue;
@@ -52,6 +61,8 @@ export async function POST(request: NextRequest) {
       const body = await request.json();
       text = body.text || "";
       structure = body.structure || "auto";
+      style = body.style || "professional";
+      format = body.format || "pdf";
     }
 
     if (!text && fileContexts.length === 0 && !structure) {
@@ -62,28 +73,81 @@ export async function POST(request: NextRequest) {
     }
 
     let fullPrompt = buildPrompt(text || "", structure || "auto");
+    if (style === "simple") {
+      fullPrompt += "\n\nWrite in simple, plain English suitable for a general audience.";
+    }
     if (fileContexts.length > 0) {
       fullPrompt += "\n\nAdditional context from attached files:\n" + fileContexts.join("\n\n---\n\n");
     }
 
-    const config = getAIConfig();
+    const config = await getAIConfigAsync();
+    if (!config.apiKey) {
+      return new Response(JSON.stringify({ error: "AI is not configured yet. Please try again later." }), {
+        status: 503,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     const messages = [
       { role: "system" as const, content: SYSTEM_PROMPT },
       { role: "user" as const, content: fullPrompt },
     ];
 
+    // Attribution for usage logging (server-side only — never sent to client).
+    const session = await getSession().catch(() => null);
+    const sessionId =
+      request.headers.get("x-session-id") ||
+      request.cookies.get("dm_sid")?.value ||
+      null;
+    const promptTokensEst = estimateTokens(SYSTEM_PROMPT + fullPrompt);
+
+    let providerUsage: UsageReport | null = null;
+    let completionText = "";
+    let streamError: string | null = null;
+
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          for await (const chunk of streamAIResponse(messages, config)) {
+          for await (const chunk of streamAIResponse(messages, config, {
+            onUsage: (u) => {
+              providerUsage = u;
+            },
+          })) {
+            completionText += chunk;
             controller.enqueue(encoder.encode(chunk));
           }
           controller.close();
         } catch (error: any) {
-          const errorMsg = `\n\n[Error: ${error.message || "AI generation failed."}]`;
+          streamError = error.message || "AI generation failed.";
+          const errorMsg = `\n\n[Error: ${streamError}]`;
           controller.enqueue(encoder.encode(errorMsg));
           controller.close();
+        } finally {
+          // Server-side usage log — fire and forget, never blocks/fails the stream.
+          // Failed generations (no content streamed) are NOT logged: no spend occurred.
+          if (streamError && !completionText) return;
+          try {
+            const promptTokens = providerUsage?.promptTokens || promptTokensEst;
+            const completionTokens =
+              providerUsage?.completionTokens || estimateTokens(completionText);
+            const totalTokens =
+              providerUsage?.totalTokens || promptTokens + completionTokens;
+            const cost = estimateCostUsd(config.model, promptTokens, completionTokens);
+            await prisma.apiUsageLog.create({
+              data: {
+                provider: config.provider,
+                model: config.model,
+                promptTokens,
+                completionTokens,
+                totalTokens,
+                estimatedCostUsd: cost,
+                userId: session?.id ?? null,
+                sessionId,
+                path: "/api/generate",
+              },
+            });
+          } catch {}
         }
       },
     });

@@ -48,12 +48,13 @@ function envFallback(key: string): string | null {
 export async function getSetting(key: string): Promise<string | null> {
   try {
     const row = await prisma.adminSetting.findUnique({ where: { key } });
-    if (row?.encryptedValue) {
+    if (row) {
+      // Empty string means explicitly cleared in admin (shadows env).
+      if (!row.encryptedValue) return "";
       try {
-        const dec = decryptSecret(row.encryptedValue);
-        if (dec) return dec;
+        return decryptSecret(row.encryptedValue);
       } catch {
-        // If stored plain (legacy), return as-is
+        // If stored plain (legacy seed defaults), return as-is
         return row.encryptedValue;
       }
     }

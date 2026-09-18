@@ -28,7 +28,22 @@ export default function PrivacyPage() {
             <li>Documents you upload or create</li>
             <li>Usage data and analytics</li>
             <li>Payment information (processed securely by third parties)</li>
+            <li>Newsletter email address (when you subscribe, e.g. after free generations)</li>
           </ul>
+
+          <h2 className="text-3xl font-bold mb-6" style={{ fontFamily: 'var(--font-playfair)', color: '#0F172A' }}>Analytics & Newsletter</h2>
+          <p className="text-slate-600 leading-relaxed mb-4">
+            We run our own privacy-friendly analytics (no third-party trackers). When you browse, we log the visited
+            page, a random session identifier, and technical details (IP address, browser user-agent, referrer) to
+            understand usage and prevent abuse. Raw IP addresses are automatically deleted after 90 days; only
+            aggregate counts are kept longer.
+          </p>
+          <p className="text-slate-600 leading-relaxed mb-8">
+            If you subscribe to our newsletter, we store your email address (and name, if provided) solely to send
+            product updates. You can unsubscribe at any time — contact us or use the unsubscribe option and we will
+            remove you. AI usage statistics shown to administrators are aggregate cost estimates only and are never
+            shared publicly.
+          </p>
 
           <div className="h-px bg-slate-200 my-12" />
 

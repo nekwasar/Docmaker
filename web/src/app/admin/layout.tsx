@@ -38,9 +38,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               {admin.email}
             </span>
           </div>
-          <nav className="flex items-center gap-1 text-[12px] font-medium">
-            <a href="/admin" className="rounded-[6px] px-2 py-1.5 text-[#0F172A] hover:bg-[#F8FAFC]">Dashboard</a>
-            <a href="/" className="rounded-[6px] px-2 py-1.5 text-[#475569] hover:bg-[#F8FAFC]">← Site</a>
+          <nav className="flex items-center gap-1 text-[12px] font-medium overflow-x-auto">
+            <a href="/admin" className="rounded-[6px] px-2 py-1.5 text-[#0F172A] hover:bg-[#F8FAFC] whitespace-nowrap">Dashboard</a>
+            <a href="/admin/settings" className="rounded-[6px] px-2 py-1.5 text-[#475569] hover:bg-[#F8FAFC] whitespace-nowrap">AI Settings</a>
+            <a href="/admin/usage" className="rounded-[6px] px-2 py-1.5 text-[#475569] hover:bg-[#F8FAFC] whitespace-nowrap">Usage</a>
+            <a href="/admin/visitors" className="rounded-[6px] px-2 py-1.5 text-[#475569] hover:bg-[#F8FAFC] whitespace-nowrap">Visitors</a>
+            <a href="/admin/newsletter" className="rounded-[6px] px-2 py-1.5 text-[#475569] hover:bg-[#F8FAFC] whitespace-nowrap">Newsletter</a>
+            <a href="/admin/users" className="rounded-[6px] px-2 py-1.5 text-[#475569] hover:bg-[#F8FAFC] whitespace-nowrap">Users</a>
+            <a href="/" className="rounded-[6px] px-2 py-1.5 text-[#475569] hover:bg-[#F8FAFC] whitespace-nowrap">← Site</a>
           </nav>
         </div>
       </header>

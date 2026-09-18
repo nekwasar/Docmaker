@@ -143,3 +143,62 @@ model Template {
 
   user            User     @relation(fields: [userId], references: [id])
 }
+
+model AdminSetting {
+  key            String   @id
+  encryptedValue String   @db.Text
+  updatedBy      String?
+  updatedAt      DateTime @updatedAt
+}
+
+model ApiUsageLog {
+  id               String   @id @default(cuid())
+  provider         String
+  model            String
+  promptTokens     Int      @default(0)
+  completionTokens Int      @default(0)
+  totalTokens      Int      @default(0)
+  estimatedCostUsd Decimal  @db.Decimal(10, 6) @default(0)
+  userId           String?
+  sessionId        String?
+  path             String?
+  createdAt        DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([sessionId])
+}
+
+model PageView {
+  id        String   @id @default(cuid())
+  path      String
+  sessionId String?
+  userId    String?
+  ip        String?
+  userAgent String?
+  referrer  String?
+  createdAt DateTime @default(now())
+
+  @@index([path, createdAt])
+  @@index([sessionId])
+}
+
+model Subscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  source    String?
+  status    String   @default("subscribed") // subscribed, unsubscribed
+  createdAt DateTime @default(now())
+
+  @@index([status])
+}
+
+model AdminAuditLog {
+  id          String   @id @default(cuid())
+  adminUserId String
+  action      String
+  details     Json?
+  createdAt   DateTime @default(now())
+
+  @@index([adminUserId])
+}

@@ -25,6 +25,7 @@ services:
       - "4000:4000"
     volumes:
       - ./web/src:/app/src
+      - ./web/prisma:/app/prisma
       - web-node-modules:/app/node_modules
       - web-next:/app/.next
     env_file: ./web/.env

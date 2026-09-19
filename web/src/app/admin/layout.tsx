@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { requireAdminPage } from "@/lib/admin";
 import { getSession } from "@/lib/session";
 import { adminBody, adminHead } from "./fonts";
+import AdminNav from "./Nav";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const admin = await requireAdminPage();
@@ -32,23 +33,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className={`min-h-screen bg-white ${adminBody.className}`}>
       <header className="sticky top-0 z-10 bg-[#3D4D4E]">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <div className="flex items-center gap-2">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-2 sm:py-0 sm:h-14 sm:flex sm:items-center sm:justify-between sm:gap-4">
+          <div className="flex items-center gap-2 py-1 sm:py-0">
             <span className={`text-[15px] font-bold tracking-tight text-white ${adminHead.className}`}>Docmaker Admin</span>
-            <span className="rounded-[6px] border border-white/20 bg-white/10 px-1.5 py-0.5 text-[10px] font-medium text-[#E3D5C2]">
+            <span className="rounded-[6px] border border-white/20 bg-white/10 px-1.5 py-0.5 text-[10px] font-medium text-[#E3D5C2] max-w-[150px] truncate">
               {admin.email}
             </span>
           </div>
-          <nav className="flex items-center gap-1 overflow-x-auto text-[12px] font-medium">
-            <a href="/admin" className="rounded-[6px] px-2 py-1.5 text-white hover:bg-white/10 whitespace-nowrap">Dashboard</a>
-            <a href="/admin/settings" className="rounded-[6px] px-2 py-1.5 text-white/70 hover:bg-white/10 hover:text-white whitespace-nowrap">AI Settings</a>
-            <a href="/admin/usage" className="rounded-[6px] px-2 py-1.5 text-white/70 hover:bg-white/10 hover:text-white whitespace-nowrap">Usage</a>
-            <a href="/admin/visitors" className="rounded-[6px] px-2 py-1.5 text-white/70 hover:bg-white/10 hover:text-white whitespace-nowrap">Visitors</a>
-            <a href="/admin/newsletter" className="rounded-[6px] px-2 py-1.5 text-white/70 hover:bg-white/10 hover:text-white whitespace-nowrap">Newsletter</a>
-            <a href="/admin/users" className="rounded-[6px] px-2 py-1.5 text-white/70 hover:bg-white/10 hover:text-white whitespace-nowrap">Users</a>
-            <a href="/admin/audit" className="rounded-[6px] px-2 py-1.5 text-white/70 hover:bg-white/10 hover:text-white whitespace-nowrap">Audit</a>
-            <a href="/" className="rounded-[6px] px-2 py-1.5 text-[#B2A295] hover:bg-white/10 whitespace-nowrap">← Site</a>
-          </nav>
+          <div className="pb-1 sm:pb-0 sm:min-w-0 sm:flex-1 sm:flex sm:justify-end">
+            <AdminNav />
+          </div>
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 sm:px-6 py-6 sm:py-8">{children}</main>

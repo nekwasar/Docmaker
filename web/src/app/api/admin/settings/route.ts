@@ -50,7 +50,10 @@ export async function PUT(req: NextRequest) {
     if (key === "GATE_ENABLED" && val !== "true" && val !== "false") {
       return NextResponse.json({ error: "GATE_ENABLED must be true/false" }, { status: 400 });
     }
-    if (key === "AI_PROVIDER" && !["openrouter", "openai", "anthropic", "ollama", "custom"].includes(val)) {
+    if (
+      key === "AI_PROVIDER" &&
+      !["openrouter", "openai", "anthropic", "google", "xai", "deepseek", "alibaba", "moonshot", "zhipu", "mistral", "ollama", "custom"].includes(val)
+    ) {
       return NextResponse.json({ error: "Invalid AI_PROVIDER" }, { status: 400 });
     }
     await setSetting(key, val, gate.user.id);

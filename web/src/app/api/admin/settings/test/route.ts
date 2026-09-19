@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin, audit } from "@/lib/admin";
-import { getAIConfigAsync } from "@/lib/ai/config";
+import { getAIConfigAsync, baseUrlForProvider } from "@/lib/ai/config";
 
 // Tiny non-streamed ping. Deliberately NOT logged to ApiUsageLog.
 export async function POST() {
@@ -12,15 +12,10 @@ export async function POST() {
     if (!config.apiKey) {
       return NextResponse.json({ ok: false, error: "No API key configured" }, { status: 400 });
     }
-    const baseUrl =
-      config.baseUrl ||
-      (config.provider === "openrouter"
-        ? "https://openrouter.ai/api/v1"
-        : config.provider === "ollama"
-          ? "http://localhost:11434/v1"
-          : config.provider === "anthropic"
-            ? "https://api.anthropic.com/v1"
-            : "https://api.openai.com/v1");
+    const baseUrl = baseUrlForProvider(config.provider, config.baseUrl);
+    if (!baseUrl) {
+      return NextResponse.json({ ok: false, error: "Custom provider needs a Base URL" }, { status: 400 });
+    }
 
     const res = await fetch(`${baseUrl}/chat/completions`, {
       method: "POST",

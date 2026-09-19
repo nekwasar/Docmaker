@@ -6,7 +6,34 @@
 
 import { getSetting } from "@/lib/settings";
 
-export type AIProvider = 'openai' | 'anthropic' | 'openrouter' | 'ollama' | 'custom';
+export type AIProvider =
+  | 'openrouter'
+  | 'openai'
+  | 'anthropic'
+  | 'google'
+  | 'xai'
+  | 'deepseek'
+  | 'alibaba'
+  | 'moonshot'
+  | 'zhipu'
+  | 'mistral'
+  | 'ollama'
+  | 'custom';
+
+export const AI_PROVIDERS: Array<{ id: AIProvider; label: string; region: 'Global' | 'US' | 'China' }> = [
+  { id: 'openrouter', label: 'OpenRouter (all models, one key)', region: 'Global' },
+  { id: 'openai', label: 'OpenAI', region: 'US' },
+  { id: 'anthropic', label: 'Anthropic', region: 'US' },
+  { id: 'google', label: 'Google', region: 'US' },
+  { id: 'xai', label: 'xAI (Grok)', region: 'US' },
+  { id: 'deepseek', label: 'DeepSeek', region: 'China' },
+  { id: 'alibaba', label: 'Alibaba (Qwen)', region: 'China' },
+  { id: 'moonshot', label: 'Moonshot (Kimi)', region: 'China' },
+  { id: 'zhipu', label: 'Zhipu (GLM)', region: 'China' },
+  { id: 'mistral', label: 'Mistral', region: 'Global' },
+  { id: 'ollama', label: 'Ollama (local)', region: 'Global' },
+  { id: 'custom', label: 'Custom endpoint', region: 'Global' },
+];
 
 export interface AIConfig {
   provider: AIProvider;
@@ -53,25 +80,81 @@ export async function getAIConfigAsync(): Promise<AIConfig> {
   };
 }
 
-// Supported models via OpenRouter
-export const SUPPORTED_MODELS = [
-  { id: 'openai/gpt-4', name: 'GPT-4', provider: 'OpenAI' },
-  { id: 'openai/gpt-4-turbo', name: 'GPT-4 Turbo', provider: 'OpenAI' },
-  { id: 'openai/gpt-4o', name: 'GPT-4o', provider: 'OpenAI' },
-  { id: 'anthropic/claude-3-opus', name: 'Claude 3 Opus', provider: 'Anthropic' },
-  { id: 'anthropic/claude-3-sonnet', name: 'Claude 3 Sonnet', provider: 'Anthropic' },
-  { id: 'anthropic/claude-3-haiku', name: 'Claude 3 Haiku', provider: 'Anthropic' },
-  { id: 'google/gemini-pro', name: 'Gemini Pro', provider: 'Google' },
-  { id: 'meta-llama/llama-3-70b', name: 'Llama 3 70B', provider: 'Meta' },
-  { id: 'mistralai/mixtral-8x7b', name: 'Mixtral 8x7B', provider: 'Mistral' },
-] as const;
+// Current models (reviewed Sept 2026) — OpenRouter IDs, grouped by region.
+// Legacy IDs (gpt-4, claude-3-*, gemini-pro, llama-3-70b, mixtral) removed:
+// unsupported or superseded. A custom ID can always be typed manually.
+export interface ModelOption {
+  id: string;
+  name: string;
+  provider: string;
+}
+
+export const MODEL_GROUPS: Array<{ region: string; models: ModelOption[] }> = [
+  {
+    region: 'US — Flagships',
+    models: [
+      { id: 'openai/gpt-5.6-sol', name: 'GPT-5.6 Sol', provider: 'OpenAI' },
+      { id: 'openai/gpt-5.5', name: 'GPT-5.5', provider: 'OpenAI' },
+      { id: 'anthropic/claude-opus-4.8', name: 'Claude Opus 4.8', provider: 'Anthropic' },
+      { id: 'anthropic/claude-sonnet-5', name: 'Claude Sonnet 5', provider: 'Anthropic' },
+      { id: 'google/gemini-3.7-flash', name: 'Gemini 3.7 Flash', provider: 'Google' },
+      { id: 'x-ai/grok-4.6', name: 'Grok 4.6', provider: 'xAI' },
+      { id: 'meta/muse-spark-1.3', name: 'Muse Spark 1.3', provider: 'Meta' },
+    ],
+  },
+  {
+    region: 'US — Efficient',
+    models: [
+      { id: 'openai/gpt-4o-mini', name: 'GPT-4o mini', provider: 'OpenAI' },
+      { id: 'anthropic/claude-haiku-4.5', name: 'Claude Haiku 4.5', provider: 'Anthropic' },
+      { id: 'google/gemini-3.1-pro', name: 'Gemini 3.1 Pro', provider: 'Google' },
+      { id: 'x-ai/grok-4.5', name: 'Grok 4.5', provider: 'xAI' },
+      { id: 'mistralai/mistral-nemo', name: 'Mistral Nemo', provider: 'Mistral' },
+    ],
+  },
+  {
+    region: 'China',
+    models: [
+      { id: 'deepseek/deepseek-v4-flash', name: 'DeepSeek V4 Flash', provider: 'DeepSeek' },
+      { id: 'deepseek/deepseek-v4-pro', name: 'DeepSeek V4 Pro', provider: 'DeepSeek' },
+      { id: 'qwen/qwen3.7-max', name: 'Qwen 3.7 Max', provider: 'Alibaba' },
+      { id: 'z-ai/glm-5.3', name: 'GLM 5.3', provider: 'Zhipu' },
+      { id: 'z-ai/glm-5.3-flash', name: 'GLM 5.3 Flash', provider: 'Zhipu' },
+      { id: 'moonshotai/kimi-k3', name: 'Kimi K3', provider: 'Moonshot' },
+      { id: 'moonshotai/kimi-k2', name: 'Kimi K2', provider: 'Moonshot' },
+      { id: 'xiaomi/mimo-v2.5', name: 'MiMo V2.5', provider: 'Xiaomi' },
+      { id: 'tencent/hy3', name: 'Hunyuan HY3', provider: 'Tencent' },
+      { id: 'minimax/m3', name: 'MiniMax M3', provider: 'MiniMax' },
+      { id: 'stepfun/step-3.7-flash', name: 'Step 3.7 Flash', provider: 'StepFun' },
+    ],
+  },
+];
+
+// Flat list (kept for compat).
+export const SUPPORTED_MODELS: ModelOption[] = MODEL_GROUPS.flatMap((g) => g.models);
+
+const PROVIDER_BASE_URLS: Record<Exclude<AIProvider, 'custom'>, string> = {
+  openrouter: 'https://openrouter.ai/api/v1',
+  openai: 'https://api.openai.com/v1',
+  anthropic: 'https://api.anthropic.com/v1',
+  google: 'https://generativelanguage.googleapis.com/v1beta/openai/',
+  xai: 'https://api.x.ai/v1',
+  deepseek: 'https://api.deepseek.com/v1',
+  alibaba: 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1',
+  moonshot: 'https://api.moonshot.ai/v1',
+  zhipu: 'https://open.bigmodel.cn/api/paas/v4',
+  mistral: 'https://api.mistral.ai/v1',
+  ollama: 'http://localhost:11434/v1',
+};
+
+export function baseUrlForProvider(provider: AIProvider, custom?: string): string {
+  if (custom) return custom;
+  if (provider === 'custom') return '';
+  return PROVIDER_BASE_URLS[provider] ?? 'https://api.openai.com/v1';
+}
 
 function resolveBaseUrl(config: AIConfig): string {
-  if (config.baseUrl) return config.baseUrl;
-  if (config.provider === 'openrouter') return 'https://openrouter.ai/api/v1';
-  if (config.provider === 'ollama') return 'http://localhost:11434/v1';
-  if (config.provider === 'anthropic') return 'https://api.anthropic.com/v1';
-  return 'https://api.openai.com/v1';
+  return baseUrlForProvider(config.provider, config.baseUrl);
 }
 
 // Streaming response handler — yields text chunks, reports provider usage via opts.

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Paperclip, Mic, Copy, Download, X, User, Square, RotateCcw, FileText, FileUp, LayoutGrid, ArrowUp, Sparkles, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { Paperclip, Mic, Copy, Download, X, User, Square, RotateCcw, FileText, FileUp, LayoutGrid, ArrowUp, Sparkles, ChevronDown, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { templates as staticTemplates, type Template } from "@/data/templates";
 import { DocumentPreview } from "./DocumentPreview";
 
@@ -24,6 +24,7 @@ export default function GeneratePage() {
   const [text, setText] = useState("");
   const [selectedStyle, setSelectedStyle] = useState<(typeof STYLE_OPTIONS)[number]["value"]>("professional");
   const [selectedFormat, setSelectedFormat] = useState<(typeof FORMAT_OPTIONS)[number]>("PDF");
+  const [tplTheme, setTplTheme] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [output, setOutput] = useState("");
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
@@ -248,6 +249,7 @@ function getClientSessionId(): string {
 
   const useTemplate = async (tpl: Template) => {
     setPreviewTemplate(null);
+    setTplTheme("liceria");
     if (tpl.fileUrl) {
       try {
         const res = await fetch(tpl.fileUrl);
@@ -311,10 +313,41 @@ function getClientSessionId(): string {
   };
 
   const copy = () => navigator.clipboard.writeText(output);
+  const [downloading, setDownloading] = useState(false);
+
+  const downloadRendered = async () => {
+    if (!output.trim() || downloading) return;
+    setDownloading(true);
+    try {
+      const fmt = selectedFormat.toLowerCase();
+      const themeName = tplTheme || "liceria";
+      const res = await fetch("/api/generate/render", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ markdown: output, format: fmt === "pdf" ? "pdf" : "docx", theme: themeName }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Render failed");
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `document.${fmt === "pdf" ? "pdf" : "docx"}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e: any) {
+      setOutput((p) => p + `\n\n[Download error: ${e.message}]`);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const download = () => {
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([output], { type: "text/markdown" }));
-    a.download = `document.${selectedFormat.toLowerCase() === "pdf" ? "pdf" : selectedFormat.toLowerCase() === "docx" ? "docx" : "md"}`;
+    a.download = `document.md`;
     a.click();
   };
 
@@ -478,8 +511,8 @@ function getClientSessionId(): string {
                     <button onClick={copy} className="rounded-[6px] border border-[#E2E8F0] bg-white p-1.5 hover:bg-slate-50" aria-label="Copy">
                       <Copy className="h-3.5 w-3.5 text-slate-600" strokeWidth={1.5} />
                     </button>
-                    <button onClick={download} className="rounded-[6px] border border-[#E2E8F0] bg-white p-1.5 hover:bg-slate-50" aria-label="Download">
-                      <Download className="h-3.5 w-3.5 text-slate-600" strokeWidth={1.5} />
+                    <button onClick={selectedFormat.toLowerCase() === "markdown" ? download : downloadRendered} disabled={downloading} className="rounded-[6px] border border-[#E2E8F0] bg-white p-1.5 hover:bg-slate-50 disabled:opacity-40" aria-label={selectedFormat.toLowerCase() === "pdf" ? "Download PDF" : selectedFormat.toLowerCase() === "docx" ? "Download DOCX" : "Download markdown"}>
+                      {downloading ? <Loader2 className="h-3.5 w-3.5 animate-spin text-[#3D4D4E]" strokeWidth={1.5} /> : <Download className="h-3.5 w-3.5 text-slate-600" strokeWidth={1.5} />}
                     </button>
                     {!generating && output && (
                       <button onClick={() => setOutput("")} className="rounded-[6px] border border-[#E2E8F0] bg-white p-1.5 hover:bg-slate-50" aria-label="Regenerate">

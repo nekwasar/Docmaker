@@ -31,6 +31,7 @@ services:
     environment:
       DATABASE_URL: postgresql://namesranker:namesranker@docmaker-postgres:5432/docmaker
       NEXTAUTH_URL: https://docmaker.io
+      GOTENBERG_URL: http://docmaker-gotenberg:3000
       TURBOPACK_ROOT: /app
     extra_hosts:
       - "host.docker.internal:host-gateway"

@@ -6,10 +6,14 @@ import { useEffect, useState } from "react";
 interface Stats {
   spend: { totalUsd: number; last30dUsd: number };
   generations: { total: number; last30d: number };
-  visitors: { total: number; last7d: number };
   subscribers: number;
   byModel: Array<{ model: string; costUsd: number; count: number }>;
   dailySpend: Array<{ date: string; costUsd: number; count: number }>;
+}
+
+interface LiveVisitors {
+  users: { total: number; new: number; returning: number };
+  sessions: number;
 }
 
 function Card({ label, value, sub }: { label: string; value: string; sub?: string }) {
@@ -27,15 +31,23 @@ const fmtUsd = (n: number) =>
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
+  const [live, setLive] = useState<LiveVisitors | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/admin/stats")
-      .then(async (r) => {
+    Promise.all([
+      fetch("/api/admin/stats").then(async (r) => {
         if (!r.ok) throw new Error(r.status === 401 || r.status === 403 ? "Not authorized" : "Failed to load");
         return r.json();
+      }),
+      // Live visitor counts come from the analytics source (unique visitors + visits),
+      // not the raw page-view row counter.
+      fetch("/api/admin/analytics/overview?days=30").then((r) => (r.ok ? r.json() : null)).catch(() => null),
+    ])
+      .then(([s, o]) => {
+        setStats(s);
+        if (o) setLive({ users: o.users, sessions: o.sessions });
       })
-      .then(setStats)
       .catch((e) => setError(e.message));
   }, []);
 
@@ -53,7 +65,11 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Card label="AI spend (total)" value={fmtUsd(stats.spend.totalUsd)} sub={`${fmtUsd(stats.spend.last30dUsd)} last 30d`} />
         <Card label="Generations" value={String(stats.generations.total)} sub={`${stats.generations.last30d} last 30d`} />
-        <Card label="Visitors" value={String(stats.visitors.total)} sub={`${stats.visitors.last7d} last 7d`} />
+        <Card
+          label="Unique visitors (30d)"
+          value={live ? String(live.users.total) : "…"}
+          sub={live ? `${live.sessions} visits • ${live.users.new} new` : "Live from analytics…"}
+        />
         <Card label="Subscribers" value={String(stats.subscribers)} />
       </div>
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">

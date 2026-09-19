@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { requireAdmin, audit } from "@/lib/admin";
+import { requireAdminWrite, audit } from "@/lib/admin";
 
 const prisma = new PrismaClient();
 
 // Retention: raw PageView rows (with IP/UA) older than 90 days are deleted.
 // Aggregates (top paths, counts) are computed live, so nothing else is needed.
 export async function POST(req: NextRequest) {
-  const gate = await requireAdmin();
+  const gate = await requireAdminWrite();
   if ("response" in gate) return gate.response;
 
   const body = await req.json().catch(() => ({}));

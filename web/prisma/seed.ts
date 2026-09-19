@@ -1,6 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
+function roleRank(role: string): number {
+  return ["free", "pro", "mod", "admin", "super-admin"].indexOf(role);
+}
+
 const prisma = new PrismaClient();
 
 async function main() {
@@ -11,12 +15,15 @@ async function main() {
   if (!admin) {
     const passwordHash = await bcrypt.hash(password, 10);
     admin = await prisma.user.create({
-      data: { email, name: "Admin", passwordHash, role: "admin" },
+      data: { email, name: "Admin", passwordHash, role: "super-admin" },
     });
-    console.log(`Seeded admin user ${email}`);
+    console.log(`Seeded super-admin user ${email}`);
   } else {
     const updates: Record<string, string> = {};
-    if (admin.role !== "admin") updates.role = "admin";
+    if (roleRank(admin.role) < roleRank("super-admin")) {
+      updates.role = "super-admin";
+      console.log(`Promoted ${email} to super-admin`);
+    }
     if (!admin.passwordHash) {
       updates.passwordHash = await bcrypt.hash(password, 10);
       console.log(`Backfilled missing password for ${email}`);

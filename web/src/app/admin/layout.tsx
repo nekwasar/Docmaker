@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { requireAdminPage } from "@/lib/admin";
+import { requireAdminPage, roleLabel } from "@/lib/admin";
 import { getSession } from "@/lib/session";
 import { adminBody, adminHead } from "./fonts";
 import AdminNav from "./Nav";
@@ -36,8 +36,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-2 sm:py-0 sm:h-14 sm:flex sm:items-center sm:justify-between sm:gap-4">
           <div className="flex items-center gap-2 py-1 sm:py-0">
             <span className={`text-[15px] font-bold tracking-tight text-white ${adminHead.className}`}>Docmaker Admin</span>
-            <span className="rounded-[6px] border border-white/20 bg-white/10 px-1.5 py-0.5 text-[10px] font-medium text-[#E3D5C2] max-w-[150px] truncate">
-              {admin.email}
+            <span
+              title={admin.email}
+              className="rounded-[6px] border border-white/20 bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-[#B2A295]"
+            >
+              {roleLabel(admin.role)}
             </span>
           </div>
           <div className="pb-1 sm:pb-0 sm:min-w-0 sm:flex-1 sm:flex sm:justify-end">

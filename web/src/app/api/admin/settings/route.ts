@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { requireAdmin, audit } from "@/lib/admin";
+import { requireAdmin, requireAdminWrite, audit } from "@/lib/admin";
 import { getSetting, setSetting, maskSecret } from "@/lib/settings";
 
 const prisma = new PrismaClient();
@@ -24,7 +24,7 @@ export async function GET() {
 }
 
 export async function PUT(req: NextRequest) {
-  const gate = await requireAdmin();
+  const gate = await requireAdminWrite();
   if ("response" in gate) return gate.response;
 
   const body = await req.json().catch(() => ({}));

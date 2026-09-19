@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { requireAdmin, audit } from "@/lib/admin";
+import { requireAdminWrite, audit } from "@/lib/admin";
 import { getAIConfigAsync, baseUrlForProvider } from "@/lib/ai/config";
 
 // Tiny non-streamed ping. Deliberately NOT logged to ApiUsageLog.
 export async function POST() {
-  const gate = await requireAdmin();
+  const gate = await requireAdminWrite();
   if ("response" in gate) return gate.response;
 
   try {

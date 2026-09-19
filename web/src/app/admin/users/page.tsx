@@ -64,7 +64,7 @@ export default function AdminUsers() {
     <div className="space-y-4">
       <div>
         <h1 className={`text-[22px] font-bold tracking-tight text-[#3D4D4E] ${adminHead.className}`}>Users</h1>
-        <p className="mt-1 text-[13px] text-[#64748B]">{total} users. Roles: free, pro, admin. You cannot demote yourself.</p>
+          <p className="mt-1 text-[13px] text-[#64748B]">{total} users. Roles: free → pro → mod → admin → super-admin. Mods can view; changes need admin+. Your own role is locked.</p>
       </div>
       {msg && <p className="rounded-[8px] border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12px] text-emerald-700">{msg}</p>}
       {err && <p className="rounded-[8px] border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-700">{err}</p>}
@@ -101,11 +101,13 @@ export default function AdminUsers() {
                   <select
                     value={u.role}
                     onChange={(e) => setRole(u, e.target.value)}
-                    className="rounded-[6px] border border-[#E2E8F0] bg-white px-2 py-1 text-[12px] font-medium text-[#3D4D4E]"
+                    className="rounded-[6px] border border-[#E2E8F0] bg-white px-2 py-1 text-[12px] font-medium text-[#0F172A]"
                   >
                     <option value="free">free</option>
                     <option value="pro">pro</option>
+                    <option value="mod">mod</option>
                     <option value="admin">admin</option>
+                    <option value="super-admin">super-admin</option>
                   </select>
                 </td>
                 <td className="px-3 py-2 text-right">

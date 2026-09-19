@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { requireAdmin, audit } from "@/lib/admin";
+import { requireAdmin, requireAdminWrite, audit } from "@/lib/admin";
 
 const prisma = new PrismaClient();
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const gate = await requireAdmin();
+  const gate = await requireAdminWrite();
   if ("response" in gate) return gate.response;
   const { id } = await params;
 
@@ -24,7 +24,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const gate = await requireAdmin();
+  const gate = await requireAdminWrite();
   if ("response" in gate) return gate.response;
   const { id } = await params;
 

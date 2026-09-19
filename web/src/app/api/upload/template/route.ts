@@ -80,12 +80,21 @@ export async function POST(req: NextRequest) {
           // Thumbnails via ghostscript directly (no docker) — we installed gs in the web container
           try {
             const id = Date.now().toString(36);
-            // Use gs to render first 3 pages at 96 dpi
-            execSync(`gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=png16m -r96 -dFirstPage=1 -dLastPage=3 -sOutputFile="${uploadsDir}/${id}-%d.png" "${filePath}"`, { stdio: "ignore" });
+            // Use gs to render first 6 pages at 110 dpi (AI needs all page archetypes:
+            // cover, TOC, content, table, closing).
+            execSync(`gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=png16m -r110 -dFirstPage=1 -dLastPage=6 -sOutputFile="${uploadsDir}/${id}-%d.png" "${filePath}"`, { stdio: "ignore" });
             const thumbs: string[] = [];
-            for (let i = 1; i <= 3; i++) {
+            for (let i = 1; i <= 6; i++) {
               const p = path.join(uploadsDir, `${id}-${i}.png`);
               if (fs.existsSync(p)) thumbs.push(`/uploads/templates/${id}-${i}.png`);
+            }
+            if (thumbs.length === 0) {
+              // gs produced nothing (e.g. single-page short doc) — retry without page range
+              execSync(`gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=png16m -r110 -sOutputFile="${uploadsDir}/${id}-%d.png" "${filePath}"`, { stdio: "ignore" });
+              for (let i = 1; i <= 6; i++) {
+                const p = path.join(uploadsDir, `${id}-${i}.png`);
+                if (fs.existsSync(p)) thumbs.push(`/uploads/templates/${id}-${i}.png`);
+              }
             }
             if (thumbs.length > 0) thumbnails = thumbs;
             else console.error("gs produced no thumbnails for", filePath);

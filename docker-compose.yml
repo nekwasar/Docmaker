@@ -26,6 +26,7 @@ services:
     volumes:
       - ./web/src:/app/src
       - ./web/prisma:/app/prisma
+      - ./web/public:/app/public
       - web-node-modules:/app/node_modules
       - web-next:/app/.next
     env_file: ./web/.env

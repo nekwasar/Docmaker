@@ -1,48 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
 import { renderMarkdownToStyledPages, htmlToStyledPdf, getTheme, type DocumentTheme } from "@/lib/render/document";
+import { ensurePrintCss } from "@/lib/ai/designer";
 import { execSync } from "child_process";
-import { writeFile, readFile, unlink, mkdir } from "fs/promises";
+import { writeFile, mkdir, unlink } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
 import { randomUUID } from "crypto";
 
-async function markdownToDocx(md: string): Promise<Buffer> {
+async function htmlToDocx(html: string): Promise<Buffer> {
   const tmpDir = join(tmpdir(), "docmaker-render");
   await mkdir(tmpDir, { recursive: true });
-  const inPath = join(tmpDir, `${randomUUID()}.md`);
+  const inPath = join(tmpDir, `${randomUUID()}.html`);
   const outPath = join(tmpDir, `${randomUUID()}.docx`);
-  await writeFile(inPath, md);
+  await writeFile(inPath, html, "utf-8");
   try {
-    execSync(`pandoc "${inPath}" -o "${outPath}" -t docx`, { maxBuffer: 100 * 1024 * 1024 });
+    execSync(`pandoc "${inPath}" -f html -o "${outPath}" -t docx`, { maxBuffer: 100 * 1024 * 1024 });
     const { readFile } = await import("fs/promises");
     return await readFile(outPath);
   } finally {
-    await writeFile(inPath, "").catch(() => {});
-    await import("fs/promises").then((fs) => fs.unlink(inPath).catch(() => {}));
-    await import("fs/promises").then((fs) => fs.unlink(outPath).catch(() => {}));
+    unlink(inPath).catch(() => {});
+    unlink(outPath).catch(() => {});
   }
 }
 
 // POST /api/generate/render
-// Body: { markdown, format: "pdf"|"docx", theme?: "liceria"|"dark"|"serif", themeConfig?: DocumentTheme }
-// Returns a downloadable file (PDF or DOCX) rendered with the selected theme.
+// Body (template flow): { html, format: "pdf"|"docx" }
+// Body (default flow):  { markdown, format: "pdf"|"docx", theme?: "liceria" }
+// Returns a downloadable file.
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    const markdown = typeof body.markdown === "string" ? body.markdown : "";
     const format = body.format === "docx" ? "docx" : "pdf";
-    const themeName = typeof body.theme === "string" ? body.theme : undefined;
+    const aiHtml = typeof body.html === "string" ? body.html : "";
+    const markdown = typeof body.markdown === "string" ? body.markdown : "";
     const themeConfig = body.themeConfig as DocumentTheme | undefined;
+    const themeName = typeof body.theme === "string" ? body.theme : undefined;
 
-    if (!markdown.trim()) {
+    if (!aiHtml.trim() && !markdown.trim()) {
       return NextResponse.json({ error: "No content to render" }, { status: 400 });
     }
 
-    const theme = themeConfig ?? getTheme(themeName);
+    // Template flow: the AI already produced the designed HTML — use it as-is.
+    const html = aiHtml.trim()
+      ? ensurePrintCss(aiHtml)
+      : renderMarkdownToStyledPages(markdown, themeConfig ?? getTheme(themeName));
 
     if (format === "pdf") {
-      // Markdown → styled HTML → Gotenberg Chromium → PDF
-      const html = renderMarkdownToStyledPages(markdown, theme);
       const pdfBuffer = await htmlToStyledPdf(html);
       return new Response(pdfBuffer as unknown as BodyInit, {
         headers: {
@@ -53,8 +56,8 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // format === "docx": Markdown → pandoc → DOCX
-    const docxBuffer = await markdownToDocx(markdown);
+    // DOCX: HTML → pandoc → DOCX (keeps structure from the designed HTML)
+    const docxBuffer = await htmlToDocx(html);
     return new Response(docxBuffer as unknown as BodyInit, {
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",

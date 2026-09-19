@@ -25,8 +25,11 @@ export default function GeneratePage() {
   const [selectedStyle, setSelectedStyle] = useState<(typeof STYLE_OPTIONS)[number]["value"]>("professional");
   const [selectedFormat, setSelectedFormat] = useState<(typeof FORMAT_OPTIONS)[number]>("PDF");
   const [tplTheme, setTplTheme] = useState<string | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [genStage, setGenStage] = useState<"idle" | "thinking" | "designing" | "writing" | "compiling">("idle");
   const [output, setOutput] = useState("");
+  const [outputHtml, setOutputHtml] = useState("");
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
   const [previewPage, setPreviewPage] = useState(0);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
@@ -174,7 +177,9 @@ function getClientSessionId(): string {
     if ((!text.trim() && attachedFiles.length === 0) || generating) return;
     if (gateMustSubscribe) return;
     setGenerating(true);
+    setGenStage("thinking");
     setOutput("");
+    setOutputHtml("");
     const controller = new AbortController();
     abortRef.current = controller;
     const sid = getClientSessionId();
@@ -185,6 +190,7 @@ function getClientSessionId(): string {
       form.append("structure", "business");
       form.append("style", selectedStyle);
       form.append("format", selectedFormat.toLowerCase());
+      if (selectedTemplate) form.append("templateId", selectedTemplate.id);
       attachedFiles.forEach((f) => form.append("files", f));
 
       const res = await fetch("/api/generate", {
@@ -197,22 +203,44 @@ function getClientSessionId(): string {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.error || "Failed");
       }
+
+      // Read stage events (SSE) — never render raw streamed content.
       const reader = res.body?.getReader();
       const dec = new TextDecoder();
+      let buffer = "";
       if (reader) {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-          setOutput((p) => p + dec.decode(value, { stream: true }));
+          buffer += dec.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+            try {
+              const evt = JSON.parse(line.slice(6));
+              if (evt.stage === "done") {
+                setOutput(evt.markdown || "");
+                setOutputHtml(evt.html || "");
+                setGenStage("idle");
+              } else if (evt.stage === "error") {
+                throw new Error(evt.error || "Generation failed");
+              } else if (evt.stage) {
+                setGenStage(evt.stage);
+              }
+            } catch (parseErr: any) {
+              if (parseErr?.message && !parseErr.message.includes("JSON")) throw parseErr;
+            }
+          }
         }
       }
     } catch (e: any) {
       failed = true;
       if (e.name !== "AbortError") setOutput(`Error: ${e.message}`);
+      setGenStage("idle");
     } finally {
       setGenerating(false);
       abortRef.current = null;
-      // Re-check the newsletter gate after each generation (server counts it).
       if (!failed) checkGate(sid);
     }
   };
@@ -250,6 +278,7 @@ function getClientSessionId(): string {
   const useTemplate = async (tpl: Template) => {
     setPreviewTemplate(null);
     setTplTheme("liceria");
+    setSelectedTemplate(tpl);
     if (tpl.fileUrl) {
       try {
         const res = await fetch(tpl.fileUrl);
@@ -316,15 +345,18 @@ function getClientSessionId(): string {
   const [downloading, setDownloading] = useState(false);
 
   const downloadRendered = async () => {
-    if (!output.trim() || downloading) return;
+    if ((!outputHtml.trim() && !output.trim()) || downloading) return;
     setDownloading(true);
     try {
       const fmt = selectedFormat.toLowerCase();
       const themeName = tplTheme || "liceria";
+      const payload: Record<string, unknown> = { format: fmt === "pdf" ? "pdf" : "docx", theme: themeName };
+      if (outputHtml.trim()) payload.html = outputHtml;
+      else payload.markdown = output;
       const res = await fetch("/api/generate/render", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ markdown: output, format: fmt === "pdf" ? "pdf" : "docx", theme: themeName }),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -473,14 +505,28 @@ function getClientSessionId(): string {
             </div>
           </div>
 
-          {/* Agent thinking indicator (kept, but compact) */}
+          {/* Stage indicator — users only see progress states, never streamed content */}
           {generating && (
-            <div className="flex items-center gap-2 rounded-[10px] border border-[#E2E8F0] bg-white px-3 py-2.5">
+            <div className="flex items-center gap-3 rounded-[10px] border border-[#E2E8F0] bg-white px-4 py-3.5">
               <span className="relative flex h-2.5 w-2.5 shrink-0">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-30" />
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
               </span>
-              <span className="text-[12px] font-medium text-[#0F172A]">Generating response...</span>
+              <div className="min-w-0">
+                <p className="text-[13px] font-medium text-[#0F172A]">
+                  {genStage === "designing"
+                    ? "Designing pages from your template…"
+                    : genStage === "writing"
+                      ? "Writing your document…"
+                      : genStage === "compiling"
+                        ? "Compiling your document…"
+                        : "Thinking about your document…"}
+                </p>
+                <p className="mt-0.5 text-[11px] text-[#64748B]">
+                  {selectedTemplate ? `Using template “${selectedTemplate.title}”` : "Applying the Docmaker theme"}
+                </p>
+              </div>
+              <Loader2 className="ml-auto h-4 w-4 shrink-0 animate-spin text-[#3D4D4E]" strokeWidth={1.5} />
             </div>
           )}
 
@@ -502,32 +548,50 @@ function getClientSessionId(): string {
                   )}
                 </div>
               )}
-              <div className="overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white">
-                <div className="flex items-center justify-between border-b border-[#E2E8F0] px-3 py-2">
-                  <span className="inline-flex items-center gap-2 text-[11px] font-medium tracking-wide text-[#475569] uppercase">
-                    {generating && <span className="h-2 w-2 rounded-[2px] bg-emerald-500 animate-pulse" />} {generating ? "Generating" : "Preview"}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <button onClick={copy} className="rounded-[6px] border border-[#E2E8F0] bg-white p-1.5 hover:bg-slate-50" aria-label="Copy">
-                      <Copy className="h-3.5 w-3.5 text-slate-600" strokeWidth={1.5} />
-                    </button>
-                    <button onClick={selectedFormat.toLowerCase() === "markdown" ? download : downloadRendered} disabled={downloading} className="rounded-[6px] border border-[#E2E8F0] bg-white p-1.5 hover:bg-slate-50 disabled:opacity-40" aria-label={selectedFormat.toLowerCase() === "pdf" ? "Download PDF" : selectedFormat.toLowerCase() === "docx" ? "Download DOCX" : "Download markdown"}>
-                      {downloading ? <Loader2 className="h-3.5 w-3.5 animate-spin text-[#3D4D4E]" strokeWidth={1.5} /> : <Download className="h-3.5 w-3.5 text-slate-600" strokeWidth={1.5} />}
-                    </button>
-                    {!generating && output && (
-                      <button onClick={() => setOutput("")} className="rounded-[6px] border border-[#E2E8F0] bg-white p-1.5 hover:bg-slate-50" aria-label="Regenerate">
+              {(outputHtml || output) && !output.startsWith("Error:") && (
+                <div className="overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white">
+                  <div className="flex items-center justify-between border-b border-[#E2E8F0] px-3 py-2">
+                    <span className="inline-flex items-center gap-2 text-[11px] font-medium tracking-wide text-[#475569] uppercase">
+                      Document{selectedTemplate ? ` • ${selectedTemplate.title}` : ""}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <button onClick={copy} className="rounded-[6px] border border-[#E2E8F0] bg-white p-1.5 hover:bg-slate-50" aria-label="Copy source">
+                        <Copy className="h-3.5 w-3.5 text-slate-600" strokeWidth={1.5} />
+                      </button>
+                      <button
+                        onClick={downloadRendered}
+                        disabled={downloading}
+                        className="inline-flex items-center gap-1.5 rounded-[6px] bg-[#0F172A] px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-black disabled:opacity-40"
+                      >
+                        {downloading ? <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={1.5} /> : <Download className="h-3.5 w-3.5" strokeWidth={1.5} />}
+                        {selectedFormat.toLowerCase() === "docx" ? "Download DOCX" : selectedFormat.toLowerCase() === "markdown" ? "Download MD" : "Download PDF"}
+                      </button>
+                      <button onClick={() => { setOutput(""); setOutputHtml(""); }} className="rounded-[6px] border border-[#E2E8F0] bg-white p-1.5 hover:bg-slate-50" aria-label="Clear">
                         <RotateCcw className="h-3.5 w-3.5 text-slate-600" strokeWidth={1.5} />
                       </button>
-                    )}
+                    </div>
                   </div>
+                  {outputHtml ? (
+                    <div className="bg-[#E8EAED] p-3 sm:p-5">
+                      <div className="mx-auto max-w-[820px] rounded-[6px] bg-white shadow-sm overflow-hidden">
+                        <iframe
+                          title="Document preview"
+                          srcDoc={outputHtml}
+                          sandbox=""
+                          className="w-full border-0"
+                          style={{ height: "70vh" }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="max-h-[56vh] overflow-y-auto bg-[#F8FAFC] p-4">
+                      <div className="rounded-[8px] border border-[#E2E8F0] bg-white p-4">
+                        <DocumentPreview content={output} category="Business" paginated />
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="max-h-[56vh] overflow-y-auto bg-[#F8FAFC] p-4">
-                  <div className="rounded-[8px] border border-[#E2E8F0] bg-white p-4">
-                    <DocumentPreview content={output} category="Business" paginated />
-                    {generating && <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse bg-[#0F172A] align-middle" />}
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           )}
 

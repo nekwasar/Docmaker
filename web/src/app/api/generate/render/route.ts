@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { renderMarkdownToHtml, htmlToStyledPdf, getTheme, type DocumentTheme } from "@/lib/render/document";
+import { renderMarkdownToStyledPages, htmlToStyledPdf, getTheme, type DocumentTheme } from "@/lib/render/document";
 import { execSync } from "child_process";
 import { writeFile, readFile, unlink, mkdir } from "fs/promises";
 import { tmpdir } from "os";
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
 
     if (format === "pdf") {
       // Markdown → styled HTML → Gotenberg Chromium → PDF
-      const html = renderMarkdownToHtml(markdown, theme);
+      const html = renderMarkdownToStyledPages(markdown, theme);
       const pdfBuffer = await htmlToStyledPdf(html);
       return new Response(pdfBuffer as unknown as BodyInit, {
         headers: {

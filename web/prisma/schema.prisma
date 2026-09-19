@@ -169,17 +169,49 @@ model ApiUsageLog {
 }
 
 model PageView {
-  id        String   @id @default(cuid())
-  path      String
-  sessionId String?
-  userId    String?
-  ip        String?
-  userAgent String?
-  referrer  String?
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  path         String
+  title        String?
+  sessionId    String?
+  visitorId    String?
+  userId       String?
+  isNewVisitor Boolean  @default(false)
+  isNewSession Boolean  @default(false)
+  device       String?  // mobile, tablet, desktop
+  os           String?
+  browser      String?
+  screen       String?  // e.g. 390x844
+  language     String?
+  timezone     String?
+  utmSource    String?
+  utmMedium    String?
+  utmCampaign  String?
+  ip           String?
+  userAgent    String?
+  referrer     String?
+  createdAt    DateTime @default(now())
 
   @@index([path, createdAt])
   @@index([sessionId])
+  @@index([visitorId])
+  @@index([createdAt])
+}
+
+model Session {
+  id          String   @id // client analytics session id (rotates after 30m inactivity)
+  visitorId   String?
+  userId      String?
+  landingPath String?
+  referrer    String?
+  device      String?
+  os          String?
+  browser     String?
+  startedAt   DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+  pageCount   Int      @default(0)
+
+  @@index([visitorId])
+  @@index([startedAt])
 }
 
 model Subscriber {

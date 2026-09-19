@@ -33,9 +33,13 @@ export default function PrivacyPage() {
 
           <h2 className="text-3xl font-bold mb-6" style={{ fontFamily: 'var(--font-playfair)', color: '#0F172A' }}>Analytics & Newsletter</h2>
           <p className="text-slate-600 leading-relaxed mb-4">
-            We run our own privacy-friendly analytics (no third-party trackers). When you browse, we log the visited
-            page, a random session identifier, and technical details (IP address, browser user-agent, referrer) to
-            understand usage and prevent abuse. Raw IP addresses are automatically deleted after 90 days; only
+            We run our own privacy-friendly analytics (no third-party trackers such as Google Analytics). When you
+            browse, we log the visited page and page title, a random visitor identifier, a visit session identifier
+            (a new visit starts after 30 minutes of inactivity), and technical details: IP address, browser
+            user-agent, referrer, device type, operating system, browser, screen size, language, timezone, and
+            campaign tags (UTM) if present. A lightweight heartbeat keeps visit durations accurate while a tab is
+            open. This helps us understand usage, tell new visitors apart from returning ones, and prevent abuse.
+            Raw IP addresses, user-agents and detailed view rows are automatically deleted after 90 days; only
             aggregate counts are kept longer.
           </p>
           <p className="text-slate-600 leading-relaxed mb-8">

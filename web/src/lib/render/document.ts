@@ -61,8 +61,8 @@ function parseMarkdownToPages(markdown: string, theme: DocumentTheme): PageStruc
   };
 
   let currentHeading = "";
-  let currentTokens: typeof tokens = [];
-  const sections: Array<{ title: string; tokens: typeof tokens }> = [];
+  let currentTokens: any[] = [];
+  const sections: Array<{ title: string; tokens: any[] }> = [];
   let afterH1 = false; // track if we just saw h1 (cover title) — next paragraph is subtitle
 
   // Walk tokens: h1 = cover title, h2 = section titles, content between h2s

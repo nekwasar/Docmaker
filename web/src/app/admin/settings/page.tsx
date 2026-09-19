@@ -2,7 +2,7 @@
 
 import { adminHead } from "../fonts";
 import { useEffect, useMemo, useState } from "react";
-import { AI_PROVIDERS, MODEL_GROUPS, baseUrlForProvider, type AIProvider } from "@/lib/ai/config";
+import { AI_PROVIDERS, MODEL_GROUPS, baseUrlForProvider, type AIProvider } from "@/lib/ai/catalog";
 import { getModelPrice } from "@/lib/pricing";
 
 const PROVIDER_IDS = AI_PROVIDERS.map((p) => p.id);

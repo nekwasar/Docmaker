@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Paperclip, Mic, Copy, Download, X, User, Square, RotateCcw, FileText, FileUp, LayoutGrid, ArrowUp, Sparkles, ChevronDown, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Paperclip, Mic, Download, X, User, Square, RotateCcw, FileText, FileUp, LayoutGrid, ArrowUp, Sparkles, ChevronDown, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { templates as staticTemplates, type Template } from "@/data/templates";
 import { DocumentPreview } from "./DocumentPreview";
+import GenerationProgress from "./GenerationProgress";
 
 const EXAMPLE_PROMPTS = [
   { label: "Draft a Non-Disclosure Agreement", text: "Draft a mutual Non-Disclosure Agreement between Nova Studio Inc. and Acme Corp, 2-year confidentiality, define confidential information, obligations, term, and return of materials.", cat: "Legal" },
@@ -169,7 +170,13 @@ function getClientSessionId(): string {
   };
 
   const handlePromptClick = (prompt: string) => {
-    setText(prompt);
+    setText((prev) => {
+      const cur = prev.trimEnd();
+      if (!cur) return prompt;
+      // Never replace the user's text — append. Skip exact duplicates.
+      if (cur.includes(prompt)) return prev;
+      return `${cur}\n\n${prompt}`;
+    });
     textareaRef.current?.focus();
   };
 
@@ -341,16 +348,41 @@ function getClientSessionId(): string {
     touchStartX.current = null;
   };
 
-  const copy = () => navigator.clipboard.writeText(output);
   const [downloading, setDownloading] = useState(false);
+
+  // Derive a human filename from the generated document (first heading).
+  const outputExt = selectedFormat.toLowerCase() === "docx" ? "docx" : selectedFormat.toLowerCase() === "markdown" ? "md" : "pdf";
+  const docFileName = (() => {
+    const h1 = outputHtml.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+    const md = output.match(/^#\s+(.+)$/m);
+    const raw = (h1 ? h1[1].replace(/<[^>]+>/g, " ") : md ? md[1] : "document")
+      .replace(/&#?\w+;/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    const slug = raw
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 60);
+    return slug || "document";
+  })();
 
   const downloadRendered = async () => {
     if ((!outputHtml.trim() && !output.trim()) || downloading) return;
     setDownloading(true);
     try {
       const fmt = selectedFormat.toLowerCase();
+      // Markdown downloads the raw text directly.
+      if (fmt === "markdown") {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([output], { type: "text/markdown" }));
+        a.download = `${docFileName}.md`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        return;
+      }
       const themeName = tplTheme || "liceria";
-      const payload: Record<string, unknown> = { format: fmt === "pdf" ? "pdf" : "docx", theme: themeName };
+      const payload: Record<string, unknown> = { format: fmt === "docx" ? "docx" : "pdf", theme: themeName };
       if (outputHtml.trim()) payload.html = outputHtml;
       else payload.markdown = output;
       const res = await fetch("/api/generate/render", {
@@ -366,7 +398,7 @@ function getClientSessionId(): string {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `document.${fmt === "pdf" ? "pdf" : "docx"}`;
+      a.download = `${docFileName}.${fmt === "docx" ? "docx" : "pdf"}`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (e: any) {
@@ -383,7 +415,6 @@ function getClientSessionId(): string {
     a.click();
   };
 
-  const isEmpty = !output && !generating;
 
   return (
     <div className="min-h-[calc(100dvh-64px)] bg-[#F8FAFC]">
@@ -505,93 +536,63 @@ function getClientSessionId(): string {
             </div>
           </div>
 
-          {/* Stage indicator — users only see progress states, never streamed content */}
+          {/* Generation progress — animated, honest, never a static label */}
           {generating && (
-            <div className="flex items-center gap-3 rounded-[10px] border border-[#E2E8F0] bg-white px-4 py-3.5">
-              <span className="relative flex h-2.5 w-2.5 shrink-0">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-30" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
-              </span>
-              <div className="min-w-0">
-                <p className="text-[13px] font-medium text-[#0F172A]">
-                  {genStage === "designing"
-                    ? "Designing pages from your template…"
-                    : genStage === "writing"
-                      ? "Writing your document…"
-                      : genStage === "compiling"
-                        ? "Compiling your document…"
-                        : "Thinking about your document…"}
-                </p>
-                <p className="mt-0.5 text-[11px] text-[#64748B]">
-                  {selectedTemplate ? `Using template “${selectedTemplate.title}”` : "Applying the Docmaker theme"}
-                </p>
+            <GenerationProgress
+              stage={genStage === "idle" ? "thinking" : genStage}
+              templateTitle={selectedTemplate?.title ?? null}
+            />
+          )}
+
+          {/* Minimal download card — the only post-generation UI */}
+          {!generating && (outputHtml || output) && !output.startsWith("Error:") && (
+            <div className="rounded-[10px] border border-[#E2E8F0] bg-white p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] border border-[#E2E8F0] bg-[#FAFAFA]">
+                  <FileText className="h-4 w-4 text-[#3D4D4E]" strokeWidth={1.5} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[13px] font-semibold text-[#0F172A]">
+                    {docFileName}.{outputExt}
+                  </p>
+                  <p className="text-[11px] text-[#64748B]">
+                    {outputExt.toUpperCase()} ready{selectedTemplate ? ` • ${selectedTemplate.title}` : ""}
+                  </p>
+                </div>
+                <button
+                  onClick={downloadRendered}
+                  disabled={downloading}
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-[6px] bg-[#0F172A] px-4 py-2 text-[12px] font-semibold text-white hover:bg-black disabled:opacity-40"
+                >
+                  {downloading ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={1.5} />
+                  ) : (
+                    <Download className="h-3.5 w-3.5" strokeWidth={1.5} />
+                  )}
+                  Download {outputExt.toUpperCase()}
+                </button>
+                <button
+                  onClick={() => { setOutput(""); setOutputHtml(""); }}
+                  className="shrink-0 rounded-[6px] border border-[#E2E8F0] bg-white p-1.5 hover:bg-slate-50"
+                  aria-label="Start over"
+                  title="Start over"
+                >
+                  <RotateCcw className="h-3.5 w-3.5 text-slate-600" strokeWidth={1.5} />
+                </button>
               </div>
-              <Loader2 className="ml-auto h-4 w-4 shrink-0 animate-spin text-[#3D4D4E]" strokeWidth={1.5} />
             </div>
           )}
 
-          {/* Output preview */}
-          {!isEmpty && (
-            <div className="space-y-4">
-              {text && (
-                <div className="rounded-[10px] border border-[#E2E8F0] bg-white p-4">
-                  <p className="text-[11px] font-medium tracking-wide text-[#475569] uppercase">Your prompt</p>
-                  <p className="mt-2 whitespace-pre-wrap text-[13px] leading-5 text-[#0F172A]">{text}</p>
-                  {attachedFiles.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {attachedFiles.map((f, i) => (
-                        <span key={`${f.name}-${f.size}-${i}`} className="inline-flex items-center gap-1 rounded-[6px] border border-[#E2E8F0] bg-[#FAFAFA] px-1.5 py-0.5 text-[11px] text-[#0F172A]">
-                          <FileText className="h-2.5 w-2.5" strokeWidth={1.5} /> {f.name}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-              {(outputHtml || output) && !output.startsWith("Error:") && (
-                <div className="overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white">
-                  <div className="flex items-center justify-between border-b border-[#E2E8F0] px-3 py-2">
-                    <span className="inline-flex items-center gap-2 text-[11px] font-medium tracking-wide text-[#475569] uppercase">
-                      Document{selectedTemplate ? ` • ${selectedTemplate.title}` : ""}
-                    </span>
-                    <div className="flex items-center gap-1.5">
-                      <button onClick={copy} className="rounded-[6px] border border-[#E2E8F0] bg-white p-1.5 hover:bg-slate-50" aria-label="Copy source">
-                        <Copy className="h-3.5 w-3.5 text-slate-600" strokeWidth={1.5} />
-                      </button>
-                      <button
-                        onClick={downloadRendered}
-                        disabled={downloading}
-                        className="inline-flex items-center gap-1.5 rounded-[6px] bg-[#0F172A] px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-black disabled:opacity-40"
-                      >
-                        {downloading ? <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={1.5} /> : <Download className="h-3.5 w-3.5" strokeWidth={1.5} />}
-                        {selectedFormat.toLowerCase() === "docx" ? "Download DOCX" : selectedFormat.toLowerCase() === "markdown" ? "Download MD" : "Download PDF"}
-                      </button>
-                      <button onClick={() => { setOutput(""); setOutputHtml(""); }} className="rounded-[6px] border border-[#E2E8F0] bg-white p-1.5 hover:bg-slate-50" aria-label="Clear">
-                        <RotateCcw className="h-3.5 w-3.5 text-slate-600" strokeWidth={1.5} />
-                      </button>
-                    </div>
-                  </div>
-                  {outputHtml ? (
-                    <div className="bg-[#E8EAED] p-3 sm:p-5">
-                      <div className="mx-auto max-w-[820px] rounded-[6px] bg-white shadow-sm overflow-hidden">
-                        <iframe
-                          title="Document preview"
-                          srcDoc={outputHtml}
-                          sandbox=""
-                          className="w-full border-0"
-                          style={{ height: "70vh" }}
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="max-h-[56vh] overflow-y-auto bg-[#F8FAFC] p-4">
-                      <div className="rounded-[8px] border border-[#E2E8F0] bg-white p-4">
-                        <DocumentPreview content={output} category="Business" paginated />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
+          {/* Generation error */}
+          {!generating && output.startsWith("Error:") && (
+            <div className="rounded-[10px] border border-red-200 bg-red-50 p-4">
+              <p className="text-[12px] font-medium text-red-700">{output.replace(/^Error:\s*/, "")}</p>
+              <button
+                onClick={() => setOutput("")}
+                className="mt-2 rounded-[6px] border border-red-200 bg-white px-3 py-1.5 text-[12px] font-medium text-red-700 hover:bg-red-50"
+              >
+                Try again
+              </button>
             </div>
           )}
 

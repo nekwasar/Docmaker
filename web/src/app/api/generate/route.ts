@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { streamAIResponse, getAIConfigAsync, type UsageReport } from "@/lib/ai/config";
+import { modelIdForProvider, type AIProvider } from "@/lib/ai/catalog";
 import { estimateCostUsd, estimateTokens } from "@/lib/pricing";
 import { buildPrompt, SYSTEM_PROMPT } from "@/lib/ai/prompts";
 import { getSession } from "@/lib/session";
@@ -97,7 +98,9 @@ export async function POST(request: NextRequest) {
       ? `dm_sid=${mintedSid}; Path=/; Max-Age=${365 * 24 * 3600}; SameSite=Lax`
       : null;
 
-    const config = await getAIConfigAsync();
+    const rawConfig = await getAIConfigAsync();
+    // Map OpenRouter model IDs to native IDs when using direct provider connections.
+    const config = { ...rawConfig, model: modelIdForProvider(rawConfig.model, rawConfig.provider as AIProvider) };
     if (!config.apiKey) {
       const headers: Record<string, string> = { "Content-Type": "application/json" };
       if (sidCookie) headers["Set-Cookie"] = sidCookie;

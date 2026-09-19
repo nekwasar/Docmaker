@@ -24,19 +24,21 @@ services:
     ports:
       - "4000:4000"
     volumes:
-      - ./web:/app
-      - /app/node_modules
-      - /app/.next
+      - ./web/src:/app/src
+      - web-node-modules:/app/node_modules
+      - web-next:/app/.next
     env_file: ./web/.env
     environment:
       DATABASE_URL: postgresql://namesranker:namesranker@docmaker-postgres:5432/docmaker
       NEXTAUTH_URL: https://docmaker.io
+      TURBOPACK_ROOT: /app
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
       db:
         condition: service_healthy
-    command: npm run dev -- -p 4000 -H 0.0.0.0
+    command: >
+      sh -c "npm run dev -- -p 4000 -H 0.0.0.0"
 
   gotenberg:
     image: gotenberg/gotenberg:8
@@ -66,3 +68,5 @@ services:
 
 volumes:
   pgdata:
+  web-node-modules:
+  web-next:

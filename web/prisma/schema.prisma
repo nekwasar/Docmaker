@@ -136,6 +136,7 @@ model Template {
   fileUrl         String?  // /uploads/templates/<id>.pdf etc
   fileName        String?  // original filename
   fileSize        Int?
+  designKit       Json?    // extracted design system: theme + page skeletons (one-time vision call)
   isPublic        Boolean  @default(true)
   downloads       Int      @default(0)
   createdAt       DateTime @default(now())

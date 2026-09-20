@@ -59,6 +59,18 @@ export function extractHtml(text: string): string {
 export function ensurePrintCss(html: string): string {
   if (!html) return html;
   let out = html;
+  // Google Fonts @import inside <style> breaks Gotenberg's Chromium rendering
+  // (network fetch stalls → blank PDF). Convert to <link> tags in <head>.
+  const fontImports = /@import\s+url\(['"]?(https:\/\/fonts\.googleapis\.com[^)'"]+)['"]?\);?/gi;
+  const fontLinks: string[] = [];
+  out = out.replace(fontImports, (_m, url) => {
+    fontLinks.push(`<link rel="stylesheet" href="${url}">`);
+    return "";
+  });
+  if (fontLinks.length && /<\/head>/i.test(out)) {
+    out = out.replace(/<\/head>/i, `${fontLinks.join("\n")}</head>`);
+  }
+  // Normalize @page
   if (/@page/i.test(out)) {
     out = out.replace(/@page[^{]*\{[^}]*\}/gi, "@page{size:A4;margin:0;}");
   } else {
@@ -69,5 +81,11 @@ export function ensurePrintCss(html: string): string {
     const force = "<style>html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}</style>";
     out = /<\/head>/i.test(out) ? out.replace(/<\/head>/i, `${force}</head>`) : force + out;
   }
+  // Chromium sub-pixel overflow: 297mm rounds up → each page spills into 2.
+  out = out.replace(/(height\s*:\s*)297mm/g, "$1296.8mm");
+  // break-after:page conflicts with page-break-after:always → double page breaks.
+  out = out.replace(/\s*break-after\s*:[^;]+;/gi, "");
+  // Fix blank trailing pages.
+  out = out.replace(/\.page\s*:\s*last-of-type\s*\{[^}]*\}/gi, ".page:last-of-type{page-break-after:auto;}");
   return out;
 }

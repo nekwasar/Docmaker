@@ -148,6 +148,22 @@ export async function POST(req: NextRequest) {
       if (prompt) content = prompt.slice(0, 20000);
     }
 
+    // One-time design-kit extraction — vision call studies the page images and
+    // produces reusable page skeletons. Every later generation from this
+    // template reuses the kit (fast: no vision at generation time).
+    let designKit: unknown = null;
+    if (thumbnails && Array.isArray(thumbnails) && thumbnails.length > 0) {
+      try {
+        const { extractDesignKit } = await import("@/lib/render/designKit");
+        const kit = await extractDesignKit(thumbnails as string[], title);
+        designKit = kit as any;
+        console.log("[upload] design kit extracted for", title);
+      } catch (kitErr: any) {
+        // Non-fatal: generation falls back to per-generation vision flow.
+        console.error("[upload] design kit extraction failed:", kitErr.message?.slice(0, 200));
+      }
+    }
+
     const template = await prisma.template.create({
       data: {
         userId: user.id,
@@ -161,6 +177,7 @@ export async function POST(req: NextRequest) {
         fileUrl,
         fileName,
         fileSize,
+        designKit: designKit as any,
         isPublic,
       },
     });

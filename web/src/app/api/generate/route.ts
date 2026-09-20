@@ -8,6 +8,7 @@ import { estimateCostUsd, estimateTokens } from "@/lib/pricing";
 import { buildPrompt, SYSTEM_PROMPT } from "@/lib/ai/prompts";
 import { DESIGNER_SYSTEM_PROMPT, buildDesignerPrompt, extractHtml, ensurePrintCss } from "@/lib/ai/designer";
 import { renderMarkdownToStyledPages, getTheme } from "@/lib/render/document";
+import { assembleFromKit, parseMarkdownToContent, loadTemplateImages, type DesignKit } from "@/lib/render/designKit";
 import { getSession } from "@/lib/session";
 
 const prisma = new PrismaClient();
@@ -22,20 +23,6 @@ type Stage =
   | { stage: "done"; html: string; markdown: string; template: string | null }
   | { stage: "error"; error: string };
 
-function loadTemplateImages(thumbnails: unknown): string[] {
-  const urls = Array.isArray(thumbnails) ? (thumbnails as string[]) : [];
-  const out: string[] = [];
-  for (const url of urls.slice(0, 6)) {
-    try {
-      const fp = path.join(process.cwd(), "public", url.replace(/^\//, ""));
-      const buf = fs.readFileSync(fp);
-      out.push(`data:image/png;base64,${buf.toString("base64")}`);
-    } catch {
-      // skip unreadable thumbnail
-    }
-  }
-  return out;
-}
 
 export async function POST(request: NextRequest) {
   const encoder = new TextEncoder();
@@ -132,29 +119,15 @@ export async function POST(request: NextRequest) {
             throw new Error("AI is not configured yet. Please try again later.");
           }
 
-          // Load the template (if any) — images become the design reference.
+          // Load the template (if any) — kit provides the design, images the fallback.
           let templateImages: string[] = [];
+          let designKit: unknown = null;
           if (templateId) {
             const tpl = await prisma.template.findUnique({ where: { id: templateId } });
             if (tpl) {
               templateTitle = tpl.title;
-              templateImages = loadTemplateImages(tpl.thumbnails);
-              // Fall back to the original file's first page if no thumbnails exist yet.
-              if (templateImages.length === 0 && tpl.fileUrl && tpl.fileUrl.endsWith(".pdf")) {
-                try {
-                  const { execSync } = await import("child_process");
-                  const pdfPath = path.join(process.cwd(), "public", tpl.fileUrl.replace(/^\//, ""));
-                  const outBase = `/tmp/tpl-${Date.now()}`;
-                  execSync(`gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=png16m -r110 -dFirstPage=1 -dLastPage=6 -sOutputFile='${outBase}-%d.png' '${pdfPath}'`, { stdio: "ignore" });
-                  for (let i = 1; i <= 6; i++) {
-                    const p = `${outBase}-${i}.png`;
-                    if (fs.existsSync(p)) {
-                      templateImages.push(`data:image/png;base64,${fs.readFileSync(p).toString("base64")}`);
-                      fs.unlinkSync(p);
-                    }
-                  }
-                } catch {}
-              }
+              designKit = tpl.designKit;
+              templateImages = loadTemplateImages(tpl.thumbnails, tpl.fileUrl);
             }
           }
 
@@ -163,37 +136,72 @@ export async function POST(request: NextRequest) {
             userContent += `\n\nReference material from attached files:\n${fileContexts.join("\n\n---\n\n")}`;
           }
 
-          if (templateImages.length > 0) {
-            // ===== TEMPLATE FLOW: vision → HTML replicating the design =====
-            send({ stage: "thinking" });
-            send({ stage: "designing" });
+          if (templateImages.length > 0 || designKit) {
+            // ===== TEMPLATE FLOW =====
+            // Fast path: cached design kit → only the CONTENT is AI-written
+            // (text-only call, ~1-2KB output). No vision cost at generation.
+            if (designKit) {
+              send({ stage: "thinking" });
+              send({ stage: "writing" });
 
-            const messages: MultimodalMessage[] = [
-              { role: "system", content: DESIGNER_SYSTEM_PROMPT },
-              {
-                role: "user",
-                content: [
-                  { type: "text", text: buildDesignerPrompt(userContent, style, structure) },
-                  ...templateImages.map((url) => ({ type: "image_url" as const, image_url: { url } })),
+              let fullPrompt = buildPrompt(text || "", structure || "auto");
+              fullPrompt += `\n\nThe document will be typeset into a pre-designed template with page archetypes: cover, table of contents, content pages, ${""}and a closing page. Structure your markdown to use these archetypes: start with a # main title, use ## headings for each major section, use tables and lists where appropriate.`;
+              if (style === "simple") {
+                fullPrompt += "\n\nWrite in simple, plain English suitable for a general audience.";
+              }
+              if (fileContexts.length > 0) {
+                fullPrompt += "\n\nAdditional context from attached files:\n" + fileContexts.join("\n\n---\n\n");
+              }
+
+              let raw = "";
+              let usage: UsageReport | null = null;
+              for await (const chunk of streamAIResponse(
+                [
+                  { role: "system", content: SYSTEM_PROMPT },
+                  { role: "user", content: fullPrompt },
                 ],
-              },
-            ];
+                config,
+                { onUsage: (u) => { usage = u; } }
+              )) {
+                raw += chunk;
+              }
+              markdown = raw;
+              if (usage) usageTokens = usage;
 
-            // Streamed server-side (long HTML generations exceed non-streaming
-            // provider timeouts). The client only sees stages — never content.
-            let raw = "";
-            let usage: UsageReport | null = null;
-            for await (const chunk of streamAIResponse(messages, config, {
-              onUsage: (u) => { usage = u; },
-            })) {
-              raw += chunk;
+              send({ stage: "compiling" });
+              // Parse the markdown into pages and fill the cached skeletons.
+              const parsed = parseMarkdownToContent(markdown);
+              html = ensurePrintCss(assembleFromKit(designKit as unknown as DesignKit, parsed));
+            } else {
+              // Slow fallback: per-generation vision → HTML (no kit cached yet)
+              send({ stage: "thinking" });
+              send({ stage: "designing" });
+
+              const messages: MultimodalMessage[] = [
+                { role: "system", content: DESIGNER_SYSTEM_PROMPT },
+                {
+                  role: "user",
+                  content: [
+                    { type: "text", text: buildDesignerPrompt(userContent, style, structure) },
+                    ...templateImages.map((url) => ({ type: "image_url" as const, image_url: { url } })),
+                  ],
+                },
+              ];
+
+              let raw = "";
+              let usage: UsageReport | null = null;
+              for await (const chunk of streamAIResponse(messages, config, {
+                onUsage: (u) => { usage = u; },
+              })) {
+                raw += chunk;
+              }
+              html = ensurePrintCss(extractHtml(raw));
+              if (!html || !html.includes("<")) {
+                throw new Error("The model did not return a valid document design. Try again or pick a different model.");
+              }
+              markdown = userContent;
+              if (usage) usageTokens = usage;
             }
-            html = ensurePrintCss(extractHtml(raw));
-            if (!html || !html.includes("<")) {
-              throw new Error("The model did not return a valid document design. Try again or pick a different model.");
-            }
-            markdown = userContent; // used for the prompt display / fallback
-            if (usage) usageTokens = usage;
           } else {
             // ===== DEFAULT FLOW: markdown → page-type renderer =====
             send({ stage: "thinking" });

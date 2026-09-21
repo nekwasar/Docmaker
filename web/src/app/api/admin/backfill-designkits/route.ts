@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, type Prisma } from "@prisma/client";
 import { extractDesignKit, loadTemplateImages } from "@/lib/render/designKit";
 import { requireAdminWrite } from "@/lib/admin";
 
@@ -32,10 +32,11 @@ export async function POST(req: NextRequest) {
         continue;
       }
       const kit = await extractDesignKit(t.title, images);
-      await prisma.template.update({ where: { id: t.id }, data: { designKit: kit as any } });
+      await prisma.template.update({ where: { id: t.id }, data: { designKit: kit as unknown as Prisma.InputJsonValue } });
       results.push({ id: t.id, title: t.title, ok: true, seconds: Math.round((Date.now() - t0) / 1000) });
-    } catch (e: any) {
-      results.push({ id: t.id, title: t.title, ok: false, error: e.message?.slice(0, 200), seconds: Math.round((Date.now() - t0) / 1000) });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      results.push({ id: t.id, title: t.title, ok: false, error: msg.slice(0, 200), seconds: Math.round((Date.now() - t0) / 1000) });
     }
   }
 

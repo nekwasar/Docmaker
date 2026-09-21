@@ -1,7 +1,8 @@
 import fs from "fs";
 import path from "path";
-import { marked } from "marked";
-import { streamAIResponse, getAIConfigAsync, type MultimodalMessage, type UsageReport } from "@/lib/ai/config";
+import { execSync } from "child_process";
+import { marked, type Tokens } from "marked";
+import { streamAIResponse, getAIConfigAsync, type MultimodalMessage } from "@/lib/ai/config";
 import { modelIdForProvider, type AIProvider } from "@/lib/ai/catalog";
 
 // Design-kit extraction: a ONE-TIME vision call per template that converts the
@@ -72,7 +73,6 @@ export function loadTemplateImages(thumbnails: unknown, fileUrl?: string | null)
   // Fallback: render from the original PDF if no thumbnails are readable
   if (out.length === 0 && fileUrl && fileUrl.endsWith(".pdf")) {
     try {
-      const { execSync } = require("child_process") as typeof import("child_process");
       const pdfPath = path.join(process.cwd(), "public", fileUrl.replace(/^\//, ""));
       const outBase = `/tmp/dk-${Date.now()}`;
       execSync(`gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=png16m -r110 -dFirstPage=1 -dLastPage=6 -sOutputFile='${outBase}-%d.png' '${pdfPath}'`, { stdio: "ignore" });
@@ -126,17 +126,18 @@ export async function extractDesignKit(
     raw += chunk;
   }
 
-  const parsed = extractJson(raw) as Partial<DesignKit> & {
+  interface RawKit {
     brand?: DesignKit["brand"];
-    cssVars?: Record<string, string>;
     css?: string;
+    cssVars?: string;
     pageSkeletons?: DesignKit["pageSkeletons"];
     skeletons?: DesignKit["pageSkeletons"];
-  };
+  }
 
   // Normalise: accept both `css`/`cssVars`+`skeletons`/`pageSkeletons` spellings
-  const css = (parsed as any).css || (parsed as any).cssVars || "";
-  const skeletons = (parsed as any).pageSkeletons || (parsed as any).skeletons || {};
+  const parsed = extractJson(raw) as RawKit;
+  const css = parsed.css || parsed.cssVars || "";
+  const skeletons = parsed.pageSkeletons || parsed.skeletons || {};
   if (!css || typeof css !== "string" || css.length < 200) {
     throw new Error("Design kit extraction returned incomplete CSS");
   }
@@ -197,7 +198,7 @@ export function assembleFromKit(
     const sec = content.sections[i];
     const skel = i === 0 ? (s.content ?? s.extraContent) : s.extraContent ?? s.content;
     if (!skel) continue;
-    let page = skel
+    const page = skel
       .replace(/\{\{HEADER\}\}/g, header)
       .replace(/\{\{TITLE\}\}/g, esc(sec.title))
       .replace(/\{\{BODY\}\}/g, sec.html);
@@ -241,10 +242,10 @@ export function parseMarkdownToContent(markdown: string): {
   let subtitle = "";
   let afterH1 = false;
 
-  interface Sec { title: string; bodyTokens: any[]; hasTable: boolean }
+  interface Sec { title: string; bodyTokens: Tokens.Generic[]; hasTable: boolean }
   const sections: Sec[] = [];
   let currentTitle = "";
-  let currentTokens: any[] = [];
+  let currentTokens: Tokens.Generic[] = [];
 
   for (const token of tokens) {
     if (token.type === "heading" && token.depth === 1) {
@@ -259,7 +260,7 @@ export function parseMarkdownToContent(markdown: string): {
       currentTokens = [];
       afterH1 = false;
     } else if (afterH1 && token.type === "paragraph" && !currentTitle) {
-      const text = (token as any).text || "";
+      const text = token.text || "";
       if (text.length < 200 && !text.startsWith("|")) subtitle = text;
       afterH1 = false;
     } else {

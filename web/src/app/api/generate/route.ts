@@ -1,7 +1,6 @@
 import { NextRequest } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import fs from "fs";
-import path from "path";
 import { streamAIResponse, getAIConfigAsync, type MultimodalMessage, type UsageReport } from "@/lib/ai/config";
 import { modelIdForProvider, type AIProvider } from "@/lib/ai/catalog";
 import { estimateCostUsd, estimateTokens } from "@/lib/pricing";
@@ -30,9 +29,8 @@ export async function POST(request: NextRequest) {
   let text = "";
   let structure = "auto";
   let style = "professional";
-  let format = "pdf";
   let templateId = "";
-  let fileContexts: string[] = [];
+  const fileContexts: string[] = [];
 
   try {
     const contentType = request.headers.get("content-type") || "";
@@ -41,7 +39,6 @@ export async function POST(request: NextRequest) {
       text = (form.get("text") as string) || "";
       structure = (form.get("structure") as string) || "auto";
       style = (form.get("style") as string) || "professional";
-      format = (form.get("format") as string) || "pdf";
       templateId = (form.get("templateId") as string) || "";
       const files = form.getAll("files") as File[];
       for (const file of files) {
@@ -78,7 +75,6 @@ export async function POST(request: NextRequest) {
       text = body.text || "";
       structure = body.structure || "auto";
       style = body.style || "professional";
-      format = body.format || "pdf";
       templateId = body.templateId || "";
     }
 
@@ -235,8 +231,8 @@ export async function POST(request: NextRequest) {
           }
 
           send({ stage: "done", html, markdown: markdown.slice(0, 40000), template: templateTitle });
-        } catch (err: any) {
-          send({ stage: "error", error: err.message || "Generation failed" });
+        } catch (err: unknown) {
+          send({ stage: "error", error: err instanceof Error ? err.message : "Generation failed" });
         } finally {
           // Usage log — server-side, never sent to the client.
           try {
@@ -270,8 +266,8 @@ export async function POST(request: NextRequest) {
     };
     if (sidCookie) headers["Set-Cookie"] = sidCookie;
     return new Response(stream, { headers });
-  } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message || "Generation failed" }), {
+  } catch (error: unknown) {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Generation failed" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });

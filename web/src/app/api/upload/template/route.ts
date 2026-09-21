@@ -1,10 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, type Prisma } from "@prisma/client";
 import fs from "fs";
 import path from "path";
 import { execSync } from "child_process";
 
 const prisma = new PrismaClient();
+
+interface PdfTextItem { str?: string }
+interface PdfPageProxy {
+  getTextContent: () => Promise<{ items: PdfTextItem[] }>;
+  getViewport: (o: { scale: number }) => { width: number; height: number };
+  render: (o: { canvasContext: unknown; viewport: unknown }) => { promise: Promise<void> };
+}
+interface PdfDocumentProxy {
+  numPages: number;
+  getPage: (n: number) => Promise<PdfPageProxy>;
+}
+interface PdfjsModule {
+  GlobalWorkerOptions: { workerSrc: string };
+  getDocument: (src: {
+    data: Uint8Array;
+    disableWorker?: boolean;
+    useWorkerFetch?: boolean;
+    isEvalSupported?: boolean;
+  }) => { promise: Promise<PdfDocumentProxy> };
+}
+
+async function loadPdfjs(): Promise<PdfjsModule> {
+  const mod = (await import("pdfjs-dist/legacy/build/pdf.mjs")) as unknown as PdfjsModule;
+  try { mod.GlobalWorkerOptions.workerSrc = ""; } catch {}
+  return mod;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -58,16 +84,14 @@ export async function POST(req: NextRequest) {
           // Fallback to pdfjs if pdftotext produced nothing
           if (!content) {
             try {
-              const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-              // Try to avoid worker issues by explicitly disabling worker
-              try { (pdfjs as any).GlobalWorkerOptions.workerSrc = ""; } catch {}
-              const doc = await (pdfjs as any).getDocument({ data: new Uint8Array(buf), disableWorker: true, useWorkerFetch: false, isEvalSupported: false }).promise;
+              const pdfjs = await loadPdfjs();
+              const doc = await pdfjs.getDocument({ data: new Uint8Array(buf), disableWorker: true, useWorkerFetch: false, isEvalSupported: false }).promise;
               let all = "";
               const pages = Math.min(doc.numPages, 5);
               for (let i = 1; i <= pages; i++) {
                 const page = await doc.getPage(i);
                 const tc = await page.getTextContent();
-                const t = tc.items.map((it: any) => it.str).join(" ");
+                const t = tc.items.map((it) => it.str ?? "").join(" ");
                 all += t + "\n\n";
               }
               content = all.trim().slice(0, 20000) || `PDF: ${file.name} — ${doc.numPages} pages`;
@@ -102,9 +126,8 @@ export async function POST(req: NextRequest) {
             console.error("ghostscript thumbnail failed", thumbErr);
             // Fallback to pdfjs+canvas if gs fails
             try {
-              const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-              try { (pdfjs as any).GlobalWorkerOptions.workerSrc = ""; } catch {}
-              const doc = await (pdfjs as any).getDocument({ data: new Uint8Array(buf), disableWorker: true }).promise;
+              const pdfjs = await loadPdfjs();
+              const doc = await pdfjs.getDocument({ data: new Uint8Array(buf), disableWorker: true }).promise;
               const id = Date.now().toString(36) + "_c";
               const { createCanvas } = await import("canvas");
               const numThumbs = Math.min(doc.numPages, 3);
@@ -116,7 +139,7 @@ export async function POST(req: NextRequest) {
                 const scale = targetWidth / viewport.width;
                 const scaled = page.getViewport({ scale });
                 const canvas = createCanvas(scaled.width, scaled.height);
-                const ctx = canvas.getContext("2d") as any;
+                const ctx = canvas.getContext("2d");
                 ctx.fillStyle = "#FFFFFF";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 await page.render({ canvasContext: ctx, viewport: scaled }).promise;
@@ -154,13 +177,17 @@ export async function POST(req: NextRequest) {
     let designKit: unknown = null;
     if (thumbnails && Array.isArray(thumbnails) && thumbnails.length > 0) {
       try {
-        const { extractDesignKit } = await import("@/lib/render/designKit");
-        const kit = await extractDesignKit(thumbnails as string[], title);
-        designKit = kit as any;
-        console.log("[upload] design kit extracted for", title);
-      } catch (kitErr: any) {
+        const { extractDesignKit, loadTemplateImages } = await import("@/lib/render/designKit");
+        const images = loadTemplateImages(thumbnails as string[], fileUrl);
+        if (images.length > 0) {
+          const kit = await extractDesignKit(title, images);
+          designKit = kit as unknown as Prisma.InputJsonValue;
+          console.log("[upload] design kit extracted for", title);
+        }
+      } catch (kitErr: unknown) {
         // Non-fatal: generation falls back to per-generation vision flow.
-        console.error("[upload] design kit extraction failed:", kitErr.message?.slice(0, 200));
+        const msg = kitErr instanceof Error ? kitErr.message : String(kitErr);
+        console.error("[upload] design kit extraction failed:", msg.slice(0, 200));
       }
     }
 
@@ -173,17 +200,18 @@ export async function POST(req: NextRequest) {
         prompt: content || description || title,
         content,
         author,
-        thumbnails: thumbnails as any,
+        thumbnails: (thumbnails as unknown) as Prisma.InputJsonValue,
         fileUrl,
         fileName,
         fileSize,
-        designKit: designKit as any,
+        designKit: (designKit ?? undefined) as Prisma.InputJsonValue | undefined,
         isPublic,
       },
     });
     return NextResponse.json({ template });
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : "Template upload failed";
     console.error(e);
-    return NextResponse.json({ error: e.message }, { status: 500 });
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

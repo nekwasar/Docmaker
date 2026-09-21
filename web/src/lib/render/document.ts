@@ -1,4 +1,4 @@
-import { marked } from "marked";
+import { marked, type Tokens } from "marked";
 
 // Page-type document renderer — replicates the uploaded template's EXACT design.
 // Each page is a separate <div class="page"> with page-break-after: always.
@@ -35,6 +35,106 @@ export function getTheme(name?: string): DocumentTheme {
   return LICERIA_THEME;
 }
 
+// ---------- Dynamic styling ----------
+// No-template documents must never fall back to a fixed look: the AI picks a
+// palette + font pairing per generation (design spec line), and if it omits
+// one, a curated palette is chosen deterministically from the prompt — so the
+// design always varies with the content and never locks to one theme.
+
+export interface DesignSpec {
+  primary?: string;
+  accent?: string;
+  text?: string;
+  bg?: string;
+  headingFont?: string;
+  bodyFont?: string;
+}
+
+const GOOGLE_FONT_WEIGHTS: Record<string, string> = {
+  // name -> google fonts css2 weight spec
+  Archivo: "wght@400;500;600;700",
+  "Public Sans": "wght@400;500;600;700",
+  "Space Grotesk": "wght@400;500;600;700",
+  Inter: "wght@400;500;600;700",
+  Manrope: "wght@400;500;600;700",
+  "DM Sans": "wght@400;500;600;700",
+  "Playfair Display": "wght@400;500;600;700",
+  "Source Serif 4": "wght@400;500;600;700",
+  Sora: "wght@400;500;600;700",
+  "Libre Baskerville": "wght@400;700",
+  Lora: "wght@400;500;600;700",
+  Poppins: "wght@300;400;500;600;700",
+  Fraunces: "wght@400;500;600;700",
+};
+
+const FONT_FALLBACK: Record<string, string> = {
+  serif: "'Source Serif 4', Georgia, serif",
+};
+
+export const FONT_WHITELIST = Object.keys(GOOGLE_FONT_WEIGHTS);
+
+const PALETTES: Array<{ primary: string; accent: string; text: string }> = [
+  { primary: "#2F4F43", accent: "#C9A227", text: "#161D19" }, // forest
+  { primary: "#1B2A4A", accent: "#C08362", text: "#12131A" }, // navy
+  { primary: "#23272E", accent: "#7FA3A0", text: "#101114" }, // charcoal
+  { primary: "#5E2233", accent: "#D8B08C", text: "#1D1216" }, // bordeaux
+  { primary: "#2C3E50", accent: "#9AB3C9", text: "#10151B" }, // slate
+  { primary: "#3D4A26", accent: "#C77B3F", text: "#16180F" }, // olive
+  { primary: "#16505B", accent: "#E3B23C", text: "#0D1719" }, // teal
+  { primary: "#4A2545", accent: "#C5A572", text: "#171015" }, // plum
+];
+
+function hashString(s: string): number {
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+function safeHex(v: unknown): string | null {
+  return typeof v === "string" && /^#[0-9a-fA-F]{6}$/.test(v) ? v : null;
+}
+
+function safeFont(v: unknown): string | null {
+  if (typeof v !== "string") return null;
+  const hit = FONT_WHITELIST.find((f) => f.toLowerCase() === v.trim().toLowerCase());
+  return hit ?? null;
+}
+
+/** Build a per-document theme: AI design spec if valid, else seeded palette. */
+export function deriveDynamicTheme(spec: unknown, seed?: string): DocumentTheme {
+  const s = (spec ?? {}) as DesignSpec;
+  const base = seed ? PALETTES[hashString(seed) % PALETTES.length] : PALETTES[Math.floor(Math.random() * PALETTES.length)];
+  const fontSeed = seed ? hashString(seed + "::font") : Math.floor(Math.random() * FONT_WHITELIST.length);
+  const headingFont = safeFont(s.headingFont) ?? FONT_WHITELIST[fontSeed % FONT_WHITELIST.length];
+  const bodyFont = safeFont(s.bodyFont) ?? FONT_WHITELIST[(fontSeed + 3) % FONT_WHITELIST.length];
+  return {
+    colors: {
+      primary: safeHex(s.primary) ?? base.primary,
+      accent: safeHex(s.accent) ?? base.accent,
+      bg: safeHex(s.bg) ?? "#FFFFFF",
+      text: safeHex(s.text) ?? base.text,
+    },
+    fonts: {
+      heading: `'${headingFont}', ${headingFont === "Playfair Display" || headingFont === "Libre Baskerville" || headingFont === "Lora" || headingFont === "Source Serif 4" || headingFont === "Fraunces" ? FONT_FALLBACK.serif : "sans-serif"}`,
+      body: `'${bodyFont}', ${bodyFont === "Lora" || bodyFont === "Source Serif 4" ? FONT_FALLBACK.serif : "sans-serif"}`,
+    },
+    brand: { left: "Docmaker", right: "" },
+    contact: {},
+  };
+}
+
+/** Google Fonts <link> href covering a theme's heading + body fonts. */
+export function fontsLinkHref(theme: DocumentTheme): string | null {
+  const names = new Set<string>();
+  for (const f of [theme.fonts.heading, theme.fonts.body]) {
+    const m = /'([^']+)'/.exec(f);
+    if (m && GOOGLE_FONT_WEIGHTS[m[1]]) names.add(m[1]);
+  }
+  if (names.size === 0) return null;
+  const params = [...names].map((n) => `family=${n.replace(/ /g, "+")}:${GOOGLE_FONT_WEIGHTS[n]}`).join("&");
+  return `https://fonts.googleapis.com/css2?${params}&display=swap`;
+}
+
 // ---------- Markdown parsing into page structures ----------
 
 interface TocEntry { num: string; title: string }
@@ -61,8 +161,8 @@ function parseMarkdownToPages(markdown: string, theme: DocumentTheme): PageStruc
   };
 
   let currentHeading = "";
-  let currentTokens: any[] = [];
-  const sections: Array<{ title: string; tokens: any[] }> = [];
+  let currentTokens: Tokens.Generic[] = [];
+  const sections: Array<{ title: string; tokens: Tokens.Generic[] }> = [];
   let afterH1 = false; // track if we just saw h1 (cover title) — next paragraph is subtitle
 
   // Walk tokens: h1 = cover title, h2 = section titles, content between h2s
@@ -91,7 +191,7 @@ function parseMarkdownToPages(markdown: string, theme: DocumentTheme): PageStruc
       afterH1 = false;
     } else if (afterH1 && token.type === "paragraph" && !currentHeading) {
       // First paragraph right after h1 = subtitle on cover
-      const text = (token as any).text || "";
+      const text = (token.text || "").replace(/\*+/g, "").replace(/`+/g, "").trim();
       if (text.length < 200 && !text.startsWith("|")) {
         pages.cover.subtitle = text;
       }
@@ -123,7 +223,7 @@ function parseMarkdownToPages(markdown: string, theme: DocumentTheme): PageStruc
 
     let type: "content" | "table" | "list" = "content";
     if (hasTable) type = "table";
-    else if (hasList && !s.tokens.some((t) => t.type === "paragraph" && ((t as any).text || "").length > 200)) type = "list";
+    else if (hasList && !s.tokens.some((t) => t.type === "paragraph" && ((t as Tokens.Generic).text || "").length > 200)) type = "list";
 
     return { type, title: s.title, html };
   });
@@ -211,6 +311,7 @@ export function renderMarkdownToStyledPages(markdown: string, theme?: DocumentTh
 <html lang="en">
 <head>
 <meta charset="utf-8">
+${fontsLinkHref(t) ? `<link rel="stylesheet" href="${fontsLinkHref(t)}">` : ""}
 <style>
   @page { size: A4; margin: 0; }
   * { margin: 0; padding: 0; box-sizing: border-box; }

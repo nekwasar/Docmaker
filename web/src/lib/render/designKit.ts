@@ -260,7 +260,7 @@ export function parseMarkdownToContent(markdown: string): {
       currentTokens = [];
       afterH1 = false;
     } else if (afterH1 && token.type === "paragraph" && !currentTitle) {
-      const text = token.text || "";
+      const text = (token.text || "").replace(/\*+/g, "").replace(/`+/g, "").trim();
       if (text.length < 200 && !text.startsWith("|")) subtitle = text;
       afterH1 = false;
     } else {

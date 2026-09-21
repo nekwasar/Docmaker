@@ -6,7 +6,7 @@ import { modelIdForProvider, type AIProvider } from "@/lib/ai/catalog";
 import { estimateCostUsd, estimateTokens } from "@/lib/pricing";
 import { buildPrompt, SYSTEM_PROMPT } from "@/lib/ai/prompts";
 import { DESIGNER_SYSTEM_PROMPT, buildDesignerPrompt, extractHtml, ensurePrintCss } from "@/lib/ai/designer";
-import { renderMarkdownToStyledPages, getTheme } from "@/lib/render/document";
+import { renderMarkdownToStyledPages, deriveDynamicTheme, type DocumentTheme, type DesignSpec } from "@/lib/render/document";
 import { assembleFromKit, parseMarkdownToContent, loadTemplateImages, type DesignKit } from "@/lib/render/designKit";
 import { getSession } from "@/lib/session";
 
@@ -19,8 +19,23 @@ type Stage =
   | { stage: "designing" }
   | { stage: "writing" }
   | { stage: "compiling" }
-  | { stage: "done"; html: string; markdown: string; template: string | null }
+  | { stage: "done"; html: string; markdown: string; template: string | null; themeConfig?: DocumentTheme }
   | { stage: "error"; error: string };
+
+// Design spec emitted by the model as the first line: <!--design:{...}-->
+function stripDesignSpec(md: string): { markdown: string; spec: DesignSpec | null } {
+  const m = /<!--\s*design\s*:?([\s\S]*?)-->/i.exec(md);
+  if (!m) return { markdown: md, spec: null };
+  const start = m[1].indexOf("{");
+  const end = m[1].lastIndexOf("}");
+  let spec: DesignSpec | null = null;
+  if (start !== -1 && end !== -1) {
+    try {
+      spec = JSON.parse(m[1].slice(start, end + 1)) as DesignSpec;
+    } catch {}
+  }
+  return { markdown: md.replace(m[0], "").trimStart(), spec };
+}
 
 
 export async function POST(request: NextRequest) {
@@ -109,6 +124,7 @@ export async function POST(request: NextRequest) {
         let html = "";
         let usageTokens = { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
         let templateTitle: string | null = null;
+        let themeConfig: DocumentTheme | undefined;
 
         try {
           if (!config.apiKey) {
@@ -199,10 +215,13 @@ export async function POST(request: NextRequest) {
               if (usage) usageTokens = usage;
             }
           } else {
-            // ===== DEFAULT FLOW: markdown → page-type renderer =====
+            // ===== DEFAULT FLOW: markdown → dynamic per-document design =====
             send({ stage: "thinking" });
 
             let fullPrompt = buildPrompt(text || "", structure || "auto");
+            // Dynamic styling: the model picks a palette + fonts that fit THIS
+            // document. Never a fixed default — spec line is parsed and applied.
+            fullPrompt += `\n\nVery important — first line of your response must be exactly one HTML comment specifying this document's visual identity. Choose colors and fonts that genuinely fit the document's subject, audience, and tone (a legal NDA should look sober; a kids' program proposal may be warm; a tech report crisp; vary your choices between documents):\n<!--design:{"primary":"#1B2A4A","accent":"#C08362","text":"#12131A","bg":"#FFFFFF","headingFont":"Space Grotesk","bodyFont":"Inter"}-->\nColors are hex. headingFont and bodyFont must be chosen from: ${"Archivo, Public Sans, Space Grotesk, Inter, Manrope, DM Sans, Playfair Display, Source Serif 4, Sora, Libre Baskerville, Lora, Poppins, Fraunces"}. After that single line, output the markdown document starting with "# " title. No other commentary.`;
             if (style === "simple") {
               fullPrompt += "\n\nWrite in simple, plain English suitable for a general audience.";
             }
@@ -227,10 +246,14 @@ export async function POST(request: NextRequest) {
             if (usage) usageTokens = usage;
 
             send({ stage: "compiling" });
-            html = renderMarkdownToStyledPages(markdown, getTheme("liceria"));
+            const { markdown: cleanMd, spec } = stripDesignSpec(markdown);
+            const dynamicTheme = deriveDynamicTheme(spec, text || cleanMd);
+            markdown = cleanMd;
+            html = renderMarkdownToStyledPages(markdown, dynamicTheme);
+            themeConfig = dynamicTheme;
           }
 
-          send({ stage: "done", html, markdown: markdown.slice(0, 40000), template: templateTitle });
+          send({ stage: "done", html, markdown: markdown.slice(0, 40000), template: templateTitle, themeConfig });
         } catch (err: unknown) {
           send({ stage: "error", error: err instanceof Error ? err.message : "Generation failed" });
         } finally {

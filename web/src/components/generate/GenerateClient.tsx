@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Paperclip, Mic, Download, X, User, Square, RotateCcw, FileText, FileUp, LayoutGrid, ArrowUp, Sparkles, ChevronDown, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { templates as staticTemplates, type Template } from "@/data/templates";
+import type { DocumentTheme } from "@/lib/render/document";
 import { DocumentPreview } from "./DocumentPreview";
 import GenerationProgress from "./GenerationProgress";
 
@@ -27,6 +28,7 @@ export default function GeneratePage() {
   const [selectedFormat, setSelectedFormat] = useState<(typeof FORMAT_OPTIONS)[number]>("PDF");
   const [tplTheme, setTplTheme] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+  const [docTheme, setDocTheme] = useState<DocumentTheme | null>(null);
   const [generating, setGenerating] = useState(false);
   const [genStage, setGenStage] = useState<"idle" | "thinking" | "designing" | "writing" | "compiling">("idle");
   const [output, setOutput] = useState("");
@@ -188,6 +190,7 @@ function getClientSessionId(): string {
     setGenStage("thinking");
     setOutput("");
     setOutputHtml("");
+    setDocTheme(null);
     const controller = new AbortController();
     abortRef.current = controller;
     const sid = getClientSessionId();
@@ -230,6 +233,7 @@ function getClientSessionId(): string {
               if (evt.stage === "done") {
                 setOutput(evt.markdown || "");
                 setOutputHtml(evt.html || "");
+                setDocTheme(evt.themeConfig || null);
                 setGenStage("idle");
               } else if (evt.stage === "error") {
                 throw new Error(evt.error || "Generation failed");
@@ -403,6 +407,10 @@ function getClientSessionId(): string {
       }
       const themeName = tplTheme || "liceria";
       const payload: Record<string, unknown> = { format: fmt === "docx" ? "docx" : "pdf", theme: themeName };
+      // Default flow (no template): reuse the exact dynamic design from generation.
+      if (!outputHtml.trim()) {
+        if (docTheme) payload.themeConfig = docTheme;
+      }
       if (outputHtml.trim()) payload.html = outputHtml;
       else payload.markdown = output;
       const res = await fetch("/api/generate/render", {

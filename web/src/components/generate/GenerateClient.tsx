@@ -72,6 +72,7 @@ function getClientSessionId(): string {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const touchStartX = useRef<number | null>(null);
+  const tplFileRef = useRef<string | null>(null);
 
   const checkGate = async (sid?: string) => {
     try {
@@ -282,39 +283,58 @@ function getClientSessionId(): string {
 
   const stop = () => abortRef.current?.abort();
 
-  const useTemplate = async (tpl: Template) => {
+  const applyTemplate = async (tpl: Template) => {
     setPreviewTemplate(null);
     setTplTheme("liceria");
+    // Single template at a time: selecting a new one drops the previous
+    // template's attached file (and its selection implicitly).
+    if (tplFileRef.current) {
+      const oldName = tplFileRef.current;
+      tplFileRef.current = null;
+      setAttachedFiles((prev) => prev.filter((f) => f.name !== oldName));
+    }
     setSelectedTemplate(tpl);
+    let attached = false;
     if (tpl.fileUrl) {
       try {
         const res = await fetch(tpl.fileUrl);
         const blob = await res.blob();
         const name = tpl.fileUrl.split("/").pop() || `${tpl.title}.pdf`;
         const file = new File([blob], name, { type: blob.type || "application/pdf" });
+        attached = true;
+        tplFileRef.current = name;
         setAttachedFiles((prev) => {
           if (prev.some((p) => p.name === file.name && p.size === file.size)) return prev;
           return [file, ...prev].slice(0, 3);
         });
       } catch {}
     }
-    const guided = tpl.fileUrl
+    const guided = attached
       ? `<!-- ✎ Add your main content above — replace this line -->\nYour content here: \n\n---\nUse the attached template "${tpl.title}" as the exact structure and styling reference. Keep its sections, headings, and layout (see attached file), but replace the body with new content based on what I wrote above. Generate a complete, paginated document.\n`
       : `<!-- ✎ Add your main content above — this template's text is below for reference -->\nYour content here: \n\n---\nTemplate reference — "${tpl.title}":\n${tpl.content}\n\n---\nUsing the template above as structure, generate a new document with my content. Keep the same headings and flow.\n`;
-    setText(guided);
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        const el = textareaRef.current;
-        if (!el) return;
-        el.focus();
-        const v = el.value;
-        const endMarker = "---\n";
-        const end = v.indexOf(endMarker);
-        if (end !== -1) el.setSelectionRange(0, end + endMarker.length);
-        else el.select();
-        el.scrollTop = 0;
-      }, 50);
+    // Only insert the guided prompt when the input box is empty — never
+    // replace or append to text the user already wrote.
+    let inserted = false;
+    setText((prev) => {
+      if (prev.trim()) return prev;
+      inserted = true;
+      return guided;
     });
+    if (inserted) {
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          const el = textareaRef.current;
+          if (!el) return;
+          el.focus();
+          const v = el.value;
+          const endMarker = "---\n";
+          const end = v.indexOf(endMarker);
+          if (end !== -1) el.setSelectionRange(0, end + endMarker.length);
+          else el.select();
+          el.scrollTop = 0;
+        }, 50);
+      });
+    }
   };
 
   useEffect(() => { setPreviewPage(0); }, [previewTemplate]);
@@ -756,7 +776,7 @@ function getClientSessionId(): string {
             )}
           </div>
           <div className="shrink-0 border-t border-[#E2E8F0] bg-white p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
-            <button onClick={() => useTemplate(previewTemplate)} className="w-full rounded-[10px] bg-[#0F172A] py-3 text-[14px] font-semibold text-white hover:bg-black active:scale-[0.99]">
+            <button onClick={() => applyTemplate(previewTemplate)} className="w-full rounded-[10px] bg-[#0F172A] py-3 text-[14px] font-semibold text-white hover:bg-black active:scale-[0.99]">
               Use this template
             </button>
           </div>

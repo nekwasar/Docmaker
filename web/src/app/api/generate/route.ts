@@ -122,6 +122,14 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Template selection is mandatory — every document is built from a template.
+    if (!templateId) {
+      return new Response(JSON.stringify({ error: "Select a template before generating." }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     // Attribution (server-side only).
     const session = await getSession().catch(() => null);
     let sessionId = request.headers.get("x-session-id") || request.cookies.get("dm_sid")?.value || null;

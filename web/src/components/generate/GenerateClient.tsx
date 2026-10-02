@@ -186,6 +186,7 @@ function getClientSessionId(): string {
 
   const generate = async () => {
     if ((!text.trim() && attachedFiles.length === 0) || generating) return;
+    if (!selectedTemplate) return; // template selection is mandatory
     if (gateMustSubscribe) return;
     setGenerating(true);
     setGenStage("thinking");
@@ -289,6 +290,15 @@ function getClientSessionId(): string {
   };
 
   const stop = () => abortRef.current?.abort();
+
+  const clearTemplate = () => {
+    setSelectedTemplate(null);
+    if (tplFileRef.current) {
+      const oldName = tplFileRef.current;
+      tplFileRef.current = null;
+      setAttachedFiles((prev) => prev.filter((f) => f.name !== oldName));
+    }
+  };
 
   const applyTemplate = async (tpl: Template) => {
     setPreviewTemplate(null);
@@ -475,165 +485,13 @@ function getClientSessionId(): string {
             </div>
           </div>
 
-          {/* Input Area — un-stuck, directly under hero, with exposed controls */}
-          <div className="rounded-[12px] border border-[#E2E8F0] bg-white shadow-xl shadow-[0_20px_25px_-5px_rgba(0,0,0,0.06)] focus-within:border-[#0F172A] focus-within:ring-1 focus-within:ring-[#0F172A] overflow-hidden">
-            {/* Exposed Interactive Controls */}
-            <div className="flex flex-wrap items-center gap-2 border-b border-[#E2E8F0] bg-[#FAFAFA] px-3 py-2">
-              <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-medium text-[#475569]">Style</span>
-                <div className="relative">
-                  <select
-                    value={selectedStyle}
-                    onChange={(e) => setSelectedStyle(e.target.value as any)}
-                    className="appearance-none rounded-[6px] border border-[#E2E8F0] bg-white pl-2 pr-6 py-1 text-[12px] font-medium text-[#0F172A] focus:outline-none focus:border-[#0F172A]"
-                  >
-                    {STYLE_OPTIONS.map((s) => (
-                      <option key={s.value} value={s.value}>{s.label}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 h-3 w-3 text-[#475569]" strokeWidth={1.5} />
-                </div>
-              </div>
-              <span className="h-4 w-px bg-[#E2E8F0]" />
-              <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-medium text-[#475569]">Format</span>
-                <div className="relative">
-                  <select
-                    value={selectedFormat}
-                    onChange={(e) => setSelectedFormat(e.target.value as any)}
-                    className="appearance-none rounded-[6px] border border-[#E2E8F0] bg-white pl-2 pr-6 py-1 text-[12px] font-medium text-[#0F172A] focus:outline-none focus:border-[#0F172A]"
-                  >
-                    {FORMAT_OPTIONS.map((f) => (
-                      <option key={f} value={f}>{f}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 h-3 w-3 text-[#475569]" strokeWidth={1.5} />
-                </div>
-              </div>
-              <span className="ml-auto hidden sm:inline text-[11px] text-[#64748B]">~{pages} {pages === 1 ? "page" : "pages"}</span>
-            </div>
-
-            <textarea
-              ref={textareaRef}
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Describe what you want to create, paste your draft, or drop a file — we’ll structure and format it…"
-              rows={3}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) generate();
-              }}
-              className="min-h-[96px] max-h-[200px] w-full resize-none bg-white px-3 py-3 text-[13px] leading-5 text-[#0F172A] placeholder:text-[#94A3B8] focus:outline-none"
-            />
-
-            {attachedFiles.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 px-3 pb-2">
-                {attachedFiles.map((f, i) => (
-                  <span key={`${f.name}-${f.size}-${i}`} className="inline-flex items-center gap-1 rounded-[6px] border border-[#E2E8F0] bg-[#FAFAFA] px-1.5 py-0.5 text-[11px] text-[#0F172A]">
-                    {f.name}
-                    <button onClick={() => setAttachedFiles((prev) => prev.filter((x) => x !== f))} className="ml-1 rounded-[4px] p-0.5 hover:bg-white">
-                      <X className="h-2.5 w-2.5" strokeWidth={1.5} />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
-
-            <div className="flex items-center justify-between gap-2 border-t border-[#E2E8F0] bg-[#FAFAFA] px-3 py-2.5">
-              <div className="flex items-center gap-2">
-                <input ref={fileInputRef as any} type="file" multiple accept=".pdf,.docx,.txt,.csv,.xlsx,.png,.jpg,.jpeg,.webp" className="hidden" onChange={(e) => handleFiles(e.target.files)} />
-                <button
-                  type="button"
-                  onClick={() => (fileInputRef as any).current?.click()}
-                  className="inline-flex items-center gap-1.5 rounded-[6px] border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-[12px] font-medium text-[#0F172A] hover:bg-slate-50"
-                >
-                  <Paperclip className="h-3.5 w-3.5" strokeWidth={1.5} /> Attach
-                </button>
-                <button type="button" className="inline-flex items-center gap-1.5 rounded-[6px] border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-[12px] font-medium text-[#0F172A] hover:bg-slate-50">
-                  <Mic className="h-3.5 w-3.5" strokeWidth={1.5} /> Voice
-                </button>
-              </div>
-              {generating ? (
-                <button onClick={stop} className="inline-flex items-center gap-1.5 rounded-[6px] bg-[#0F172A] px-4 py-2 text-[13px] font-semibold text-white hover:bg-black">
-                  <Square className="h-3.5 w-3.5 fill-white" strokeWidth={1.5} /> Stop
-                </button>
-              ) : (
-                <button
-                  onClick={generate}
-                  className="inline-flex items-center gap-1.5 rounded-[6px] bg-[#0F172A] px-5 py-2.5 text-[13px] font-bold text-white hover:bg-black shadow-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  Generate Document <span aria-hidden>→</span>
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Generation progress — animated, honest, never a static label */}
-          {generating && (
-            <GenerationProgress
-              stage={genStage === "idle" ? "thinking" : genStage}              templateTitle={selectedTemplate?.title ?? null}
-            />
-          )}
-
-          {/* Minimal download card — the only post-generation UI */}
-          {!generating && (outputHtml || output) && !output.startsWith("Error:") && (
-            <div className="rounded-[10px] border border-[#E2E8F0] bg-white p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] border border-[#E2E8F0] bg-[#FAFAFA]">
-                  <FileText className="h-4 w-4 text-[#3D4D4E]" strokeWidth={1.5} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13px] font-semibold text-[#0F172A]">
-                    {docFileName}.{outputExt}
-                  </p>
-                  <p className="text-[11px] text-[#64748B]">
-                    {docArchetype && !selectedTemplate
-                      ? `Detected: ${docArchetype.charAt(0).toUpperCase() + docArchetype.slice(1)} • enhanced brief applied`
-                      : `${outputExt.toUpperCase()} ready${selectedTemplate ? ` • ${selectedTemplate.title}` : ""}`}
-                  </p>
-                </div>
-                <button
-                  onClick={downloadRendered}
-                  disabled={downloading}
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-[6px] bg-[#0F172A] px-4 py-2 text-[12px] font-semibold text-white hover:bg-black disabled:opacity-40"
-                >
-                  {downloading ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={1.5} />
-                  ) : (
-                    <Download className="h-3.5 w-3.5" strokeWidth={1.5} />
-                  )}
-                  Download {outputExt.toUpperCase()}
-                </button>
-                <button
-                  onClick={() => { setOutput(""); setOutputHtml(""); }}
-                  className="shrink-0 rounded-[6px] border border-[#E2E8F0] bg-white p-1.5 hover:bg-slate-50"
-                  aria-label="Start over"
-                  title="Start over"
-                >
-                  <RotateCcw className="h-3.5 w-3.5 text-slate-600" strokeWidth={1.5} />
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Generation error */}
-          {!generating && output.startsWith("Error:") && (
-            <div className="rounded-[10px] border border-red-200 bg-red-50 p-4">
-              <p className="text-[12px] font-medium text-red-700">{output.replace(/^Error:\s*/, "")}</p>
-              <button
-                onClick={() => setOutput("")}
-                className="mt-2 rounded-[6px] border border-red-200 bg-white px-3 py-1.5 text-[12px] font-medium text-red-700 hover:bg-red-50"
-              >
-                Try again
-              </button>
-            </div>
-          )}
-
-          {/* Templates — kept below input for discovery */}
+          {/* Templates — required before generating (sits above the input) */}
           <div className="space-y-2 pt-2">
             <div className="flex items-center justify-between gap-2">
               <div className="inline-flex items-center gap-2 min-w-0">
                 <LayoutGrid className="h-3.5 w-3.5 text-[#475569] shrink-0" strokeWidth={1.5} />
                 <p className="text-[11px] font-semibold tracking-wide text-[#0F172A] uppercase">Templates</p>
+                <span className="rounded-[4px] border border-[#FDE68A] bg-[#FFFBEB] px-1 py-0 text-[9px] font-bold uppercase tracking-wide text-[#B45309]">Required</span>
                 <span className="rounded-[6px] border border-[#E2E8F0] bg-[#FAFAFA] px-1.5 py-0.5 text-[10px] font-medium text-[#475569]">{templates.length}</span>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
@@ -719,6 +577,177 @@ function getClientSessionId(): string {
               </div>
             )}
           </div>
+
+          {/* Input Area — un-stuck, directly under hero, with exposed controls */}
+          <div className="rounded-[12px] border border-[#E2E8F0] bg-white shadow-xl shadow-[0_20px_25px_-5px_rgba(0,0,0,0.06)] focus-within:border-[#0F172A] focus-within:ring-1 focus-within:ring-[#0F172A] overflow-hidden">
+            {/* Exposed Interactive Controls */}
+            <div className="flex flex-wrap items-center gap-2 border-b border-[#E2E8F0] bg-[#FAFAFA] px-3 py-2">
+              {selectedTemplate && (
+                <button
+                  type="button"
+                  onClick={clearTemplate}
+                  title={`Template: ${selectedTemplate.title} — click to remove`}
+                  className="inline-flex h-[18px] max-w-[130px] items-center gap-1 rounded-full border border-[#0F172A] bg-[#0F172A] px-1.5 text-[9px] font-semibold leading-none text-white hover:bg-black"
+                >
+                  <LayoutGrid className="h-2.5 w-2.5 shrink-0" strokeWidth={2} />
+                  <span className="truncate">{selectedTemplate.title}</span>
+                  <span className="shrink-0 pl-0.5 text-[9px] leading-none opacity-70" aria-hidden>×</span>
+                </button>
+              )}
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] font-medium text-[#475569]">Style</span>
+                <div className="relative">
+                  <select
+                    value={selectedStyle}
+                    onChange={(e) => setSelectedStyle(e.target.value as any)}
+                    className="appearance-none rounded-[6px] border border-[#E2E8F0] bg-white pl-2 pr-6 py-1 text-[12px] font-medium text-[#0F172A] focus:outline-none focus:border-[#0F172A]"
+                  >
+                    {STYLE_OPTIONS.map((s) => (
+                      <option key={s.value} value={s.value}>{s.label}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 h-3 w-3 text-[#475569]" strokeWidth={1.5} />
+                </div>
+              </div>
+              <span className="h-4 w-px bg-[#E2E8F0]" />
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] font-medium text-[#475569]">Format</span>
+                <div className="relative">
+                  <select
+                    value={selectedFormat}
+                    onChange={(e) => setSelectedFormat(e.target.value as any)}
+                    className="appearance-none rounded-[6px] border border-[#E2E8F0] bg-white pl-2 pr-6 py-1 text-[12px] font-medium text-[#0F172A] focus:outline-none focus:border-[#0F172A]"
+                  >
+                    {FORMAT_OPTIONS.map((f) => (
+                      <option key={f} value={f}>{f}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 h-3 w-3 text-[#475569]" strokeWidth={1.5} />
+                </div>
+              </div>
+              <span className="ml-auto hidden sm:inline text-[11px] text-[#64748B]">~{pages} {pages === 1 ? "page" : "pages"}</span>
+            </div>
+
+            <textarea
+              ref={textareaRef}
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Describe what you want to create, paste your draft, or drop a file — we’ll structure and format it…"
+              rows={3}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) generate();
+              }}
+              className="min-h-[96px] max-h-[200px] w-full resize-none bg-white px-3 py-3 text-[13px] leading-5 text-[#0F172A] placeholder:text-[#94A3B8] focus:outline-none"
+            />
+
+            {attachedFiles.filter((f) => f.name !== tplFileRef.current).length > 0 && (
+              <div className="flex flex-wrap gap-1.5 px-3 pb-2">
+                {attachedFiles.filter((f) => f.name !== tplFileRef.current).map((f, i) => (
+                  <span key={`${f.name}-${f.size}-${i}`} className="inline-flex items-center gap-1 rounded-[6px] border border-[#E2E8F0] bg-[#FAFAFA] px-1.5 py-0.5 text-[11px] text-[#0F172A]">
+                    {f.name}
+                    <button onClick={() => setAttachedFiles((prev) => prev.filter((x) => x !== f))} className="ml-1 rounded-[4px] p-0.5 hover:bg-white">
+                      <X className="h-2.5 w-2.5" strokeWidth={1.5} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="flex items-center justify-between gap-2 border-t border-[#E2E8F0] bg-[#FAFAFA] px-3 py-2.5">
+              <div className="flex items-center gap-2">
+                <input ref={fileInputRef as any} type="file" multiple accept=".pdf,.docx,.txt,.csv,.xlsx,.png,.jpg,.jpeg,.webp" className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+                <button
+                  type="button"
+                  onClick={() => (fileInputRef as any).current?.click()}
+                  className="inline-flex items-center gap-1.5 rounded-[6px] border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-[12px] font-medium text-[#0F172A] hover:bg-slate-50"
+                >
+                  <Paperclip className="h-3.5 w-3.5" strokeWidth={1.5} /> Attach
+                </button>
+                <button type="button" className="inline-flex items-center gap-1.5 rounded-[6px] border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-[12px] font-medium text-[#0F172A] hover:bg-slate-50">
+                  <Mic className="h-3.5 w-3.5" strokeWidth={1.5} /> Voice
+                </button>
+              </div>
+              {!selectedTemplate && (
+                <span className="ml-auto hidden sm:inline text-[10px] font-medium text-[#B45309]">Template required</span>
+              )}
+              {generating ? (
+                <button onClick={stop} className="inline-flex items-center gap-1.5 rounded-[6px] bg-[#0F172A] px-4 py-2 text-[13px] font-semibold text-white hover:bg-black">
+                  <Square className="h-3.5 w-3.5 fill-white" strokeWidth={1.5} /> Stop
+                </button>
+              ) : (
+                <button
+                  onClick={generate}
+                  disabled={!selectedTemplate}
+                  title={selectedTemplate ? undefined : "Pick a template first — every document starts from a template"}
+                  className="inline-flex items-center gap-1.5 rounded-[6px] bg-[#0F172A] px-5 py-2.5 text-[13px] font-bold text-white hover:bg-black shadow-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {selectedTemplate ? <>Generate Document <span aria-hidden>→</span></> : "Select a template"}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Generation progress — animated, honest, never a static label */}
+          {generating && (
+            <GenerationProgress
+              stage={genStage === "idle" ? "thinking" : genStage}              templateTitle={selectedTemplate?.title ?? null}
+            />
+          )}
+
+          {/* Minimal download card — the only post-generation UI */}
+          {!generating && (outputHtml || output) && !output.startsWith("Error:") && (
+            <div className="rounded-[10px] border border-[#E2E8F0] bg-white p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] border border-[#E2E8F0] bg-[#FAFAFA]">
+                  <FileText className="h-4 w-4 text-[#3D4D4E]" strokeWidth={1.5} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[13px] font-semibold text-[#0F172A]">
+                    {docFileName}.{outputExt}
+                  </p>
+                  <p className="text-[11px] text-[#64748B]">
+                    {docArchetype && !selectedTemplate
+                      ? `Detected: ${docArchetype.charAt(0).toUpperCase() + docArchetype.slice(1)} • enhanced brief applied`
+                      : `${outputExt.toUpperCase()} ready${selectedTemplate ? ` • ${selectedTemplate.title}` : ""}`}
+                  </p>
+                </div>
+                <button
+                  onClick={downloadRendered}
+                  disabled={downloading}
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-[6px] bg-[#0F172A] px-4 py-2 text-[12px] font-semibold text-white hover:bg-black disabled:opacity-40"
+                >
+                  {downloading ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={1.5} />
+                  ) : (
+                    <Download className="h-3.5 w-3.5" strokeWidth={1.5} />
+                  )}
+                  Download {outputExt.toUpperCase()}
+                </button>
+                <button
+                  onClick={() => { setOutput(""); setOutputHtml(""); }}
+                  className="shrink-0 rounded-[6px] border border-[#E2E8F0] bg-white p-1.5 hover:bg-slate-50"
+                  aria-label="Start over"
+                  title="Start over"
+                >
+                  <RotateCcw className="h-3.5 w-3.5 text-slate-600" strokeWidth={1.5} />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Generation error */}
+          {!generating && output.startsWith("Error:") && (
+            <div className="rounded-[10px] border border-red-200 bg-red-50 p-4">
+              <p className="text-[12px] font-medium text-red-700">{output.replace(/^Error:\s*/, "")}</p>
+              <button
+                onClick={() => setOutput("")}
+                className="mt-2 rounded-[6px] border border-red-200 bg-white px-3 py-1.5 text-[12px] font-medium text-red-700 hover:bg-red-50"
+              >
+                Try again
+              </button>
+            </div>
+          )}
+
         </div>
       </div>
 

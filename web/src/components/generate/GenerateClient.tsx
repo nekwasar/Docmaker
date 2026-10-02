@@ -490,17 +490,10 @@ function getClientSessionId(): string {
             <div className="flex items-center justify-between gap-2">
               <div className="inline-flex items-center gap-2 min-w-0">
                 <LayoutGrid className="h-3.5 w-3.5 text-[#475569] shrink-0" strokeWidth={1.5} />
-                <p className="text-[11px] font-semibold tracking-wide text-[#0F172A] uppercase">1 · Choose a template</p>
+                <p className="text-[11px] font-semibold tracking-wide text-[#0F172A] uppercase">Choose a template</p>
                 <span className="rounded-[4px] border border-[#FDE68A] bg-[#FFFBEB] px-1 py-0 text-[9px] font-bold uppercase tracking-wide text-[#B45309]">Required</span>
-                <span className="rounded-[6px] border border-[#E2E8F0] bg-[#FAFAFA] px-1.5 py-0.5 text-[10px] font-medium text-[#475569]">{templates.length}</span>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
-                <button
-                  onClick={handleCreateTemplate}
-                  className="inline-flex items-center gap-1 rounded-[6px] bg-[#0F172A] px-2 py-1 text-[11px] font-semibold text-white hover:bg-black active:scale-[0.98]"
-                >
-                  + Add Template
-                </button>
                 <a href="/templates" className="inline-flex items-center gap-1 rounded-[6px] border border-[#E2E8F0] bg-white px-2 py-1 text-[11px] font-medium text-[#0F172A] hover:bg-slate-50">
                   See all <ArrowUp className="h-3 w-3 rotate-45" strokeWidth={1.5} />
                 </a>
@@ -592,7 +585,7 @@ function getClientSessionId(): string {
             )}
           </div>
 
-          <p className="text-[11px] font-semibold tracking-wide text-[#0F172A] uppercase pt-2">2 · Describe your document</p>
+          <p className="text-[11px] font-semibold tracking-wide text-[#0F172A] uppercase pt-2">Describe your document</p>
 
           {/* Input Area — under the template step, with exposed controls */}
           <div className="rounded-[12px] border border-[#E2E8F0] bg-white shadow-xl shadow-[0_20px_25px_-5px_rgba(0,0,0,0.06)] focus-within:border-[#0F172A] focus-within:ring-1 focus-within:ring-[#0F172A] overflow-hidden">

@@ -196,7 +196,7 @@ export default function GenerationProgress({ stage, templateTitle }: Props) {
       {/* Footer — elapsed + honest expectation */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#E2E8F0] bg-[#FAFAFA] px-4 py-2.5">
         <span className="text-[11px] text-[#64748B]">
-          Elapsed {mm}:{ss} • usually takes 1–2 minutes
+          Elapsed {mm}:{ss} • usually takes 30 to 45 seconds
         </span>
         <span className="text-[11px] text-[#64748B]">
           Keep this tab open — your download will appear here.

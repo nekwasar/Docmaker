@@ -2,8 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Menu, X, Sparkles, FileText, Globe, ArrowUpDown, Plus, LayoutGrid, Search } from "lucide-react";
+import { Home, Menu, X, Sparkles, FileText, Globe, ArrowUpDown, Plus, LayoutGrid, Search, ChevronLeft, CreditCard } from "lucide-react";
 import { useState, useEffect } from "react";
+
+const RAIL_MENU = [
+  { label: "AI Generate", href: "/generate", icon: <Sparkles className="h-4 w-4 shrink-0" strokeWidth={1.75} /> },
+  { label: "PDF Tools", href: "/pdf", icon: <FileText className="h-4 w-4 shrink-0" strokeWidth={1.75} /> },
+  { label: "Convert", href: "/convert", icon: <Globe className="h-4 w-4 shrink-0" strokeWidth={1.75} /> },
+  { label: "Transfer", href: "/transfer", icon: <ArrowUpDown className="h-4 w-4 shrink-0" strokeWidth={1.75} /> },
+  { label: "Pricing", href: "/pricing", icon: <CreditCard className="h-4 w-4 shrink-0" strokeWidth={1.75} /> },
+];
 
 export function BottomNav() {
   const pathname = usePathname();
@@ -13,6 +21,8 @@ export function BottomNav() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [railOpen, setRailOpen] = useState(false); // desktop side nav — minimized by default
+  const closeRail = () => setRailOpen(false);
 
   useEffect(() => {
     const check = () => {
@@ -52,9 +62,83 @@ export function BottomNav() {
 
   return (
     <>
-      {/* Bottom Sticky Navigation — Permanently Visible, Translucent, Safe-Area Aware */}
+      {/* Desktop Side Nav — minimized (icon rail) by default, expandable */}
       <div
-        className="fixed left-1/2 z-[9999] flex -translate-x-1/2 items-center gap-1 rounded-full border border-white/10 bg-[#0F172A]/85 px-1.5 py-1.5 shadow-[0_10px_40px_rgba(0,0,0,0.25),0_2px_8px_rgba(0,0,0,0.12)] backdrop-blur-xl transition-all"
+        className={`hidden lg:flex fixed left-4 top-1/2 z-[9999] -translate-y-1/2 flex-col rounded-2xl border border-white/10 bg-[#0F172A]/85 p-1.5 shadow-[0_10px_40px_rgba(0,0,0,0.25),0_2px_8px_rgba(0,0,0,0.12)] backdrop-blur-xl transition-all ${
+          railOpen ? "w-[212px] items-stretch" : "w-[54px] items-center"
+        }`}
+        role="navigation"
+        aria-label="Primary"
+      >
+        <Link
+          href="/"
+          onClick={closeRail}
+          className={`flex items-center gap-3 rounded-xl py-2.5 text-[13px] font-medium transition-colors ${railOpen ? "px-3" : "justify-center"} ${
+            isHome ? "bg-white text-[#0F172A]" : "text-white/90 hover:bg-white/10 hover:text-white"
+          }`}
+          aria-current={isHome ? "page" : undefined}
+        >
+          <Home className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+          {railOpen && <span className="truncate">Home</span>}
+        </Link>
+        <Link
+          href="/templates"
+          onClick={closeRail}
+          className={`flex items-center gap-3 rounded-xl py-2.5 text-[13px] font-medium transition-colors ${railOpen ? "px-3" : "justify-center"} ${
+            isActive("/templates") ? "bg-white text-[#0F172A]" : "text-white/90 hover:bg-white/10 hover:text-white"
+          }`}
+        >
+          <LayoutGrid className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+          {railOpen && <span className="truncate">Templates</span>}
+        </Link>
+        <button
+          onClick={() => setSearchOpen(true)}
+          className={`flex items-center gap-3 rounded-xl py-2.5 text-[13px] font-medium text-white/90 transition-colors hover:bg-white/10 hover:text-white ${railOpen ? "px-3" : "justify-center"}`}
+          aria-label="Search templates"
+        >
+          <Search className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+          {railOpen && <span className="truncate">Search</span>}
+        </button>
+        {railOpen && (
+          <>
+            <span className="my-1 h-px w-full bg-white/15" aria-hidden />
+            {RAIL_MENU.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={closeRail}
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-colors ${
+                  isActive(item.href) ? "bg-white text-[#0F172A]" : "text-white/90 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                {item.icon}
+                <span className="truncate">{item.label}</span>
+              </Link>
+            ))}
+            <Link
+              href="/upload/template"
+              onClick={closeRail}
+              className="mt-1 flex items-center justify-center gap-1.5 rounded-xl bg-white px-3 py-2 text-[12px] font-semibold text-[#0F172A] hover:bg-white/90"
+            >
+              <Plus className="h-3.5 w-3.5 shrink-0" /> Upload template
+            </Link>
+          </>
+        )}
+        <span className="my-1 h-px w-full bg-white/15" aria-hidden />
+        <button
+          onClick={() => setRailOpen((o) => !o)}
+          className={`flex items-center gap-3 rounded-xl py-2.5 text-[13px] font-medium text-white/90 transition-colors hover:bg-white/10 hover:text-white ${railOpen ? "px-3" : "justify-center"}`}
+          aria-expanded={railOpen}
+          aria-label={railOpen ? "Collapse sidebar" : "Expand sidebar"}
+        >
+          {railOpen ? <ChevronLeft className="h-4 w-4 shrink-0" strokeWidth={2} /> : <Menu className="h-4 w-4 shrink-0" strokeWidth={2} />}
+          {railOpen && <span className="truncate">Collapse</span>}
+        </button>
+      </div>
+
+      {/* Bottom Sticky Navigation — mobile/tablet only, Translucent, Safe-Area Aware */}
+      <div
+        className="fixed left-1/2 z-[9999] flex -translate-x-1/2 items-center gap-1 rounded-full border border-white/10 bg-[#0F172A]/85 px-1.5 py-1.5 shadow-[0_10px_40px_rgba(0,0,0,0.25),0_2px_8px_rgba(0,0,0,0.12)] backdrop-blur-xl transition-all lg:hidden"
         style={{
           bottom: "calc(1rem + env(safe-area-inset-bottom, 0px))",
           paddingBottom: "calc(0.375rem + env(safe-area-inset-bottom, 0px))",
@@ -110,7 +194,7 @@ export function BottomNav() {
 
       {/* Menu Overlay — streamlined */}
       {menuOpen && (
-        <div className="fixed inset-0 z-[9998] bg-[#0F172A]/40 backdrop-blur-sm" onClick={() => setMenuOpen(false)}>
+        <div className="fixed inset-0 z-[9998] bg-[#0F172A]/40 backdrop-blur-sm lg:hidden" onClick={() => setMenuOpen(false)}>
           <div
             className="absolute left-1/2 w-[92vw] max-w-sm -translate-x-1/2 rounded-[16px] border border-[#E2E8F0] bg-white p-2 shadow-2xl"
             style={{ bottom: "calc(5rem + env(safe-area-inset-bottom, 0px))" }}

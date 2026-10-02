@@ -220,8 +220,14 @@ export async function POST(request: NextRequest) {
 
             let fullPrompt = buildPrompt(text || "", structure || "auto");
             // Dynamic styling: the model picks a palette + fonts that fit THIS
-            // document. Never a fixed default — spec line is parsed and applied.
-            fullPrompt += `\n\nVery important — first line of your response must be exactly one HTML comment specifying this document's visual identity. Choose colors and fonts that genuinely fit the document's subject, audience, and tone (a legal NDA should look sober; a kids' program proposal may be warm; a tech report crisp; vary your choices between documents):\n<!--design:{"primary":"#1B2A4A","accent":"#C08362","text":"#12131A","bg":"#FFFFFF","headingFont":"Space Grotesk","bodyFont":"Inter"}-->\nColors are hex. headingFont and bodyFont must be chosen from: ${"Archivo, Public Sans, Space Grotesk, Inter, Manrope, DM Sans, Playfair Display, Source Serif 4, Sora, Libre Baskerville, Lora, Poppins, Fraunces"}. After that single line, output the markdown document starting with "# " title. No other commentary.`;
+            // document. The rule lives in the SYSTEM prompt — the system
+            // prompt's "output only content" rule otherwise suppresses it, and
+            // the rule must stay schema-only (a concrete example gets echoed
+            // verbatim, which fixes the style).
+            const MOODS = ["warm", "sober", "crisp", "editorial", "playful", "corporate", "artistic", "minimal", "vibrant", "earthy", "modern", "classic"];
+            const mood = MOODS[Math.floor(Math.random() * MOODS.length)];
+            const designRule = `\n\nDESIGN TOKENS (mandatory): your response MUST begin with exactly one line — an HTML comment containing a JSON object defining this document's visual identity — followed by the markdown document. This comment is required output, not meta-commentary. Keys:\n- "primary": hex color for headings and dark panels — the dominant brand color\n- "accent": hex color for subtitles and numbers — clearly lighter/different from primary\n- "text": near-black hex for body text, readable on "bg"\n- "bg": hex paper color (usually #FFFFFF; warm cream is fine)\n- "headingFont" and "bodyFont": a pairing chosen from Archivo, Public Sans, Space Grotesk, Inter, Manrope, DM Sans, Playfair Display, Source Serif 4, Sora, Libre Baskerville, Lora, Poppins, Fraunces — the two must differ\nInvent fresh values that fit THIS document's subject, audience, and tone — aim for a ${mood} feel this time; never reuse a palette from a previous document.`;
+            fullPrompt += "\n\nBegin with the <!--design:{...}--> line exactly as instructed, then the document.";
             if (style === "simple") {
               fullPrompt += "\n\nWrite in simple, plain English suitable for a general audience.";
             }
@@ -234,7 +240,7 @@ export async function POST(request: NextRequest) {
             let usage: UsageReport | null = null;
             for await (const chunk of streamAIResponse(
               [
-                { role: "system", content: SYSTEM_PROMPT },
+                { role: "system", content: SYSTEM_PROMPT + designRule },
                 { role: "user", content: fullPrompt },
               ],
               config,
@@ -247,7 +253,8 @@ export async function POST(request: NextRequest) {
 
             send({ stage: "compiling" });
             const { markdown: cleanMd, spec } = stripDesignSpec(markdown);
-            const dynamicTheme = deriveDynamicTheme(spec, text || cleanMd);
+            console.log("[design] spec", spec ? JSON.stringify(spec) : "NOT EMITTED");
+            const dynamicTheme = deriveDynamicTheme(spec);
             markdown = cleanMd;
             html = renderMarkdownToStyledPages(markdown, dynamicTheme);
             themeConfig = dynamicTheme;

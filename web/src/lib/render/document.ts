@@ -84,12 +84,6 @@ const PALETTES: Array<{ primary: string; accent: string; text: string }> = [
   { primary: "#4A2545", accent: "#C5A572", text: "#171015" }, // plum
 ];
 
-function hashString(s: string): number {
-  let h = 5381;
-  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
-  return h;
-}
-
 function safeHex(v: unknown): string | null {
   return typeof v === "string" && /^#[0-9a-fA-F]{6}$/.test(v) ? v : null;
 }
@@ -100,27 +94,54 @@ function safeFont(v: unknown): string | null {
   return hit ?? null;
 }
 
-/** Build a per-document theme: AI design spec if valid, else seeded palette. */
-export function deriveDynamicTheme(spec: unknown, seed?: string): DocumentTheme {
+/** Build a per-document theme: AI design spec if valid, else a random curated palette. */
+export function deriveDynamicTheme(spec: unknown): DocumentTheme {
   const s = (spec ?? {}) as DesignSpec;
-  const base = seed ? PALETTES[hashString(seed) % PALETTES.length] : PALETTES[Math.floor(Math.random() * PALETTES.length)];
-  const fontSeed = seed ? hashString(seed + "::font") : Math.floor(Math.random() * FONT_WHITELIST.length);
-  const headingFont = safeFont(s.headingFont) ?? FONT_WHITELIST[fontSeed % FONT_WHITELIST.length];
-  const bodyFont = safeFont(s.bodyFont) ?? FONT_WHITELIST[(fontSeed + 3) % FONT_WHITELIST.length];
-  return {
+  // Anti-echo guard: a model that copies examples or repeats itself verbatim
+  // would make the style fixed again. Track recently issued combos and refuse
+  // exact repeats — fall back to the random curated palette instead.
+  const inSpec = {
+    primary: safeHex(s.primary),
+    accent: safeHex(s.accent),
+    text: safeHex(s.text),
+    bg: safeHex(s.bg),
+    headingFont: safeFont(s.headingFont),
+    bodyFont: safeFont(s.bodyFont),
+  };
+  const signature = JSON.stringify([inSpec.primary, inSpec.accent, inSpec.text, inSpec.bg, inSpec.headingFont, inSpec.bodyFont]);
+  const banned = JSON.stringify(["#1B2A4A", "#C08362", "#12131A", "#FFFFFF", "Space Grotesk", "Inter"]);
+  const echoed = signature === banned || RECENT_SPECS.includes(signature);
+  const complete = inSpec.primary && inSpec.accent && inSpec.text && inSpec.bg && inSpec.headingFont && inSpec.bodyFont && inSpec.headingFont !== inSpec.bodyFont;
+  const useSpec = complete && !echoed;
+
+  const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+  const palette = pick(PALETTES);
+  const headingFont = (useSpec ? inSpec.headingFont : pick(FONT_WHITELIST)) as string;
+  const remaining = FONT_WHITELIST.filter((f) => f !== headingFont);
+  const bodyFont = (useSpec ? inSpec.bodyFont : pick(remaining)) as string;
+  const theme: DocumentTheme = {
     colors: {
-      primary: safeHex(s.primary) ?? base.primary,
-      accent: safeHex(s.accent) ?? base.accent,
-      bg: safeHex(s.bg) ?? "#FFFFFF",
-      text: safeHex(s.text) ?? base.text,
+      primary: (useSpec ? inSpec.primary : palette.primary) as string,
+      accent: (useSpec ? inSpec.accent : palette.accent) as string,
+      bg: (useSpec ? inSpec.bg : "#FFFFFF") as string,
+      text: (useSpec ? inSpec.text : palette.text) as string,
     },
-    fonts: {
-      heading: `'${headingFont}', ${headingFont === "Playfair Display" || headingFont === "Libre Baskerville" || headingFont === "Lora" || headingFont === "Source Serif 4" || headingFont === "Fraunces" ? FONT_FALLBACK.serif : "sans-serif"}`,
-      body: `'${bodyFont}', ${bodyFont === "Lora" || bodyFont === "Source Serif 4" ? FONT_FALLBACK.serif : "sans-serif"}`,
-    },
+    fonts: { heading: fontStack(headingFont), body: fontStack(bodyFont) },
     brand: { left: "Docmaker", right: "" },
     contact: {},
   };
+
+  RECENT_SPECS.push(useSpec ? signature : JSON.stringify([theme.colors.primary, theme.colors.accent, theme.colors.text, headingFont, bodyFont]));
+  if (RECENT_SPECS.length > 30) RECENT_SPECS.shift();
+  return theme;
+}
+
+const RECENT_SPECS: string[] = [];
+
+const SERIF_FONTS = new Set(["Playfair Display", "Libre Baskerville", "Lora", "Source Serif 4", "Fraunces"]);
+
+function fontStack(name: string): string {
+  return `'${name}', ${SERIF_FONTS.has(name) ? FONT_FALLBACK.serif : "sans-serif"}`;
 }
 
 /** Google Fonts <link> href covering a theme's heading + body fonts. */

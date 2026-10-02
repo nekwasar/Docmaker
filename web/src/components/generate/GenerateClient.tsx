@@ -76,6 +76,7 @@ function getClientSessionId(): string {
   const abortRef = useRef<AbortController | null>(null);
   const touchStartX = useRef<number | null>(null);
   const tplFileRef = useRef<string | null>(null);
+  const inputAreaRef = useRef<HTMLDivElement>(null);
 
   const checkGate = async (sid?: string) => {
     try {
@@ -352,6 +353,14 @@ function getClientSessionId(): string {
         }, 50);
       });
     }
+    // Mobile only: smooth-scroll to the input bar right after a template is selected.
+    if (typeof window !== "undefined" && window.innerWidth < 640) {
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          inputAreaRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 150);
+      });
+    }
   };
 
   useEffect(() => { setPreviewPage(0); }, [previewTemplate]);
@@ -588,7 +597,7 @@ function getClientSessionId(): string {
           <p className="text-[11px] font-semibold tracking-wide text-[#0F172A] uppercase pt-2">Describe your document</p>
 
           {/* Input Area — under the template step, with exposed controls */}
-          <div className="rounded-[12px] border border-[#E2E8F0] bg-white shadow-xl shadow-[0_20px_25px_-5px_rgba(0,0,0,0.06)] focus-within:border-[#0F172A] focus-within:ring-1 focus-within:ring-[#0F172A] overflow-hidden">
+          <div ref={inputAreaRef} className="rounded-[12px] border border-[#E2E8F0] bg-white shadow-xl shadow-[0_20px_25px_-5px_rgba(0,0,0,0.06)] focus-within:border-[#0F172A] focus-within:ring-1 focus-within:ring-[#0F172A] overflow-hidden">
             {/* Exposed Interactive Controls */}
             <div className="flex flex-wrap items-center gap-2 border-b border-[#E2E8F0] bg-[#FAFAFA] px-3 py-2">
               {selectedTemplate && (

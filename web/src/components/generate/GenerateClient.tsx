@@ -490,7 +490,7 @@ function getClientSessionId(): string {
             <div className="flex items-center justify-between gap-2">
               <div className="inline-flex items-center gap-2 min-w-0">
                 <LayoutGrid className="h-3.5 w-3.5 text-[#475569] shrink-0" strokeWidth={1.5} />
-                <p className="text-[11px] font-semibold tracking-wide text-[#0F172A] uppercase">Templates</p>
+                <p className="text-[11px] font-semibold tracking-wide text-[#0F172A] uppercase">1 · Choose a template</p>
                 <span className="rounded-[4px] border border-[#FDE68A] bg-[#FFFBEB] px-1 py-0 text-[9px] font-bold uppercase tracking-wide text-[#B45309]">Required</span>
                 <span className="rounded-[6px] border border-[#E2E8F0] bg-[#FAFAFA] px-1.5 py-0.5 text-[10px] font-medium text-[#475569]">{templates.length}</span>
               </div>
@@ -506,6 +506,7 @@ function getClientSessionId(): string {
                 </a>
               </div>
             </div>
+            <p className="text-[11px] text-[#64748B]">Click a template below to preview and select it — you can’t generate without one.</p>
             {templates.length === 0 ? (
               <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:gap-2.5 sm:overflow-visible sm:pb-0">
                 <button
@@ -543,7 +544,11 @@ function getClientSessionId(): string {
                   <button
                     key={tpl.id}
                     onClick={() => setPreviewTemplate(tpl)}
-                    className="group shrink-0 w-[48%] snap-start overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white text-left hover:border-[#CBD5E1] hover:bg-[#FAFAFA] transition-colors sm:w-auto"
+                    className={`group shrink-0 w-[48%] snap-start overflow-hidden rounded-[10px] border bg-white text-left transition-colors sm:w-auto ${
+                      selectedTemplate?.id === tpl.id
+                        ? "border-[#0F172A] ring-2 ring-[#0F172A]"
+                        : "border-[#E2E8F0] hover:border-[#CBD5E1] hover:bg-[#FAFAFA]"
+                    }`}
                   >
                     <div className="h-[195px] sm:h-[300px] border-b border-[#E2E8F0] bg-[#F8FAFC] p-2">
                       {tpl.fileUrl ? (
@@ -571,6 +576,15 @@ function getClientSessionId(): string {
                         <User className="h-3 w-3" strokeWidth={1.5} /> {tpl.author}
                         <span className="ml-1 rounded-[4px] border border-[#E2E8F0] bg-[#FAFAFA] px-1 py-0 text-[10px] font-medium">{tpl.category}</span>
                       </p>
+                      {selectedTemplate?.id === tpl.id ? (
+                        <span className="mt-2 inline-flex items-center gap-1 rounded-[6px] border border-emerald-200 bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">
+                          ✓ Selected
+                        </span>
+                      ) : (
+                        <span className="mt-2 inline-flex items-center gap-1 rounded-[6px] border border-[#E2E8F0] bg-[#FAFAFA] px-2 py-1 text-[10px] font-semibold text-[#0F172A] transition-colors group-hover:border-[#0F172A] group-hover:bg-[#0F172A] group-hover:text-white">
+                          Select template →
+                        </span>
+                      )}
                     </div>
                   </button>
                 ))}
@@ -578,7 +592,9 @@ function getClientSessionId(): string {
             )}
           </div>
 
-          {/* Input Area — un-stuck, directly under hero, with exposed controls */}
+          <p className="text-[11px] font-semibold tracking-wide text-[#0F172A] uppercase pt-2">2 · Describe your document</p>
+
+          {/* Input Area — under the template step, with exposed controls */}
           <div className="rounded-[12px] border border-[#E2E8F0] bg-white shadow-xl shadow-[0_20px_25px_-5px_rgba(0,0,0,0.06)] focus-within:border-[#0F172A] focus-within:ring-1 focus-within:ring-[#0F172A] overflow-hidden">
             {/* Exposed Interactive Controls */}
             <div className="flex flex-wrap items-center gap-2 border-b border-[#E2E8F0] bg-[#FAFAFA] px-3 py-2">
@@ -668,7 +684,7 @@ function getClientSessionId(): string {
                 </button>
               </div>
               {!selectedTemplate && (
-                <span className="ml-auto hidden sm:inline text-[10px] font-medium text-[#B45309]">Template required</span>
+                <span className="ml-auto hidden sm:inline text-[10px] font-medium text-[#B45309]">Pick a template above ↑</span>
               )}
               {generating ? (
                 <button onClick={stop} className="inline-flex items-center gap-1.5 rounded-[6px] bg-[#0F172A] px-4 py-2 text-[13px] font-semibold text-white hover:bg-black">
@@ -818,7 +834,7 @@ function getClientSessionId(): string {
           </div>
           <div className="shrink-0 border-t border-[#E2E8F0] bg-white p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
             <button onClick={() => applyTemplate(previewTemplate)} className="w-full rounded-[10px] bg-[#0F172A] py-3 text-[14px] font-semibold text-white hover:bg-black active:scale-[0.99]">
-              Use this template
+              Select this template ✓
             </button>
           </div>
         </div>

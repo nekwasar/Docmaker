@@ -6,7 +6,8 @@ import { modelIdForProvider, type AIProvider } from "@/lib/ai/catalog";
 import { estimateCostUsd, estimateTokens } from "@/lib/pricing";
 import { buildPrompt, SYSTEM_PROMPT } from "@/lib/ai/prompts";
 import { DESIGNER_SYSTEM_PROMPT, buildDesignerPrompt, extractHtml, ensurePrintCss } from "@/lib/ai/designer";
-import { renderMarkdownToStyledPages, deriveDynamicTheme, type DocumentTheme, type DesignSpec } from "@/lib/render/document";
+import { architectPlan, heuristicArchitect, type ArchitectPlan, type Archetype } from "@/lib/ai/architect";
+import { renderMarkdownToStyledPages, deriveDynamicTheme, type DocumentTheme } from "@/lib/render/document";
 import { assembleFromKit, parseMarkdownToContent, loadTemplateImages, type DesignKit } from "@/lib/render/designKit";
 import { getSession } from "@/lib/session";
 
@@ -16,26 +17,47 @@ const prisma = new PrismaClient();
 // document content is never streamed (avoids a cluttered UI).
 type Stage =
   | { stage: "thinking" }
+  | { stage: "planning" }
   | { stage: "designing" }
   | { stage: "writing" }
   | { stage: "compiling" }
-  | { stage: "done"; html: string; markdown: string; template: string | null; themeConfig?: DocumentTheme }
+  | { stage: "done"; html: string; markdown: string; template: string | null; themeConfig?: DocumentTheme; archetype?: string }
   | { stage: "error"; error: string };
 
-// Design spec emitted by the model as the first line: <!--design:{...}-->
-function stripDesignSpec(md: string): { markdown: string; spec: DesignSpec | null } {
-  const m = /<!--\s*design\s*:?([\s\S]*?)-->/i.exec(md);
-  if (!m) return { markdown: md, spec: null };
-  const start = m[1].indexOf("{");
-  const end = m[1].lastIndexOf("}");
-  let spec: DesignSpec | null = null;
-  if (start !== -1 && end !== -1) {
-    try {
-      spec = JSON.parse(m[1].slice(start, end + 1)) as DesignSpec;
-    } catch {}
+/** Assemble the writer's instructions purely from the architect's plan —
+ *  the writer prompt is derived per-request; nothing static is appended. */
+function buildWriterPrompt(plan: ArchitectPlan, userText: string, fileContexts: string[]): string {
+  const lines: string[] = [];
+  lines.push(`Document kind: ${plan.archetype}`);
+  lines.push(`Title: "${plan.title}"`);
+  if (plan.subtitle) lines.push(`Subtitle: "${plan.subtitle}"`);
+  if (plan.audience) lines.push(`Audience: ${plan.audience}`);
+  if (plan.tone) lines.push(`Tone: ${plan.tone}`);
+  lines.push(`Length: ${plan.length ?? "medium"}`);
+  const tp = plan.tablePolicy ?? "tabular-only";
+  lines.push(
+    `Tables: ${
+      tp === "none"
+        ? "do not use any tables"
+        : tp === "tabular-only"
+          ? "only for genuinely tabular data — prefer prose and lists otherwise"
+          : "use for presenting data clearly"
+    }`
+  );
+  if (plan.specialElements?.length) lines.push(`Special elements to include: ${plan.specialElements.join(", ")}`);
+  lines.push("Sections — write in exactly this order, one ## heading each:");
+  plan.sections.forEach((s, i) => lines.push(`${i + 1}. ## ${s.heading} — ${s.instruction}`));
+  if (plan.notes) lines.push(`Watch out: ${plan.notes}`);
+  lines.push("\nOriginal request from the user (the source of truth — cover everything it asks):");
+  lines.push(userText.trim() || "(none — infer from the attached material)");
+  if (fileContexts.length > 0) {
+    lines.push("\nReference material from attached files:");
+    lines.push(fileContexts.join("\n\n---\n\n"));
   }
-  return { markdown: md.replace(m[0], "").trimStart(), spec };
+  return lines.join("\n");
 }
+
+const WRITER_SYSTEM_PROMPT = `You are Docmaker's document writer. A planning step analyzed the user's request and produced a precise brief. Write the complete document in markdown following the brief exactly: its sections in order with ## headings, its tone, its length, its formatting rules, and its special elements. Start with a single # title. Use realistic placeholder details where needed. Output ONLY the document — no commentary.`;
 
 
 export async function POST(request: NextRequest) {
@@ -125,6 +147,7 @@ export async function POST(request: NextRequest) {
         let usageTokens = { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
         let templateTitle: string | null = null;
         let themeConfig: DocumentTheme | undefined;
+        let archetypeOut: Archetype | undefined;
 
         try {
           if (!config.apiKey) {
@@ -218,30 +241,47 @@ export async function POST(request: NextRequest) {
             // ===== DEFAULT FLOW: markdown → dynamic per-document design =====
             send({ stage: "thinking" });
 
-            let fullPrompt = buildPrompt(text || "", structure || "auto");
-            // Dynamic styling: the model picks a palette + fonts that fit THIS
-            // document. The rule lives in the SYSTEM prompt — the system
-            // prompt's "output only content" rule otherwise suppresses it, and
-            // the rule must stay schema-only (a concrete example gets echoed
-            // verbatim, which fixes the style).
-            const MOODS = ["warm", "sober", "crisp", "editorial", "playful", "corporate", "artistic", "minimal", "vibrant", "earthy", "modern", "classic"];
-            const mood = MOODS[Math.floor(Math.random() * MOODS.length)];
-            const designRule = `\n\nDESIGN TOKENS (mandatory): your response MUST begin with exactly one line — an HTML comment containing a JSON object defining this document's visual identity — followed by the markdown document. This comment is required output, not meta-commentary. Keys:\n- "primary": hex color for headings and dark panels — the dominant brand color\n- "accent": hex color for subtitles and numbers — clearly lighter/different from primary\n- "text": near-black hex for body text, readable on "bg"\n- "bg": hex paper color (usually #FFFFFF; warm cream is fine)\n- "headingFont" and "bodyFont": a pairing chosen from Archivo, Public Sans, Space Grotesk, Inter, Manrope, DM Sans, Playfair Display, Source Serif 4, Sora, Libre Baskerville, Lora, Poppins, Fraunces — the two must differ\nInvent fresh values that fit THIS document's subject, audience, and tone — aim for a ${mood} feel this time; never reuse a palette from a previous document.`;
-            fullPrompt += "\n\nBegin with the <!--design:{...}--> line exactly as instructed, then the document.";
-            if (style === "simple") {
-              fullPrompt += "\n\nWrite in simple, plain English suitable for a general audience.";
-            }
-            if (fileContexts.length > 0) {
-              fullPrompt += "\n\nAdditional context from attached files:\n" + fileContexts.join("\n\n---\n\n");
+            // ===== DEFAULT FLOW: Prompt Architect → writer → archetype-aware renderer =====
+            send({ stage: "thinking" });
+
+            // No hardcoded generation prompt: the user's raw prompt is
+            // advanced into a per-request brief by the architect call, with a
+            // code fallback if the AI is unavailable.
+            send({ stage: "planning" });
+            let plan: ArchitectPlan;
+            try {
+              const { plan: p, usage: aUsage } = await architectPlan(userContent, fileContexts);
+              plan = p;
+              if (aUsage) {
+                const cost = estimateCostUsd(config.model, aUsage.promptTokens, aUsage.completionTokens);
+                await prisma.apiUsageLog.create({
+                  data: {
+                    provider: config.provider,
+                    model: config.model,
+                    promptTokens: aUsage.promptTokens,
+                    completionTokens: aUsage.completionTokens,
+                    totalTokens: aUsage.totalTokens,
+                    estimatedCostUsd: cost,
+                    userId: session?.id ?? null,
+                    sessionId,
+                    path: "/api/generate (architect)",
+                  },
+                });
+              }
+              console.log("[architect] plan:", JSON.stringify({ archetype: plan.archetype, length: plan.length, sections: plan.sections.length, design: plan.design }));
+            } catch (e: unknown) {
+              plan = heuristicArchitect(userContent);
+              console.log("[architect] fallback heuristic:", plan.archetype, e instanceof Error ? `(${e.message.slice(0, 120)})` : "");
             }
 
             send({ stage: "writing" });
+            const writerPrompt = buildWriterPrompt(plan, text || "", fileContexts);
             let raw = "";
             let usage: UsageReport | null = null;
             for await (const chunk of streamAIResponse(
               [
-                { role: "system", content: SYSTEM_PROMPT + designRule },
-                { role: "user", content: fullPrompt },
+                { role: "system", content: WRITER_SYSTEM_PROMPT + (style === "simple" ? "\n\nWrite in simple, plain English suitable for a general audience." : "") },
+                { role: "user", content: writerPrompt },
               ],
               config,
               { onUsage: (u) => { usage = u; } }
@@ -252,15 +292,15 @@ export async function POST(request: NextRequest) {
             if (usage) usageTokens = usage;
 
             send({ stage: "compiling" });
-            const { markdown: cleanMd, spec } = stripDesignSpec(markdown);
-            console.log("[design] spec", spec ? JSON.stringify(spec) : "NOT EMITTED");
-            const dynamicTheme = deriveDynamicTheme(spec);
-            markdown = cleanMd;
-            html = renderMarkdownToStyledPages(markdown, dynamicTheme);
+            // Design tokens from the architect — same validation + anti-echo
+            // guard as before; falls back to a random curated palette.
+            const dynamicTheme = deriveDynamicTheme(plan.design);
+            html = ensurePrintCss(renderMarkdownToStyledPages(markdown, dynamicTheme, plan.archetype));
             themeConfig = dynamicTheme;
+            archetypeOut = plan.archetype;
           }
 
-          send({ stage: "done", html, markdown: markdown.slice(0, 40000), template: templateTitle, themeConfig });
+          send({ stage: "done", html, markdown: markdown.slice(0, 40000), template: templateTitle, themeConfig, archetype: archetypeOut });
         } catch (err: unknown) {
           send({ stage: "error", error: err instanceof Error ? err.message : "Generation failed" });
         } finally {

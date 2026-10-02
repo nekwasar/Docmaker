@@ -30,7 +30,8 @@ export default function GeneratePage() {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [docTheme, setDocTheme] = useState<DocumentTheme | null>(null);
   const [generating, setGenerating] = useState(false);
-  const [genStage, setGenStage] = useState<"idle" | "thinking" | "designing" | "writing" | "compiling">("idle");
+  const [genStage, setGenStage] = useState<"idle" | "planning" | "thinking" | "designing" | "writing" | "compiling">("idle");
+  const [docArchetype, setDocArchetype] = useState<string | null>(null);
   const [output, setOutput] = useState("");
   const [outputHtml, setOutputHtml] = useState("");
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
@@ -191,6 +192,7 @@ function getClientSessionId(): string {
     setOutput("");
     setOutputHtml("");
     setDocTheme(null);
+    setDocArchetype(null);
     const controller = new AbortController();
     abortRef.current = controller;
     const sid = getClientSessionId();
@@ -234,6 +236,7 @@ function getClientSessionId(): string {
                 setOutput(evt.markdown || "");
                 setOutputHtml(evt.html || "");
                 setDocTheme(evt.themeConfig || null);
+                setDocArchetype(evt.archetype || null);
                 setGenStage("idle");
               } else if (evt.stage === "error") {
                 throw new Error(evt.error || "Generation failed");
@@ -567,8 +570,7 @@ function getClientSessionId(): string {
           {/* Generation progress — animated, honest, never a static label */}
           {generating && (
             <GenerationProgress
-              stage={genStage === "idle" ? "thinking" : genStage}
-              templateTitle={selectedTemplate?.title ?? null}
+              stage={genStage === "idle" ? "thinking" : genStage}              templateTitle={selectedTemplate?.title ?? null}
             />
           )}
 
@@ -584,7 +586,9 @@ function getClientSessionId(): string {
                     {docFileName}.{outputExt}
                   </p>
                   <p className="text-[11px] text-[#64748B]">
-                    {outputExt.toUpperCase()} ready{selectedTemplate ? ` • ${selectedTemplate.title}` : ""}
+                    {docArchetype && !selectedTemplate
+                      ? `Detected: ${docArchetype.charAt(0).toUpperCase() + docArchetype.slice(1)} • enhanced brief applied`
+                      : `${outputExt.toUpperCase()} ready${selectedTemplate ? ` • ${selectedTemplate.title}` : ""}`}
                   </p>
                 </div>
                 <button

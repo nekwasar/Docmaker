@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Check, Loader2 } from "lucide-react";
 
-type Stage = "thinking" | "designing" | "writing" | "compiling";
+type Stage = "thinking" | "planning" | "designing" | "writing" | "compiling";
 
 interface Props {
   stage: Stage;
@@ -18,6 +18,13 @@ const MESSAGES: Record<Stage, string[]> = {
     "Reading your request",
     "Understanding the brief",
     "Planning the document structure",
+  ],
+  planning: [
+    "Detecting the document type",
+    "Matching real-world document conventions",
+    "Advancing your brief",
+    "Choosing the right structure",
+    "Selecting a fitting visual identity",
   ],
   designing: [
     "Studying the template pages",
@@ -49,7 +56,8 @@ const MESSAGES: Record<Stage, string[]> = {
 // Progress asymptotes per stage — a creeping bar that never stalls, lies,
 // or resets (UX Tigers / Nielsen: keep it honest and always moving).
 const CEILING: Record<Stage, number> = {
-  thinking: 14,
+  thinking: 8,
+  planning: 18,
   designing: 90,
   writing: 90,
   compiling: 97,
@@ -81,6 +89,15 @@ export default function GenerationProgress({ stage, templateTitle }: Props) {
   const [msgIdx, setMsgIdx] = useState(0);
   const [progress, setProgress] = useState(3);
 
+  // Adjust state during render when the stage changes (React-recommended
+  // pattern — avoids cascading-effect renders from setState-in-effect).
+  const [prevStage, setPrevStage] = useState(stage);
+  if (prevStage !== stage) {
+    setPrevStage(stage);
+    setMsgIdx(0);
+    setProgress(3);
+  }
+
   // Elapsed seconds
   useEffect(() => {
     const t = setInterval(() => setElapsed((s) => s + 1), 1000);
@@ -89,7 +106,6 @@ export default function GenerationProgress({ stage, templateTitle }: Props) {
 
   // Rotate the micro-status every 4.5s
   useEffect(() => {
-    setMsgIdx(0);
     const t = setInterval(() => setMsgIdx((i) => i + 1), 4500);
     return () => clearInterval(t);
   }, [stage]);
@@ -112,7 +128,7 @@ export default function GenerationProgress({ stage, templateTitle }: Props) {
   const stepState = (key: string): "done" | "active" | "pending" => {
     const order = ["thinking", "content", "compiling", "ready"];
     const activeIdx =
-      stage === "thinking" ? 0 : stage === "designing" || stage === "writing" ? 1 : 2;
+      stage === "thinking" || stage === "planning" ? 0 : stage === "designing" || stage === "writing" ? 1 : 2;
     const idx = order.indexOf(key);
     if (idx < activeIdx) return "done";
     if (idx === activeIdx) return "active";
